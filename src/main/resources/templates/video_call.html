@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Phòng luyện nói (Video Call)</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Phòng Luyện Nói 1-1</h2>
+        
+        <div class="controls">
+            <input type="text" id="channel" placeholder="Nhập tên phòng (vd: room1)" />
+            <input type="number" id="uid" placeholder="Nhập ID của bạn (vd: 1)" />
+            <button id="join-btn">Tham gia</button>
+            <button id="leave-btn" disabled>Rời phòng</button>
+            <button id="mic-btn" disabled>Tắt Mic</button>
+            <button id="cam-btn" disabled>Tắt Camera</button>
+        </div>
+
+        <div class="video-container">
+            <div class="video-box">
+                <p>Bạn (Local)</p>
+                <div id="local-player" class="player"></div>
+            </div>
+            <div class="video-box">
+                <p>Đối tác (Remote)</p>
+                <div id="remote-player" class="player"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Truyền AppID từ Backend (application.properties) xuống JS -->
+    <script th:inline="javascript">
+        const AGORA_APP_ID = /*[[${agoraAppId}]]*/ 'defaultAppId';
+    </script>
+    <script src="/js/video_call.js"></script>
+</body>
+</html>
