@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hồ sơ - Videocall Marching Language</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand fw-semibold" th:href="@{/profile}">Videocall Marching</a>
+        <form th:action="@{/logout}" method="post" class="ms-auto">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Đăng xuất</button>
+        </form>
+    </div>
+</nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div th:if="${param.updated}" class="alert alert-success">Hồ sơ đã được cập nhật.</div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex flex-column flex-sm-row align-items-center gap-4 mb-4">
+                        <img th:if="${profile.avatarUrl() != null}" th:src="${profile.avatarUrl()}"
+                             class="rounded-circle object-fit-cover border" width="120" height="120" alt="Avatar">
+                        <div th:unless="${profile.avatarUrl() != null}"
+                             class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center display-5"
+                             style="width:120px;height:120px" aria-label="Avatar mặc định"
+                             th:text="${#strings.substring(profile.username(), 0, 1).toUpperCase()}">U</div>
+                        <div class="text-center text-sm-start">
+                            <h1 class="h3 mb-1" th:text="${profile.username()}">Tên người dùng</h1>
+                            <p class="text-muted mb-2" th:text="${profile.phoneNumberMasked()}">+8491****678</p>
+                            <span class="badge text-bg-primary" th:text="${profile.currentLevel()}">N5</span>
+                            <span class="badge text-bg-secondary" th:text="${profile.role()}">USER</span>
+                        </div>
+                    </div>
+
+                    <dl class="row border-top pt-4 mb-4">
+                        <dt class="col-sm-5">Điểm tin cậy</dt>
+                        <dd class="col-sm-7" th:text="${#numbers.formatDecimal(profile.trustScore(), 1, 1)}">0.0</dd>
+                        <dt class="col-sm-5">Xác minh điện thoại</dt>
+                        <dd class="col-sm-7" th:text="${profile.phoneVerified()} ? 'Đã xác minh' : 'Chưa xác minh'">Chưa xác minh</dd>
+                    </dl>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-primary" th:href="@{/profile/edit}">Chỉnh sửa hồ sơ</a>
+                        <a class="btn btn-outline-primary" th:href="@{/video-call}">Vào phòng luyện nói</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng nhập - Videocall Marching Language</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body class="bg-light">
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 text-center mb-2">Đăng nhập</h1>
+                    <p class="text-muted text-center mb-4">Tiếp tục hành trình luyện nói tiếng Nhật</p>
+
+                    <div th:if="${param.registered}" class="alert alert-success" role="alert">
+                        Đăng ký thành công. Bạn có thể đăng nhập ngay.
+                    </div>
+                    <div th:if="${param.logout}" class="alert alert-info" role="alert">
+                        Bạn đã đăng xuất.
+                    </div>
+                    <div th:if="${param.error}" class="alert alert-danger" role="alert">
+                        Số điện thoại hoặc mật khẩu không đúng.
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                            <input id="phoneNumber" name="phoneNumber" type="tel" class="form-control"
+                                   placeholder="0912345678 hoặc +84912345678" autocomplete="tel" required autofocus>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input id="password" name="password" type="password" class="form-control"
+                                   autocomplete="current-password" required>
+                        </div>
+                        <button class="btn btn-primary w-100" type="submit">Đăng nhập</button>
+                    </form>
+
+                    <p class="text-center mt-4 mb-0">
+                        Chưa có tài khoản? <a th:href="@{/register}">Đăng ký</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

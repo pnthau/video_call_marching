@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Đăng ký - Videocall Marching Language</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body class="bg-light">
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 text-center mb-2">Tạo tài khoản</h1>
+                    <p class="text-muted text-center mb-4">Bắt đầu luyện giao tiếp theo trình độ của bạn</p>
+
+                    <form th:action="@{/register}" th:object="${registerRequest}" method="post" novalidate>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Tên hiển thị</label>
+                            <input id="username" type="text" th:field="*{username}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                                   autocomplete="name">
+                            <div class="invalid-feedback" th:errors="*{username}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Số điện thoại</label>
+                            <input id="phoneNumber" type="tel" th:field="*{phoneNumber}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid'"
+                                   placeholder="0912345678 hoặc +84912345678" autocomplete="tel">
+                            <div class="invalid-feedback" th:errors="*{phoneNumber}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="currentLevel" class="form-label">Trình độ hiện tại</label>
+                            <select id="currentLevel" th:field="*{currentLevel}" class="form-select"
+                                    th:classappend="${#fields.hasErrors('currentLevel')} ? 'is-invalid'">
+                                <option value="">Chọn trình độ</option>
+                                <option th:each="level : ${levels}" th:value="${level}" th:text="${level}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{currentLevel}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mật khẩu</label>
+                            <input id="password" type="password" th:field="*{password}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                   autocomplete="new-password">
+                            <div class="form-text">Từ 8 ký tự, có ít nhất một chữ cái và một chữ số.</div>
+                            <div class="invalid-feedback" th:errors="*{password}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="confirmPassword" class="form-label">Nhập lại mật khẩu</label>
+                            <input id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                   autocomplete="new-password">
+                            <div class="invalid-feedback" th:errors="*{confirmPassword}"></div>
+                        </div>
+
+                        <button class="btn btn-primary w-100" type="submit">Đăng ký</button>
+                    </form>
+
+                    <p class="text-center mt-4 mb-0">
+                        Đã có tài khoản? <a th:href="@{/login}">Đăng nhập</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
