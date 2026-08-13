@@ -34,6 +34,7 @@ public class DataInitializer {
                 // 2. Tạo Tags
                 tagRepository.saveAll(List.of(
                         Tag.builder().name("N5").tagCategory(levelCat).build(),
+
                         Tag.builder().name("N4").tagCategory(levelCat).build(),
                         Tag.builder().name("Từ vựng (Vocabulary)").tagCategory(formatCat).build(),
                         Tag.builder().name("Đóng vai (Roleplay)").tagCategory(formatCat).build(),

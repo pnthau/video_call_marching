@@ -97,14 +97,29 @@ public class MatchMakingService {
         }
 
     }
-    public MatchResultDTO getMatchStatus(Long userId) {
-        return matchResults.getOrDefault(userId, MatchResultDTO.builder().status("WAITING").build());
-    }
     public void cancelSearch(Long userId, String tagKey) {
         matchResults.remove(userId);
         if (queueTags.containsKey(tagKey)) {
             queueTags.get(tagKey).removeIf(u -> u.getUserId().equals(userId));
         }
+    }
+    public void endCall(Long userId)
+    {
+        MatchResultDTO currentUserLeaved =  matchResults.get(userId);
+
+        if(currentUserLeaved != null && "MATCHED".equals(currentUserLeaved.getStatus()))
+        {
+            matchResults.remove(userId);
+            matchResults.remove(currentUserLeaved.getPeerId());
+
+            MatchResultDTO newResult = MatchResultDTO
+                    .builder()
+                    .status("PEER_DISCONNECTED")
+                    .build();
+
+            simpMessagingTemplate.convertAndSend("/topic/match/" + currentUserLeaved.getPeerId(), newResult);
+        }
+
     }
     @EventListener
     public  void handleWebSocketDisconnectListener(SessionDisconnectEvent event){
