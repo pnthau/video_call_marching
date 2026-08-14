@@ -3,49 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <title>Phòng luyện nói (Video Call)</title>
-    <!-- Bootstrap CSS local -->
-    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <!-- Agora SDK -->
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- Thư viện Agora SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <!-- Thư viện WebSocket STOMP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 </head>
-<body class="bg-light">
-    <div class="container py-5">
-        <h2 class="text-center mb-4 text-primary fw-bold">Phòng Luyện Nói 1-1</h2>
+<body>
+    <div class="container">
+        <h2>Phòng Luyện Nói 1-1</h2>
         
-        <div class="card shadow-sm mb-4">
-            <div class="card-body d-flex flex-wrap gap-2 justify-content-center align-items-center">
-                <input type="text" id="channel" class="form-control w-auto" placeholder="Tên phòng (vd: room1)" />
-                <input type="number" id="uid" class="form-control w-auto" placeholder="ID của bạn (vd: 1)" />
-                <button id="join-btn" class="btn btn-primary">Tham gia</button>
-                <button id="leave-btn" class="btn btn-danger" disabled>Rời phòng</button>
-                <button id="mic-btn" class="btn btn-outline-secondary" disabled>Tắt Mic</button>
-                <button id="cam-btn" class="btn btn-outline-secondary" disabled>Tắt Camera</button>
-            </div>
+        <!-- Trạng thái 1: Khung nhập liệu tìm kiếm -->
+        <div id="setup-panel" class="controls" style="text-align: center; margin-bottom: 20px;">
+            <!-- Ẩn hoàn toàn các ô nhập liệu -->
+            <input type="hidden" id="uid" value="1" />
+            <input type="hidden" id="tag-key" value="n5_hoithoai" />
+            
+            <button id="find-partner-btn" style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">🔍 Bắt đầu tìm đối tác</button>
         </div>
 
-        <div class="row g-4 justify-content-center">
-            <div class="col-md-6">
-                <div class="video-box rounded shadow-sm bg-dark position-relative" style="height: 400px; overflow: hidden;">
-                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2" style="z-index: 10;">Bạn (Local)</span>
-                    <div id="local-player" class="w-100 h-100"></div>
-                </div>
+        <!-- Trạng thái 2: Màn hình chờ (Loading) -->
+        <div id="waiting-panel" class="controls" style="display: none;">
+            <p>⏳ Đang tìm kiếm đối tác... Xin vui lòng đợi.</p>
+            <button id="cancel-search-btn" style="background-color: #f44336; color: white;">Hủy tìm kiếm</button>
+        </div>
+
+        <!-- Trạng thái 3: Màn hình Video Call -->
+        <div id="call-panel" class="controls" style="display: none;">
+            <p id="room-info" style="font-weight: bold; color: green;"></p>
+            <button id="end-call-btn" style="background-color: #f44336; color: white;">Rời phòng / Kết thúc</button>
+            <button id="mic-btn">Tắt Mic</button>
+            <button id="cam-btn">Tắt Camera</button>
+        </div>
+
+        <div class="video-container" id="video-container" style="display: none;">
+            <div class="video-box">
+                <p>Bạn (Local)</p>
+                <div id="local-player" class="player"></div>
             </div>
-            <div class="col-md-6">
-                <div class="video-box rounded shadow-sm bg-dark position-relative" style="height: 400px; overflow: hidden;">
-                    <span class="badge bg-secondary position-absolute top-0 start-0 m-2" style="z-index: 10;">Đối tác (Remote)</span>
-                    <div id="remote-player" class="w-100 h-100"></div>
-                </div>
+            <div class="video-box">
+                <p>Đối tác (Remote)</p>
+                <div id="remote-player" class="player"></div>
             </div>
         </div>
     </div>
 
-    <!-- Truyền AppID từ Backend xuống JS -->
+    <!-- Truyền AppID từ Backend (application.properties) xuống JS -->
     <script th:inline="javascript">
         const AGORA_APP_ID = /*[[${agoraAppId}]]*/ 'defaultAppId';
     </script>
-    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/js/video_call.js}"></script>
+    <script src="/js/video_call.js"></script>
 </body>
 </html>
