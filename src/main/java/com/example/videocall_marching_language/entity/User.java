@@ -26,12 +26,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
-    private String phoneNumber;
-
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "current_level", nullable = false, length = 2)
     @Builder.Default
@@ -44,9 +38,8 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
-    @Column(name = "is_phone_verified")
-    @Builder.Default
-    private Boolean isPhoneVerified = false;
+    @Column(name = "avatar_public_id")
+    private String avatarPublicId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
@@ -66,4 +59,6 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 }

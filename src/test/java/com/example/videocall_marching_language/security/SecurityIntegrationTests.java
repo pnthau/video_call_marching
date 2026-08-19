@@ -36,14 +36,14 @@ class SecurityIntegrationTests {
 
     @Test
     void regularUserCannotAccessAdminRoutes() throws Exception {
-        mockMvc.perform(get("/admin/users").with(user("+84912345678").roles("USER")))
+        mockMvc.perform(get("/admin/users").with(user("learner@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void logoutRequiresCsrfAndRedirectsToLogin() throws Exception {
         mockMvc.perform(post("/logout")
-                        .with(user("+84912345678").roles("USER"))
+                        .with(user("learner@example.com").roles("USER"))
                         .with(csrf()))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login?logout"));
@@ -51,7 +51,7 @@ class SecurityIntegrationTests {
 
     @Test
     void postWithoutCsrfIsRejected() throws Exception {
-        mockMvc.perform(post("/logout").with(user("+84912345678").roles("USER")))
+        mockMvc.perform(post("/logout").with(user("learner@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 }

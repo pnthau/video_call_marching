@@ -5,7 +5,9 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.videocall_marching_language.exception.AvatarUploadException;
 import com.example.videocall_marching_language.exception.InvalidAvatarException;
 import com.example.videocall_marching_language.service.AvatarStorageService;
+import com.example.videocall_marching_language.service.AvatarUploadResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +17,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CloudinaryAvatarStorageService implements AvatarStorageService {
 
     private static final long MAX_AVATAR_SIZE = 5L * 1024 * 1024;
@@ -25,7 +28,7 @@ public class CloudinaryAvatarStorageService implements AvatarStorageService {
     private final Cloudinary cloudinary;
 
     @Override
-    public String upload(MultipartFile avatar) {
+    public AvatarUploadResult upload(MultipartFile avatar) {
         validate(avatar);
         try {
             Map<?, ?> result = cloudinary.uploader().upload(
@@ -33,14 +36,30 @@ public class CloudinaryAvatarStorageService implements AvatarStorageService {
                     ObjectUtils.asMap("folder", "videocall-marching/avatars", "resource_type", "image")
             );
             Object secureUrl = result.get("secure_url");
-            if (secureUrl == null) {
+            Object publicId = result.get("public_id");
+            if (secureUrl == null || publicId == null) {
                 throw new AvatarUploadException("Cloudinary không trả về URL ảnh", null);
             }
-            return secureUrl.toString();
+            return new AvatarUploadResult(secureUrl.toString(), publicId.toString());
         } catch (InvalidAvatarException | AvatarUploadException exception) {
             throw exception;
         } catch (IOException | RuntimeException exception) {
             throw new AvatarUploadException("Không thể tải avatar lên Cloudinary", exception);
+        }
+    }
+
+    @Override
+    public void delete(String publicId) {
+        if (publicId == null || publicId.isBlank()) {
+            return;
+        }
+        try {
+            cloudinary.uploader().destroy(
+                    publicId,
+                    ObjectUtils.asMap("resource_type", "image", "invalidate", true)
+            );
+        } catch (IOException | RuntimeException exception) {
+            log.warn("Không thể xóa avatar cũ trên Cloudinary: {}", publicId, exception);
         }
     }
 

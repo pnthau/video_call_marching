@@ -1,85 +1,67 @@
 package com.example.videocall_marching_language.service.impl;
 
-import com.example.videocall_marching_language.dto.user.RegisterRequest;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
-import com.example.videocall_marching_language.enums.UserRole;
-import com.example.videocall_marching_language.enums.UserStatus;
-import com.example.videocall_marching_language.exception.DuplicatePhoneNumberException;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
-import com.example.videocall_marching_language.repository.UserRepository;
+import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.AvatarStorageService;
+import com.example.videocall_marching_language.service.AvatarUploadResult;
 import com.example.videocall_marching_language.service.UserService;
-import com.example.videocall_marching_language.utils.PhoneNumberNormalizer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final PhoneNumberNormalizer phoneNumberNormalizer;
+    private final IUserRepository userRepository;
     private final AvatarStorageService avatarStorageService;
 
     @Override
-    @Transactional
-    public UserProfileResponse register(RegisterRequest request) {
-        validatePassword(request.getPassword());
-        if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
-        }
-
-        String normalizedPhoneNumber = phoneNumberNormalizer.normalize(request.getPhoneNumber());
-        if (userRepository.existsByPhoneNumber(normalizedPhoneNumber)) {
-            throw new DuplicatePhoneNumberException("Số điện thoại đã được sử dụng");
-        }
-
-        User user = User.builder()
-                .username(request.getUsername().trim())
-                .phoneNumber(normalizedPhoneNumber)
-                .passwordHash(passwordEncoder.encode(request.getPassword()))
-                .currentLevel(request.getCurrentLevel())
-                .trustScore(0.0f)
-                .isPhoneVerified(false)
-                .role(UserRole.USER)
-                .status(UserStatus.ACTIVE)
-                .build();
-
-        try {
-            return toResponse(userRepository.save(user));
-        } catch (DataIntegrityViolationException exception) {
-            throw new DuplicatePhoneNumberException("Số điện thoại đã được sử dụng");
-        }
-    }
-
-    @Override
     @Transactional(readOnly = true)
-    public UserProfileResponse getCurrentProfile(String phoneNumber) {
-        return toResponse(findByPhoneNumber(phoneNumber));
+    public UserProfileResponse getCurrentProfile(String email) {
+        return toResponse(findByEmail(email));
     }
 
     @Override
     @Transactional
-    public UserProfileResponse updateCurrentProfile(String phoneNumber, UpdateProfileRequest request) {
-        User user = findByPhoneNumber(phoneNumber);
+    public UserProfileResponse updateCurrentProfile(String email, UpdateProfileRequest request) {
+        User user = findByEmail(email);
         user.setUsername(request.getUsername().trim());
         user.setCurrentLevel(request.getCurrentLevel());
 
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
-            user.setAvatarUrl(avatarStorageService.upload(request.getAvatar()));
+            String previousAvatarPublicId = user.getAvatarPublicId();
+            AvatarUploadResult uploadedAvatar = avatarStorageService.upload(request.getAvatar());
+            user.setAvatarUrl(uploadedAvatar.secureUrl());
+            user.setAvatarPublicId(uploadedAvatar.publicId());
+            deleteOldAvatarAfterCommit(previousAvatarPublicId);
         }
         return toResponse(userRepository.save(user));
     }
 
-    private User findByPhoneNumber(String phoneNumber) {
-        String normalizedPhoneNumber = phoneNumberNormalizer.normalize(phoneNumber);
-        return userRepository.findByPhoneNumber(normalizedPhoneNumber)
+    private void deleteOldAvatarAfterCommit(String previousAvatarPublicId) {
+        if (previousAvatarPublicId == null || previousAvatarPublicId.isBlank()) {
+            return;
+        }
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            avatarStorageService.delete(previousAvatarPublicId);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                avatarStorageService.delete(previousAvatarPublicId);
+            }
+        });
+    }
+
+    private User findByEmail(String email) {
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Không tìm thấy tài khoản"));
     }
 
@@ -87,24 +69,11 @@ public class UserServiceImpl implements UserService {
         return new UserProfileResponse(
                 user.getId(),
                 user.getUsername(),
-                phoneNumberNormalizer.mask(user.getPhoneNumber()),
+                user.getEmail(),
                 user.getCurrentLevel(),
                 user.getTrustScore(),
                 user.getAvatarUrl(),
-                Boolean.TRUE.equals(user.getIsPhoneVerified()),
                 user.getRole()
         );
-    }
-
-    private void validatePassword(String password) {
-        if (password == null
-                || password.length() < 8
-                || password.length() > 72
-                || !password.matches(".*[A-Za-z].*")
-                || !password.matches(".*\\d.*")) {
-            throw new IllegalArgumentException(
-                    "Mật khẩu phải có từ 8 đến 72 ký tự, gồm ít nhất một chữ cái và một chữ số"
-            );
-        }
     }
 }

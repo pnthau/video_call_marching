@@ -31,7 +31,7 @@
                              th:text="${#strings.substring(profile.username(), 0, 1).toUpperCase()}">U</div>
                         <div class="text-center text-sm-start">
                             <h1 class="h3 mb-1" th:text="${profile.username()}">Tên người dùng</h1>
-                            <p class="text-muted mb-2" th:text="${profile.phoneNumberMasked()}">+8491****678</p>
+                            <p class="text-muted mb-2" th:text="${profile.email()}">user@example.com</p>
                             <span class="badge text-bg-primary" th:text="${profile.currentLevel()}">N5</span>
                             <span class="badge text-bg-secondary" th:text="${profile.role()}">USER</span>
                         </div>
@@ -40,8 +40,6 @@
                     <dl class="row border-top pt-4 mb-4">
                         <dt class="col-sm-5">Điểm tin cậy</dt>
                         <dd class="col-sm-7" th:text="${#numbers.formatDecimal(profile.trustScore(), 1, 1)}">0.0</dd>
-                        <dt class="col-sm-5">Xác minh điện thoại</dt>
-                        <dd class="col-sm-7" th:text="${profile.phoneVerified()} ? 'Đã xác minh' : 'Chưa xác minh'">Chưa xác minh</dd>
                     </dl>
 
                     <div class="d-flex flex-wrap gap-2">

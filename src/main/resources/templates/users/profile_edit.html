@@ -34,6 +34,9 @@
 
                         <div class="mb-4">
                             <label for="avatar" class="form-label">Avatar</label>
+                            <img th:if="${profile.avatarUrl() != null}" th:src="${profile.avatarUrl()}"
+                                 class="rounded-circle object-fit-cover border d-block mb-2" width="96" height="96"
+                                 alt="Avatar hiện tại">
                             <input id="avatar" type="file" th:field="*{avatar}" accept="image/jpeg,image/png,image/webp"
                                    class="form-control" th:classappend="${#fields.hasErrors('avatar')} ? 'is-invalid'">
                             <div class="form-text">JPEG, PNG hoặc WebP; tối đa 5 MB. Bỏ trống để giữ ảnh hiện tại.</div>

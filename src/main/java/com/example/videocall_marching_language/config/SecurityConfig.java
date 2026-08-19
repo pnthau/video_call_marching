@@ -1,44 +1,35 @@
 package com.example.videocall_marching_language.config;
 
-import com.example.videocall_marching_language.service.impl.CustomUserDetailsService;
+import com.example.videocall_marching_language.service.impl.GoogleOidcUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    private final GoogleOidcUserService googleOidcUserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .userDetailsService(customUserDetailsService)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/error")
+                        .requestMatchers("/login", "/oauth2/**", "/login/oauth2/**", "/css/**", "/js/**", "/images/**", "/error")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/profile/**", "/video-call", "/video-call/**", "/api/agora/**")
                         .authenticated()
                         .anyRequest().permitAll()
                 )
-                .formLogin(form -> form
+                .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .usernameParameter("phoneNumber")
-                        .passwordParameter("password")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .oidcUserService(googleOidcUserService)
+                        )
                         .defaultSuccessUrl("/profile", true)
-                        .failureUrl("/login?error")
-                        .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
