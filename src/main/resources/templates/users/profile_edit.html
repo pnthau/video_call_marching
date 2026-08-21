@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Chỉnh sửa hồ sơ - Videocall Marching Language</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body class="bg-light">
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4 p-md-5">
+                    <h1 class="h3 mb-4">Chỉnh sửa hồ sơ</h1>
+
+                    <form th:action="@{/profile/edit}" th:object="${updateProfileRequest}"
+                          method="post" enctype="multipart/form-data" novalidate>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Tên hiển thị</label>
+                            <input id="username" type="text" th:field="*{username}"
+                                   class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{username}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="currentLevel" class="form-label">Trình độ tiếng Nhật</label>
+                            <select id="currentLevel" th:field="*{currentLevel}" class="form-select"
+                                    th:classappend="${#fields.hasErrors('currentLevel')} ? 'is-invalid'">
+                                <option th:each="level : ${levels}" th:value="${level}" th:text="${level}"></option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{currentLevel}"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="avatar" class="form-label">Avatar</label>
+                            <img th:if="${profile.avatarUrl() != null}" th:src="${profile.avatarUrl()}"
+                                 class="rounded-circle object-fit-cover border d-block mb-2" width="96" height="96"
+                                 alt="Avatar hiện tại">
+                            <input id="avatar" type="file" th:field="*{avatar}" accept="image/jpeg,image/png,image/webp"
+                                   class="form-control" th:classappend="${#fields.hasErrors('avatar')} ? 'is-invalid'">
+                            <div class="form-text">JPEG, PNG hoặc WebP; tối đa 5 MB. Bỏ trống để giữ ảnh hiện tại.</div>
+                            <div class="invalid-feedback" th:errors="*{avatar}"></div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+                            <a class="btn btn-outline-secondary" th:href="@{/profile}">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
