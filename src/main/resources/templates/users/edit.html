@@ -7,67 +7,90 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 <div class="container mt-4">
+
     <h2 class="mb-4">Sửa User</h2>
+
     <div class="card">
         <div class="card-body">
+
             <form th:action="@{/users/edit/{id}(id=${user.id})}"
                   th:object="${user}"
                   method="post">
+
                 <!-- ID -->
                 <div class="mb-3">
-                    <label class="form-label">
-                        ID
-                    </label>
+                    <label class="form-label">ID</label>
                     <input type="text"
                            th:field="*{id}"
                            class="form-control"
                            readonly>
                 </div>
-                <!-- Username -->
+
+                <!-- USERNAME -->
                 <div class="mb-3">
-                    <label class="form-label">
-                        Username
-                    </label>
+                    <label class="form-label">Username</label>
                     <input type="text"
                            th:field="*{username}"
-                           class="form-control"
-                           required>
+                           class="form-control">
                 </div>
-                <!-- Level -->
+
+                <!-- EMAIL -->
                 <div class="mb-3">
-                    <label class="form-label">
-                        Level
-                    </label>
-                    <input type="number"
-                           th:field="*{currentLevel}"
+                    <label class="form-label">Email</label>
+                    <input type="email"
+                           th:field="*{email}"
                            class="form-control"
-                           min="0">
+                           placeholder="Nhập email">
                 </div>
-                <!-- Trust Score -->
+
+                <!-- LEVEL -->
                 <div class="mb-3">
-                    <label class="form-label">
-                        Trust Score
-                    </label>
+                    <label class="form-label">Level</label>
+
+                    <select th:field="*{currentLevel}"
+                            class="form-select">
+
+                        <option value="">-- Chọn Level --</option>
+
+                        <option th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- TRUST SCORE -->
+                <div class="mb-3">
+                    <label class="form-label">Trust Score</label>
+
                     <input type="number"
                            th:field="*{trustScore}"
                            class="form-control"
                            step="0.1"
-                           min="0">
+                           min="0"
+                           max="10">
                 </div>
-                <!-- Nút -->
+
+                <!-- BUTTON -->
                 <button type="submit"
                         class="btn btn-warning">
                     Lưu thay đổi
                 </button>
+
                 <a th:href="@{/users}"
                    class="btn btn-secondary">
                     Hủy
                 </a>
+
             </form>
+
         </div>
     </div>
+
 </div>
 </body>
 </html>

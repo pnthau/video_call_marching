@@ -24,6 +24,7 @@ public class UserController {
     @GetMapping
     public String listUsers(
             @RequestParam(defaultValue = "") String username,
+            @RequestParam(defaultValue = "") String email,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
@@ -32,14 +33,19 @@ public class UserController {
         }
 
         Pageable pageable = PageRequest.of(page, 5);
-        Page<User> userPage = userService.searchUsers(username, pageable);
+
+        Page<User> userPage = userService.searchUsers(
+                username,
+                email,
+                pageable
+        );
 
         model.addAttribute("users", userPage);
         model.addAttribute("username", username);
+        model.addAttribute("email", email);
 
         return "users/list";
     }
-
     // HIỂN THỊ FORM THÊM USER
     @GetMapping("/add")
     public String showAddForm(Model model) {

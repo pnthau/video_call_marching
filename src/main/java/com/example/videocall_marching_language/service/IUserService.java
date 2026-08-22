@@ -28,5 +28,9 @@ public interface IUserService {
     void deleteById(Long id);
 
     // --- Search & Pagination ---
-    Page<User> searchUsers(String username, Pageable pageable);
+    Page<User> searchUsers(
+            String username,
+            String email,
+            Pageable pageable
+    );
 }

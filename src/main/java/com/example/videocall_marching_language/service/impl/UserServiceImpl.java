@@ -3,6 +3,7 @@ package com.example.videocall_marching_language.service.impl;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.AvatarStorageService;
@@ -56,9 +57,11 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRole() == UserRole.USER)
+                .toList();
     }
-
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
@@ -90,13 +93,53 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<User> searchUsers(String username, Pageable pageable) {
-        if (username == null || username.trim().isEmpty()) {
-            return userRepository.findAll(pageable);
-        }
-        return userRepository.findByUsernameContainingIgnoreCase(username.trim(), pageable);
-    }
+    public Page<User> searchUsers(String username, String email, Pageable pageable) {
 
+        if (username == null) {
+            username = "";
+        }
+
+        if (email == null) {
+            email = "";
+        }
+
+        username = username.trim();
+        email = email.trim();
+
+        // Không nhập gì → chỉ lấy USER
+        if (username.isEmpty() && email.isEmpty()) {
+            return userRepository.findByRole(
+                    UserRole.USER,
+                    pageable
+            );
+        }
+
+        // Chỉ tìm theo username → chỉ lấy USER
+        if (!username.isEmpty() && email.isEmpty()) {
+            return userRepository.findByRoleAndUsernameContainingIgnoreCase(
+                    UserRole.USER,
+                    username,
+                    pageable
+            );
+        }
+
+        // Chỉ tìm theo email → chỉ lấy USER
+        if (username.isEmpty() && !email.isEmpty()) {
+            return userRepository.findByRoleAndEmailContainingIgnoreCase(
+                    UserRole.USER,
+                    email,
+                    pageable
+            );
+        }
+
+        // Tìm cả username + email → chỉ lấy USER
+        return userRepository.findByRoleAndUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(
+                UserRole.USER,
+                username,
+                email,
+                pageable
+        );
+    }
     // ==================== PRIVATE HELPER METHODS ====================
 
     private User findByEmail(String email) {

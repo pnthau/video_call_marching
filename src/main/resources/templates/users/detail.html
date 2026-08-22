@@ -7,36 +7,48 @@
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 <div class="container mt-4">
-    <h2 class="mb-4">Chi tiết tài khoản User</h2>
+
+    <h2 class="mb-4">Chi tiết User</h2>
+
     <div class="card">
-        <div class="card-header">
-            Thông tin User
-        </div>
         <div class="card-body">
+
             <p>
                 <strong>ID:</strong>
                 <span th:text="${user.id}"></span>
             </p>
+
             <p>
                 <strong>Username:</strong>
                 <span th:text="${user.username}"></span>
             </p>
+
+            <p>
+                <strong>Email:</strong>
+                <span th:text="${user.email}"></span>
+            </p>
+
             <p>
                 <strong>Level:</strong>
                 <span th:text="${user.currentLevel}"></span>
             </p>
+
             <p>
                 <strong>Trust Score:</strong>
                 <span th:text="${user.trustScore}"></span>
             </p>
+
             <a th:href="@{/users}"
                class="btn btn-secondary">
-                Quay lại danh sách
+                Quay lại
             </a>
+
         </div>
     </div>
+
 </div>
 </body>
 </html>

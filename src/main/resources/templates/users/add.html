@@ -28,15 +28,33 @@
                          th:text="${errorUsername}">
                     </div>
                 </div>
+                <!-- ================= EMAIL ================= -->
+                <div class="mb-3">
+                    <label class="form-label">
+                        Email
+                    </label>
+                    <input type="email"
+                           th:field="*{email}"
+                           class="form-control"
+                           placeholder="Nhập email">
+                    <div class="text-danger mt-1"
+                         th:if="${errorEmail}"
+                         th:text="${errorEmail}">
+                    </div>
+                </div>
                 <!-- ================= LEVEL ================= -->
                 <div class="mb-3">
                     <label class="form-label">
                         Level
                     </label>
-                    <input type="number"
-                           th:field="*{currentLevel}"
-                           class="form-control"
-                           min="0">
+                    <select th:field="*{currentLevel}"
+                            class="form-select">
+                        <option value="">-- Chọn Level --</option>
+                        <option th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+                    </select>
                     <div class="text-danger mt-1"
                          th:if="${errorLevel}"
                          th:text="${errorLevel}">
