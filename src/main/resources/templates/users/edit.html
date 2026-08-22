@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sửa User</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+<div class="container mt-4">
+
+    <h2 class="mb-4">Sửa User</h2>
+
+    <div class="card">
+        <div class="card-body">
+
+            <form th:action="@{/users/edit/{id}(id=${user.id})}"
+                  th:object="${user}"
+                  method="post">
+
+                <!-- ID -->
+                <div class="mb-3">
+                    <label class="form-label">ID</label>
+                    <input type="text"
+                           th:field="*{id}"
+                           class="form-control"
+                           readonly>
+                </div>
+
+                <!-- USERNAME -->
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text"
+                           th:field="*{username}"
+                           class="form-control">
+                </div>
+
+                <!-- EMAIL -->
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email"
+                           th:field="*{email}"
+                           class="form-control"
+                           placeholder="Nhập email">
+                </div>
+
+                <!-- LEVEL -->
+                <div class="mb-3">
+                    <label class="form-label">Level</label>
+
+                    <select th:field="*{currentLevel}"
+                            class="form-select">
+
+                        <option value="">-- Chọn Level --</option>
+
+                        <option th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- TRUST SCORE -->
+                <div class="mb-3">
+                    <label class="form-label">Trust Score</label>
+
+                    <input type="number"
+                           th:field="*{trustScore}"
+                           class="form-control"
+                           step="0.1"
+                           min="0"
+                           max="10">
+                </div>
+
+                <!-- BUTTON -->
+                <button type="submit"
+                        class="btn btn-warning">
+                    Lưu thay đổi
+                </button>
+
+                <a th:href="@{/users}"
+                   class="btn btn-secondary">
+                    Hủy
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -3,23 +3,31 @@ package com.example.videocall_marching_language.service.impl;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.AvatarStorageService;
 import com.example.videocall_marching_language.service.AvatarUploadResult;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
     private final AvatarStorageService avatarStorageService;
+
+    // ==================== PROFILE MANAGEMENT ====================
 
     @Override
     @Transactional(readOnly = true)
@@ -44,21 +52,95 @@ public class UserServiceImpl implements UserService {
         return toResponse(userRepository.save(user));
     }
 
-    private void deleteOldAvatarAfterCommit(String previousAvatarPublicId) {
-        if (previousAvatarPublicId == null || previousAvatarPublicId.isBlank()) {
-            return;
-        }
-        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
-            avatarStorageService.delete(previousAvatarPublicId);
-            return;
-        }
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                avatarStorageService.delete(previousAvatarPublicId);
-            }
-        });
+    // ==================== CRUD OPERATIONS ====================
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> findAll() {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRole() == UserRole.USER)
+                .toList();
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User update(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new UserNotFoundException("Không tìm thấy người dùng với ID: " + id);
+        }
+        userRepository.deleteById(id);
+    }
+
+    // ==================== SEARCH & PAGINATION ====================
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> searchUsers(String username, String email, Pageable pageable) {
+
+        if (username == null) {
+            username = "";
+        }
+
+        if (email == null) {
+            email = "";
+        }
+
+        username = username.trim();
+        email = email.trim();
+
+        // Không nhập gì → chỉ lấy USER
+        if (username.isEmpty() && email.isEmpty()) {
+            return userRepository.findByRole(
+                    UserRole.USER,
+                    pageable
+            );
+        }
+
+        // Chỉ tìm theo username → chỉ lấy USER
+        if (!username.isEmpty() && email.isEmpty()) {
+            return userRepository.findByRoleAndUsernameContainingIgnoreCase(
+                    UserRole.USER,
+                    username,
+                    pageable
+            );
+        }
+
+        // Chỉ tìm theo email → chỉ lấy USER
+        if (username.isEmpty() && !email.isEmpty()) {
+            return userRepository.findByRoleAndEmailContainingIgnoreCase(
+                    UserRole.USER,
+                    email,
+                    pageable
+            );
+        }
+
+        // Tìm cả username + email → chỉ lấy USER
+        return userRepository.findByRoleAndUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(
+                UserRole.USER,
+                username,
+                email,
+                pageable
+        );
+    }
+    // ==================== PRIVATE HELPER METHODS ====================
 
     private User findByEmail(String email) {
         return userRepository.findByEmail(email)
@@ -75,5 +157,21 @@ public class UserServiceImpl implements UserService {
                 user.getAvatarUrl(),
                 user.getRole()
         );
+    }
+
+    private void deleteOldAvatarAfterCommit(String previousAvatarPublicId) {
+        if (previousAvatarPublicId == null || previousAvatarPublicId.isBlank()) {
+            return;
+        }
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            avatarStorageService.delete(previousAvatarPublicId);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                avatarStorageService.delete(previousAvatarPublicId);
+            }
+        });
     }
 }
