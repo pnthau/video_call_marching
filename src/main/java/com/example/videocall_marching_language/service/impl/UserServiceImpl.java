@@ -57,10 +57,7 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll()
-                .stream()
-                .filter(user -> user.getRole() == UserRole.USER)
-                .toList();
+        return userRepository.findByRole(UserRole.USER);
     }
     @Override
     @Transactional(readOnly = true)
@@ -94,51 +91,11 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public Page<User> searchUsers(String username, String email, Pageable pageable) {
+        String cleanUsername = (username != null) ? username.trim() : "";
+        String cleanEmail = (email != null) ? email.trim() : "";
 
-        if (username == null) {
-            username = "";
-        }
-
-        if (email == null) {
-            email = "";
-        }
-
-        username = username.trim();
-        email = email.trim();
-
-        // Không nhập gì → chỉ lấy USER
-        if (username.isEmpty() && email.isEmpty()) {
-            return userRepository.findByRole(
-                    UserRole.USER,
-                    pageable
-            );
-        }
-
-        // Chỉ tìm theo username → chỉ lấy USER
-        if (!username.isEmpty() && email.isEmpty()) {
-            return userRepository.findByRoleAndUsernameContainingIgnoreCase(
-                    UserRole.USER,
-                    username,
-                    pageable
-            );
-        }
-
-        // Chỉ tìm theo email → chỉ lấy USER
-        if (username.isEmpty() && !email.isEmpty()) {
-            return userRepository.findByRoleAndEmailContainingIgnoreCase(
-                    UserRole.USER,
-                    email,
-                    pageable
-            );
-        }
-
-        // Tìm cả username + email → chỉ lấy USER
-        return userRepository.findByRoleAndUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(
-                UserRole.USER,
-                username,
-                email,
-                pageable
-        );
+        // Tối ưu thành 1 câu query duy nhất, không cần nhiều nhánh if-else
+        return userRepository.searchUsersByRole(UserRole.USER, cleanUsername, cleanEmail, pageable);
     }
     // ==================== PRIVATE HELPER METHODS ====================
 

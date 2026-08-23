@@ -7,7 +7,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IUserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -17,40 +20,18 @@ public interface IUserRepository extends JpaRepository<User, Long>, JpaSpecifica
 
     boolean existsByUsername(String username);
 
-    Page<User> findByUsernameContainingIgnoreCase(
-            String username,
-            Pageable pageable
-    );
+    List<User> findByRole(UserRole role);
 
-    Page<User> findByEmailContainingIgnoreCase(
-            String email,
-            Pageable pageable
-    );
-    Page<User> findByUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(
-            String username,
-            String email,
-            Pageable pageable
-    );
-    Page<User> findByRole(
-            UserRole role,
-            Pageable pageable
-    );
-    Page<User> findByRoleAndUsernameContainingIgnoreCase(
-            UserRole role,
-            String username,
-            Pageable pageable
-    );
-
-    Page<User> findByRoleAndEmailContainingIgnoreCase(
-            UserRole role,
-            String email,
-            Pageable pageable
-    );
-
-    Page<User> findByRoleAndUsernameContainingIgnoreCaseAndEmailContainingIgnoreCase(
-            UserRole role,
-            String username,
-            String email,
+    /**
+     * Tìm kiếm người dùng theo Role, Username và Email linh hoạt trong 1 câu Query duy nhất.
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role AND " +
+            "(:username IS NULL OR :username = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
+            "(:email IS NULL OR :email = '' OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%')))")
+    Page<User> searchUsersByRole(
+            @Param("role") UserRole role,
+            @Param("username") String username,
+            @Param("email") String email,
             Pageable pageable
     );
 }
