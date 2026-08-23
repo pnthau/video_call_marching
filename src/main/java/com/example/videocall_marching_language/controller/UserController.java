@@ -1,29 +1,31 @@
 package com.example.videocall_marching_language.controller;
 
+import com.example.videocall_marching_language.dto.admin.UserRequestDTO;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
 import com.example.videocall_marching_language.service.IUserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/admin/users")
+@RequiredArgsConstructor
 public class UserController {
 
     private final IUserService userService;
 
-    public UserController(IUserService userService) {
-        this.userService = userService;
-    }
-
-    // DANH SÁCH USER + TÌM KIẾM + PHÂN TRANG
+    // 1. DANH SÁCH USER + TÌM KIẾM + PHÂN TRANG
     @GetMapping
     public String listUsers(
             @RequestParam(defaultValue = "") String username,
+            @RequestParam(defaultValue = "") String email,
             @RequestParam(defaultValue = "0") int page,
             Model model) {
 
@@ -32,67 +34,43 @@ public class UserController {
         }
 
         Pageable pageable = PageRequest.of(page, 5);
-        Page<User> userPage = userService.searchUsers(username, pageable);
+        Page<User> userPage = userService.searchUsers(username, email, pageable);
 
         model.addAttribute("users", userPage);
         model.addAttribute("username", username);
+        model.addAttribute("email", email);
 
-        return "users/list";
+        return "admin/users/list";
     }
 
-    // HIỂN THỊ FORM THÊM USER
+    // 2. HIỂN THỊ FORM THÊM USER
     @GetMapping("/add")
     public String showAddForm(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("user", new UserRequestDTO());
         model.addAttribute("levels", JapaneseLevel.values());
-        return "users/add";
+        model.addAttribute("isView", false);
+        return "admin/users/form";
     }
 
-    // XỬ LÝ THÊM USER
+    // 3. XỬ LÝ THÊM USER (CÓ BEAN VALIDATION)
     @PostMapping("/add")
     public String addUser(
-            @ModelAttribute("user") User user,
+            @Valid @ModelAttribute("user") UserRequestDTO dto,
+            BindingResult bindingResult,
             Model model) {
 
-        boolean hasError = false;
-
-        // Kiểm tra username
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
-            model.addAttribute("errorUsername", "Username không được để trống");
-            hasError = true;
-        }
-
-        // Kiểm tra email
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            model.addAttribute("errorEmail", "Email không được để trống");
-            hasError = true;
-        } else if (!user.getEmail().matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) {
-            model.addAttribute("errorEmail", "Email không đúng định dạng");
-            hasError = true;
-        }
-
-        // Kiểm tra Level (Enum JapaneseLevel)
-        if (user.getCurrentLevel() == null) {
-            model.addAttribute("errorLevel", "Vui lòng chọn trình độ tiếng Nhật");
-            hasError = true;
-        }
-
-        // Kiểm tra Trust Score
-        if (user.getTrustScore() < 0 || user.getTrustScore() > 10) {
-            model.addAttribute("errorTrustScore", "Trust Score phải từ 0 đến 10");
-            hasError = true;
-        }
-
-        if (hasError) {
+        if (bindingResult.hasErrors()) {
             model.addAttribute("levels", JapaneseLevel.values());
-            return "users/add";
+            model.addAttribute("isView", false);
+            return "admin/users/form";
         }
 
+        User user = mapToEntity(dto);
         userService.save(user);
-        return "redirect:/users?success=add";
+        return "redirect:/admin/users?success=add";
     }
 
-    // XEM CHI TIẾT USER
+    // 4. XEM CHI TIẾT USER (CHẾ ĐỘ READONLY)
     @GetMapping("/{id}")
     public String viewUser(
             @PathVariable Long id,
@@ -100,14 +78,16 @@ public class UserController {
 
         User user = userService.findById(id).orElse(null);
         if (user == null) {
-            return "redirect:/users";
+            return "redirect:/admin/users";
         }
-        model.addAttribute("user", user);
 
-        return "users/detail";
+        model.addAttribute("user", mapToDTO(user));
+        model.addAttribute("levels", JapaneseLevel.values());
+        model.addAttribute("isView", true);
+        return "admin/users/form";
     }
 
-    // HIỂN THỊ FORM SỬA USER
+    // 5. HIỂN THỊ FORM SỬA USER
     @GetMapping("/edit/{id}")
     public String showEditForm(
             @PathVariable Long id,
@@ -115,29 +95,69 @@ public class UserController {
 
         User user = userService.findById(id).orElse(null);
         if (user == null) {
-            return "redirect:/users";
+            return "redirect:/admin/users";
         }
-        model.addAttribute("user", user);
+
+        model.addAttribute("user", mapToDTO(user));
         model.addAttribute("levels", JapaneseLevel.values());
-        return "users/edit";
+        model.addAttribute("isView", false);
+        return "admin/users/form";
     }
 
-    // XỬ LÝ SỬA USER
+    // 6. XỬ LÝ SỬA USER (CÓ BEAN VALIDATION)
     @PostMapping("/edit/{id}")
     public String editUser(
             @PathVariable Long id,
-            @ModelAttribute("user") User user,
+            @Valid @ModelAttribute("user") UserRequestDTO dto,
+            BindingResult bindingResult,
             Model model) {
 
-        user.setId(id);
-        userService.update(user);
-        return "redirect:/users?success=edit";
+        dto.setId(id);
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("levels", JapaneseLevel.values());
+            model.addAttribute("isView", false);
+            return "admin/users/form";
+        }
+
+        User existingUser = userService.findById(id).orElse(null);
+        if (existingUser == null) {
+            return "redirect:/admin/users";
+        }
+
+        existingUser.setUsername(dto.getUsername());
+        existingUser.setEmail(dto.getEmail());
+        existingUser.setCurrentLevel(dto.getCurrentLevel());
+        existingUser.setTrustScore(dto.getTrustScore());
+
+        userService.update(existingUser);
+        return "redirect:/admin/users?success=edit";
     }
 
-    // XÓA USER
+    // 7. XÓA USER
     @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteById(id);
-        return "redirect:/users?success=delete";
+        return "redirect:/admin/users?success=delete";
+    }
+
+    private UserRequestDTO mapToDTO(User user) {
+        return UserRequestDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .currentLevel(user.getCurrentLevel())
+                .trustScore(user.getTrustScore())
+                .build();
+    }
+
+    private User mapToEntity(UserRequestDTO dto) {
+        return User.builder()
+                .id(dto.getId())
+                .username(dto.getUsername())
+                .email(dto.getEmail())
+                .currentLevel(dto.getCurrentLevel())
+                .trustScore(dto.getTrustScore())
+                .build();
     }
 }

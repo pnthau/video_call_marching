@@ -3,6 +3,7 @@ package com.example.videocall_marching_language.service.impl;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.AvatarStorageService;
@@ -56,9 +57,8 @@ public class UserServiceImpl implements IUserService {
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        return userRepository.findAll();
+        return userRepository.findByRole(UserRole.USER);
     }
-
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
@@ -90,13 +90,13 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<User> searchUsers(String username, Pageable pageable) {
-        if (username == null || username.trim().isEmpty()) {
-            return userRepository.findAll(pageable);
-        }
-        return userRepository.findByUsernameContainingIgnoreCase(username.trim(), pageable);
-    }
+    public Page<User> searchUsers(String username, String email, Pageable pageable) {
+        String cleanUsername = (username != null) ? username.trim() : "";
+        String cleanEmail = (email != null) ? email.trim() : "";
 
+        // Tối ưu thành 1 câu query duy nhất, không cần nhiều nhánh if-else
+        return userRepository.searchUsersByRole(UserRole.USER, cleanUsername, cleanEmail, pageable);
+    }
     // ==================== PRIVATE HELPER METHODS ====================
 
     private User findByEmail(String email) {
