@@ -1,4 +1,8 @@
 # overview (mục tiêu)
+
+> **SUPERSEDED/HISTORICAL:** Spec khởi tạo này không còn là baseline phát triển.
+> Các field phone/verification đã bị thay thế bởi quyết định Google-only trong
+> `spec_user_authentication.md` và `spec_mvp_baseline.md`.
 - Khởi tạo dự án videocall_marching_language tạo ra các file theo spring boot, sữ dụng hibernate cho các entity đã được đề cập trong AGENTS.md 
 
 # rules (quy tắc nghiệp vụ)
@@ -55,4 +59,4 @@
 - **Bước 5**: 
 - **Bước 6**: 
 - **Bước 7**: 
-- **Bước 8**: 
+- **Bước 8**:
