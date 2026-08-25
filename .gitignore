@@ -38,3 +38,6 @@ out/
 
 ### Secrets ###
 .env
+
+.1devtool/
+PROJECT_ANALYSIS.md

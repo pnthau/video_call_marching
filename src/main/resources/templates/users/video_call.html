@@ -14,12 +14,25 @@
     <div class="container">
         <h2>Phòng Luyện Nói 1-1</h2>
         
-        <!-- Trạng thái 1: Khung nhập liệu tìm kiếm -->
+        <!-- Trạng thái 1: Chọn một tag cho từng nhóm -->
         <div id="setup-panel" class="controls" style="text-align: center; margin-bottom: 20px;">
-            <!-- Ẩn hoàn toàn các ô nhập liệu -->
-            <input type="hidden" id="uid" value="1" />
-            <input type="hidden" id="tag-key" value="n5_hoithoai" />
-            
+            <div th:each="categoryType : ${tagCategoryTypes}" style="margin-bottom: 15px;">
+                <label th:for="${'tag-select-' + #strings.toLowerCase(categoryType.name())}"
+                       th:text="${categoryType.displayName + ':'}"
+                       style="display: inline-block; min-width: 180px; text-align: right; font-weight: bold; margin-right: 10px;">
+                    Nhóm tag:
+                </label>
+                <select class="tag-group-select"
+                        th:id="${'tag-select-' + #strings.toLowerCase(categoryType.name())}"
+                        th:attr="data-category-type=${categoryType.name()}"
+                        style="padding: 8px 12px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc;">
+                    <option value="" th:text="${'-- Chọn ' + categoryType.displayName + ' --'}">-- Chọn --</option>
+                    <option th:each="tag : ${availableTags}"
+                            th:if="${tag.categoryType == categoryType.name()}"
+                            th:value="${tag.id}"
+                            th:text="${tag.name}"></option>
+                </select>
+            </div>
             <button id="find-partner-btn" style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">🔍 Bắt đầu tìm đối tác</button>
         </div>
 
@@ -49,9 +62,11 @@
         </div>
     </div>
 
-    <!-- Truyền AppID từ Backend (application.properties) xuống JS -->
+    <!-- Truyền AppID và thông tin user đã xác thực từ Backend xuống JS -->
     <script th:inline="javascript">
         const AGORA_APP_ID = /*[[${agoraAppId}]]*/ 'defaultAppId';
+        const CURRENT_USER_ID = /*[[${currentUserId}]]*/ 0;
+        const CURRENT_USER_LEVEL = /*[[${currentUserLevel}]]*/ 'N5';
     </script>
     <script src="/js/video_call.js"></script>
 </body>

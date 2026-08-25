@@ -3,34 +3,57 @@ package com.example.videocall_marching_language.controller.user;
 import com.example.videocall_marching_language.dto.MatchRequestDTO;
 import com.example.videocall_marching_language.dto.MatchResultDTO;
 import com.example.videocall_marching_language.dto.WaitingUserDTO;
+import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.enums.JapaneseLevel;
+import com.example.videocall_marching_language.service.IUserService;
 import com.example.videocall_marching_language.service.MatchMakingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 @Controller
 @RequiredArgsConstructor
 public class MatchMakingController {
     private final MatchMakingService matchMakingService;
+    private final IUserService userService;
+
+    private User getCurrentUser(SimpMessageHeaderAccessor headerAccessor) {
+        String email = headerAccessor.getUser() != null ? headerAccessor.getUser().getName() : null;
+        if (email == null) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            email = auth != null ? auth.getName() : null;
+        }
+        if (email == null) {
+            throw new RuntimeException("User not authenticated");
+        }
+        return userService.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 
     @MessageMapping("/join")
-    public void joinQueue(MatchRequestDTO request, SimpMessageHeaderAccessor headerAccessor)
-    {
+    public void joinQueue(MatchRequestDTO request, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
-        matchMakingService.joinQueue(request,sessionId);
+        User currentUser = getCurrentUser(headerAccessor);
+
+        request.setUserId(currentUser.getId());
+        request.setLevel(currentUser.getCurrentLevel());
+
+        matchMakingService.joinQueue(request, sessionId);
     }
 
     @MessageMapping("/cancel-search")
-    public void removeQueue(WaitingUserDTO request)
-    {
-        matchMakingService.cancelSearch(request.getUserId(),request.getTagKey());
+    public void removeQueue(WaitingUserDTO request, SimpMessageHeaderAccessor headerAccessor) {
+        User currentUser = getCurrentUser(headerAccessor);
+        matchMakingService.cancelSearch(currentUser.getId(), request.getTagKey());
     }
 
     @MessageMapping("/end-call")
-    public void leavedRoom(MatchRequestDTO request){
-        matchMakingService.endCall(request.getUserId());
+    public void leavedRoom(MatchRequestDTO request, SimpMessageHeaderAccessor headerAccessor) {
+        User currentUser = getCurrentUser(headerAccessor);
+        matchMakingService.endCall(currentUser.getId());
     }
 }
 

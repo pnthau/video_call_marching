@@ -3,6 +3,7 @@ package com.example.videocall_marching_language.service;
 import com.example.videocall_marching_language.entity.SocialAccount;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.UserStatus;
+import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.repository.SocialAccountRepository;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.impl.GoogleOidcUserService;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -59,14 +61,37 @@ class GoogleOidcUserServiceTests {
     @Test
     void repeatLoginDoesNotCreateDuplicateUser() {
         OidcUser google = googleUser(true);
-        User user = User.builder().email("learner@example.com").status(UserStatus.ACTIVE).build();
+        User user = User.builder()
+                .email("learner@example.com")
+                .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
+                .build();
         when(socialAccountRepository.findByProviderAndProviderId("GOOGLE", "google-sub"))
                 .thenReturn(Optional.of(SocialAccount.builder().user(user).build()));
 
-        serviceReturning(google).loadUser(mock(OidcUserRequest.class));
+        OidcUser result = serviceReturning(google).loadUser(mock(OidcUserRequest.class));
 
         verify(userRepository, never()).save(any());
         verify(socialAccountRepository, never()).save(any());
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority())));
+    }
+
+    @Test
+    void activeAdminLoginKeepsAdminAuthority() {
+        OidcUser google = googleUser(true);
+        User admin = User.builder()
+                .email("learner@example.com")
+                .role(UserRole.ADMIN)
+                .status(UserStatus.ACTIVE)
+                .build();
+        when(socialAccountRepository.findByProviderAndProviderId("GOOGLE", "google-sub"))
+                .thenReturn(Optional.of(SocialAccount.builder().user(admin).build()));
+
+        OidcUser result = serviceReturning(google).loadUser(mock(OidcUserRequest.class));
+
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority())));
     }
 
     @Test

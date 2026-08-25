@@ -33,4 +33,7 @@ public interface IUserService {
             String email,
             Pageable pageable
     );
+
+    // --- Additional ---
+    Optional<User> findByEmail(String email);
 }

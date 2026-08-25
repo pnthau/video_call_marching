@@ -4,6 +4,7 @@ import com.example.videocall_marching_language.entity.Rubric;
 import com.example.videocall_marching_language.entity.Tag;
 import com.example.videocall_marching_language.entity.TagCategory;
 import com.example.videocall_marching_language.enums.RubricCriteria;
+import com.example.videocall_marching_language.enums.TagCategoryType;
 import com.example.videocall_marching_language.repository.IRubricRepository;
 import com.example.videocall_marching_language.repository.ITagCategoryRepository;
 import com.example.videocall_marching_language.repository.ITagRepository;
@@ -30,9 +31,12 @@ public class DataInitializer {
             if (tagCategoryRepository.count() == 0) {
 
                 // 1. Tạo Categories
-                TagCategory levelCat = tagCategoryRepository.save(TagCategory.builder().name("Trình độ (Level)").build());
-                TagCategory formatCat = tagCategoryRepository.save(TagCategory.builder().name("Hình thức (Format)").build());
-                TagCategory topicCat = tagCategoryRepository.save(TagCategory.builder().name("Chủ đề (Topic)").build());
+                TagCategory levelCat = tagCategoryRepository.save(TagCategory.builder()
+                        .name("Trình độ luyện tập").type(TagCategoryType.LEVEL).displayOrder(1).build());
+                TagCategory formatCat = tagCategoryRepository.save(TagCategory.builder()
+                        .name("Hình thức học").type(TagCategoryType.ACTIVITY).displayOrder(2).build());
+                TagCategory topicCat = tagCategoryRepository.save(TagCategory.builder()
+                        .name("Chủ đề bài học").type(TagCategoryType.TOPIC).displayOrder(3).build());
 
                 // 2. Tạo Tags
                 tagRepository.saveAll(List.of(
