@@ -2,8 +2,8 @@
 
 ## 1. Trạng thái
 
-- Trạng thái: **DRAFT - chờ review trước khi code**.
-- Phạm vi: chốt domain và luồng MVP; chưa triển khai repository, service, controller hoặc migration.
+- Trạng thái: **PARTIALLY IMPLEMENTED — LearningSession Lifecycle V2 nghiệm thu PASS ngày 2026-08-30**.
+- Phạm vi: baseline MVP tổng thể. Authentication và Lifecycle V2 đã triển khai; Admin/Rubric và Peer Rating có gate riêng và chưa được đánh dấu hoàn thành trong tài liệu này.
 - Kiến trúc áp dụng khi triển khai feature mới: Spring Boot MVC2, theo luồng
   `Repository -> Service -> ServiceImpl -> Controller`, dùng DTO ở biên Controller.
 - Package hiện tại được giữ nguyên: `com.example.videocall_marching_language`.
@@ -213,48 +213,38 @@ Backend chỉ cấp Agora token nếu user hiện tại là participant của se
 - `totalScore = sum(details)`.
 - Chỉ participant của session hoàn tất mới được rating đối tác.
 
-## 6. Hiện trạng source đã xác minh ngày 2026-08-11
+## 6. Hiện trạng source đã xác minh ngày 2026-08-30
 
 Đã có trong source:
 
 - Package gốc `com.example.videocall_marching_language`.
 - Entity: `User`, `SocialAccount`, `Tag`, `TagCategory`, `PeerRating`.
-- `AgoraTokenService`, `AgoraController`, `WebController`.
-- Trang Thymeleaf và JavaScript gọi video cơ bản.
+- `LearningSession`, `SessionPresence`, repository/service/controller theo DTO boundary.
+- Matchmaking authenticated, session-based `AgoraTokenService`, scheduler/finalizer và WebSocket recovery.
+- Trang Thymeleaf và JavaScript gọi video theo session backend-generated.
 - Bean cấu hình Cloudinary.
-- Gradle khai báo Spring Boot `4.1.0`, Java 17, JPA, MVC, Thymeleaf, Agora,
-  Cloudinary và MySQL.
+- Flyway V1-V3, Hibernate `ddl-auto=validate`, MySQL clean/legacy verification PASS.
+- Gradle khai báo Spring Boot, Java 17, JPA, MVC, Thymeleaf, Agora, Cloudinary, MySQL và Flyway.
 
 Chưa có:
 
-- Repository layer.
-- Service interface/ServiceImpl cho business domain.
-- DTO.
-- Authentication/authorization.
 - Quan hệ User-Tag.
-- Queue/matchmaking và `LearningSession`.
 - Rubric/rating detail.
-- Test unit/integration cho nghiệp vụ.
+- Peer Rating MVP hoàn chỉnh và test tương ứng.
 
 Sai lệch tài liệu cần xử lý:
 
-- `AGENTS.md` mục Current State nói chưa có entity/service/controller nhưng source đã có.
-- `spec_agora_token.md` ghi controller ở package `controller`, source thực tế nằm ở
-  `controller.user`.
 - PDF có nơi mô tả 8 rubric nhưng quyết định MVP hiện tại là 7.
 - `PeerRating` hiện chỉ lưu tổng điểm, chưa đủ để lưu 7 tiêu chí.
 
-## 7. Thứ tự spec/implementation sau khi baseline được duyệt
+## 7. Trạng thái roadmap
 
-1. `spec_user_authentication.md`: phone/password, Google, role và profile.
-2. `spec_tag_management.md`: admin CRUD và user chọn tag/level.
-3. `spec_learning_session_matchmaking.md`: queue, matching 1-1 và session lifecycle.
-4. Cập nhật `spec_agora_token.md`: token gắn user/session, authorization và validation.
-5. Cập nhật `spec_frontend_video_call.md`: không nhập channel/UID thủ công; nhận session
-   từ backend.
-6. `spec_rubric_peer_rating.md`: 7 rubric, rating detail và trust-score baseline.
+1. Authentication/Google OIDC: implemented.
+2. LearningSession Lifecycle V2, Agora authorization và frontend recovery: implemented, Giai đoạn 1 PASS.
+3. Admin/Rubric: implementation hiện hữu cần review ở Giai đoạn 3.
+4. Peer Rating: chưa triển khai theo contract MVP; chỉ bắt đầu sau gate Admin/Rubric.
 
-Mỗi spec phải được review trước khi code feature tương ứng.
+Matchmaking queue hiện chỉ hỗ trợ một application instance. Redis/distributed matching là technical debt ngoài phạm vi MVP hiện tại.
 
 ## 8. Acceptance criteria của baseline
 
@@ -264,14 +254,13 @@ Mỗi spec phải được review trước khi code feature tương ứng.
 - [x] Có định nghĩa đo được cho session `COMPLETED`.
 - [x] Có validation và ràng buộc dữ liệu nền tảng.
 - [x] Có bảng đối chiếu source hiện tại với phần còn thiếu.
-- [ ] Người review xác nhận ngưỡng hoàn tất 5 phút và grace period 60 giây.
-- [ ] Người review xác nhận loại `SUPPORTIVENESS` khỏi bộ rubric MVP.
-- [x] `gradlew test` chạy thành công trong môi trường hiện tại ngày 2026-08-11.
+- [x] Ngưỡng hoàn tất 300 giây và reconnect grace 60 giây đã chốt và kiểm thử boundary.
+- [x] Loại `SUPPORTIVENESS` khỏi bộ rubric MVP.
+- [x] Lifecycle automated gate: 116 tests, 0 failures/errors/skipped; build PASS ngày 2026-08-30.
+- [x] MySQL clean/legacy migration và manual two-browser lifecycle/recovery PASS.
 
-## 9. Các quyết định cần reviewer xác nhận
+## 9. Quyết định còn lại ngoài Lifecycle V2
 
-1. Giữ ngưỡng hai user cùng hiện diện tối thiểu 5 phút?
-2. Giữ grace period reconnect là 60 giây?
-3. Loại `SUPPORTIVENESS` khỏi 7 rubric chính hay thay thế một tiêu chí khác?
-4. Với phone/password vòng đầu, cho đăng nhập khi `isPhoneVerified=false`, hay bắt buộc
+1. Với phone/password vòng đầu, cho đăng nhập khi `isPhoneVerified=false`, hay bắt buộc
    phải tích hợp OTP trước khi cho sử dụng matching?
+2. Peer Rating và rating detail sẽ được chốt ở `spec_rubric_peer_rating.md`; chưa được coi là implemented.
