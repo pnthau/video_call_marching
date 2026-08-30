@@ -7,7 +7,6 @@ import com.example.videocall_marching_language.enums.UserStatus;
 import com.example.videocall_marching_language.repository.SocialAccountRepository;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
@@ -23,7 +22,6 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest, OidcUser> {
 
@@ -38,16 +36,10 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
         // Load Google user
         OidcUser googleUser = loadGoogleUser(userRequest);
-        log.debug("Google OIDC claims: {}", googleUser.getClaims());
         String providerId = requiredClaim(googleUser.getSubject(), "Tài khoản Google không có subject");
         String email = requiredClaim(googleUser.getEmail(), "Tài khoản Google không có email")
                 .trim()
                 .toLowerCase(Locale.ROOT);
-
-        // Log Google user claims
-        log.info("Google OIDC login: email={}, emailVerified={}, providerId={}, sub={}, fullName={}",
-                email, googleUser.getEmailVerified(), providerId,
-                googleUser.getSubject(), googleUser.getFullName());
 
         if (!Boolean.TRUE.equals(googleUser.getEmailVerified())) {
             throw authenticationError("unverified_google_email", "Email Google chưa được xác minh");
@@ -59,8 +51,6 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
         User user = socialAccountRepository.findByProviderAndProviderId(PROVIDER, finalProviderId)
                 .map(SocialAccount::getUser)
                 .orElseGet(() -> createUser(googleUser, finalProviderId, finalEmail));
-        log.info("User after lookup/creation: id={}, email={}, status={}", user.getId(), user.getEmail(), user.getStatus());
-
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw authenticationError("disabled_account", "Tài khoản đã bị vô hiệu hóa");
         }

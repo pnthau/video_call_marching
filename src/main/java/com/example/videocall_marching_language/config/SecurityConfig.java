@@ -20,7 +20,7 @@ public class SecurityConfig {
                         .requestMatchers("/login", "/oauth2/**", "/login/oauth2/**", "/css/**", "/js/**", "/images/**", "/error")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/profile/**", "/video-call", "/video-call/**", "/api/agora/**")
+                        .requestMatchers("/profile/**", "/video-call", "/video-call/**", "/api/agora/**", "/api/sessions/**")
                         .authenticated()
                         .anyRequest().permitAll()
                 )

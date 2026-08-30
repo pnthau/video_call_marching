@@ -24,13 +24,13 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(readOnly = true)
     public UserProfileResponse getCurrentProfile(String email) {
-        return toResponse(findByEmail(email));
+        return toResponse(findByEmailOrThrow(email));
     }
 
     @Override
     @Transactional
     public UserProfileResponse updateCurrentProfile(String email, UpdateProfileRequest request) {
-        User user = findByEmail(email);
+        User user = findByEmailOrThrow(email);
         user.setUsername(request.getUsername().trim());
         user.setCurrentLevel(request.getCurrentLevel());
 
@@ -60,7 +60,13 @@ public class UserServiceImpl implements UserService {
         });
     }
 
-    private User findByEmail(String email) {
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    private User findByEmailOrThrow(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Không tìm thấy tài khoản"));
     }
