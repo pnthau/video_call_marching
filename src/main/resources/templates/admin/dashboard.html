@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Dashboard Admin</title></head>
+<body><section>
+    <h1 class="h3 mb-4">Tổng quan</h1>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Người dùng</div><div class="display-6" th:text="${dashboard.totalUsers}">0</div></div></div></div>
+        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Chủ đề</div><div class="display-6" th:text="${dashboard.totalTags}">0</div></div></div></div>
+        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Rubric đang bật</div><div class="display-6" th:text="${dashboard.activeRubrics}">0</div></div></div></div>
+    </div>
+</section></body></html>

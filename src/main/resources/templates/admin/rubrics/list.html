@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Quản lý Rubric</title></head>
+<body><section>
+    <h1 class="h3 mb-3">Rubric</h1>
+    <div class="alert alert-success" th:if="${param.updated != null}">Đã cập nhật rubric.</div>
+    <div class="alert alert-success" th:if="${param.toggled != null}">Đã đổi trạng thái rubric.</div>
+    <div class="table-responsive"><table class="table table-striped align-middle bg-white">
+        <thead><tr><th>Criteria cố định</th><th>Tên hiển thị</th><th>Mô tả</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+        <tbody><tr th:each="rubric : ${rubrics}">
+            <td><code th:text="${rubric.criteria}">ACCURACY</code></td>
+            <td th:text="${rubric.displayName}">Tên</td><td th:text="${rubric.description}">Mô tả</td>
+            <td th:text="${rubric.active ? 'Đang bật' : 'Đang tắt'}">Đang bật</td>
+            <td class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/rubrics/edit/{id}(id=${rubric.id})}">Sửa</a>
+                <form method="post" th:action="@{/admin/rubrics/toggle/{id}(id=${rubric.id})}">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn btn-sm btn-outline-secondary" type="submit" th:text="${rubric.active ? 'Tắt' : 'Bật'}">Tắt</button>
+                </form>
+            </td>
+        </tr></tbody>
+    </table></div>
+</section></body></html>

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Quản lý người dùng</title></head><body><section>
+    <h1 class="h3 mb-3">Người dùng</h1>
+    <form method="get" th:action="@{/admin/users}" class="row g-2 mb-3">
+        <div class="col-md-8"><input class="form-control" name="search" th:value="${search}" placeholder="Tìm username hoặc email"></div>
+        <div class="col-md-4"><button class="btn btn-primary" type="submit">Tìm kiếm</button></div>
+    </form>
+    <div class="table-responsive"><table class="table table-striped bg-white"><thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Trình độ</th><th>Thao tác</th></tr></thead>
+        <tbody><tr th:each="user : ${users.content}"><td th:text="${user.id}">1</td><td th:text="${user.username}">user</td><td th:text="${user.email}">email</td><td th:text="${user.currentLevel}">N5</td><td><a class="btn btn-sm btn-outline-info" th:href="@{/admin/users/{id}(id=${user.id})}">Xem</a> <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/users/{id}/edit(id=${user.id})}">Sửa</a></td></tr>
+        <tr th:if="${users.empty}"><td colspan="5" class="text-center text-muted">Không tìm thấy người dùng.</td></tr></tbody></table></div>
+    <nav th:if="${users.totalPages > 1}"><ul class="pagination"><li class="page-item" th:classappend="${users.first} ? 'disabled'"><a class="page-link" th:href="@{/admin/users(search=${search},page=${users.number - 1})}">Trước</a></li><li class="page-item disabled"><span class="page-link" th:text="|${users.number + 1} / ${users.totalPages}|">1 / 1</span></li><li class="page-item" th:classappend="${users.last} ? 'disabled'"><a class="page-link" th:href="@{/admin/users(search=${search},page=${users.number + 1})}">Sau</a></li></ul></nav>
+</section></body></html>
