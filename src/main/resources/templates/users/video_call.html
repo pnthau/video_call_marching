@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Phòng luyện nói (Video Call)</title>
+    <title>Phòng Luyện Nói 1-1 (Người Thật & AI Sensei)</title>
     <link rel="stylesheet" href="/css/style.css">
     <!-- Thư viện Agora SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
@@ -12,44 +12,100 @@
 </head>
 <body>
     <div class="container">
-        <h2>Phòng Luyện Nói 1-1</h2>
+        <header>
+            <h2>🎥 Phòng Luyện Nói 1-1</h2>
+        </header>
         
-        <!-- Trạng thái 1: Khung nhập liệu tìm kiếm -->
-        <div id="setup-panel" class="controls" style="text-align: center; margin-bottom: 20px;">
-            <!-- Ẩn hoàn toàn các ô nhập liệu -->
+        <!-- Trạng thái 1: Khung chọn chế độ -->
+        <div id="setup-panel" class="controls" style="text-align: center;">
             <input type="hidden" id="uid" value="1" />
             <input type="hidden" id="tag-key" value="n5_hoithoai" />
             
-            <button id="find-partner-btn" style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">🔍 Bắt đầu tìm đối tác</button>
+            <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <!-- Nút Gọi với AI -->
+                <button id="call-ai-btn" class="btn btn-ai" style="padding: 16px 28px; font-size: 18px;">
+                    🤖 Luyện tập 1-1 với AI Sensei (0 Đồng)
+                </button>
+                
+                <!-- Nút Ghép người thật -->
+                <button id="find-partner-btn" class="btn btn-primary" style="padding: 16px 28px; font-size: 18px;">
+                    👥 Ghép đôi với Người thật
+                </button>
+            </div>
+
+            <!-- Tùy chọn ngữ cảnh cho AI -->
+            <div id="ai-options" style="margin-top: 20px; display: inline-flex; gap: 15px; background: rgba(0,0,0,0.2); padding: 10px 20px; border-radius: 8px;">
+                <label>Chế độ:
+                    <select id="ai-mode" style="background:#0f172a; color:#fff; padding:4px 8px; border-radius:4px; border:1px solid #475569;">
+                        <option value="ROLEPLAY">Đóng vai (Roleplay)</option>
+                        <option value="SHADOWING">Nhại âm (Shadowing)</option>
+                    </select>
+                </label>
+                <label>Ngữ cảnh:
+                    <input type="text" id="ai-scenario" value="Hội thoại tại Quán Ăn" style="background:#0f172a; color:#fff; padding:4px 8px; border-radius:4px; border:1px solid #475569; width: 180px;">
+                </label>
+            </div>
         </div>
 
-        <!-- Trạng thái 2: Màn hình chờ (Loading) -->
-        <div id="waiting-panel" class="controls" style="display: none;">
-            <p>⏳ Đang tìm kiếm đối tác... Xin vui lòng đợi.</p>
-            <button id="cancel-search-btn" style="background-color: #f44336; color: white;">Hủy tìm kiếm</button>
+        <!-- Trạng thái 2: Màn hình chờ tìm người thật -->
+        <div id="waiting-panel" class="controls" style="display: none; text-align: center;">
+            <p style="font-size: 18px; margin-bottom: 15px;">⏳ Đang tìm kiếm đối tác học cùng... Xin vui lòng đợi.</p>
+            <button id="cancel-search-btn" class="btn btn-danger">Hủy tìm kiếm</button>
         </div>
 
-        <!-- Trạng thái 3: Màn hình Video Call -->
-        <div id="call-panel" class="controls" style="display: none;">
-            <p id="room-info" style="font-weight: bold; color: green;"></p>
-            <button id="end-call-btn" style="background-color: #f44336; color: white;">Rời phòng / Kết thúc</button>
-            <button id="mic-btn">Tắt Mic</button>
-            <button id="cam-btn">Tắt Camera</button>
+        <!-- Trạng thái 3: Thanh điều khiển cuộc gọi -->
+        <div id="call-panel" class="controls" style="display: none; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div id="room-info" style="font-weight: 600; color: #38bdf8;"></div>
+            <div style="display: flex; gap: 10px;">
+                <button id="mic-btn" class="btn btn-secondary">🎤 Tắt Mic</button>
+                <button id="cam-btn" class="btn btn-secondary">📷 Tắt Camera</button>
+                <button id="end-call-btn" class="btn btn-danger">🔴 Kết thúc cuộc gọi</button>
+            </div>
         </div>
 
+        <!-- Khung Video Call -->
         <div class="video-container" id="video-container" style="display: none;">
+            <!-- Khung của Bạn (Local) -->
             <div class="video-box">
-                <p>Bạn (Local)</p>
+                <p class="label">Bạn (Local)</p>
                 <div id="local-player" class="player"></div>
             </div>
+
+            <!-- Khung của Đối tác (Remote - Người thật HOẶC AI Sensei) -->
             <div class="video-box">
-                <p>Đối tác (Remote)</p>
+                <p class="label" id="remote-label">Đối tác (Remote)</p>
+                
+                <!-- Khi gọi người thật -->
                 <div id="remote-player" class="player"></div>
+
+                <!-- Khi gọi AI Sensei -->
+                <div id="ai-player-screen" class="ai-player-screen" style="display: none;">
+                    <div class="avatar-wrapper" id="avatar-wrapper">
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=TanakaSensei" class="sensei-avatar" alt="AI Sensei">
+                        <div class="avatar-pulse"></div>
+                    </div>
+                    
+                    <div class="ai-status-badge" id="ai-status-text">🎧 Đang lắng nghe bạn nói...</div>
+
+                    <!-- Phụ đề trực tiếp khi AI nói -->
+                    <div class="subtitles-overlay" id="subtitles-overlay" style="display: none;">
+                        <div class="sub-japanese" id="sub-jp"></div>
+                        <div class="sub-reading" id="sub-reading"></div>
+                        <div class="sub-vietnamese" id="sub-vi"></div>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <!-- Bảng Live Feedback sửa lỗi ngữ pháp/phát âm -->
+        <div class="feedback-card" id="feedback-card">
+            <h4>💡 Nhận xét từ AI Sensei:</h4>
+            <p id="feedback-content" style="color: #cbd5e1; margin-bottom: 6px;"></p>
+            <p id="suggested-reply" style="color: #38bdf8; font-size: 14px;"></p>
         </div>
     </div>
 
-    <!-- Truyền AppID từ Backend (application.properties) xuống JS -->
+    <!-- Truyền AppID từ Backend -->
     <script th:inline="javascript">
         const AGORA_APP_ID = /*[[${agoraAppId}]]*/ 'defaultAppId';
     </script>

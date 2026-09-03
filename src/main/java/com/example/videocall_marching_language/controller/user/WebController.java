@@ -16,4 +16,9 @@ public class WebController {
         model.addAttribute("agoraAppId", agoraAppId);
         return "users/video_call";
     }
+
+    @GetMapping("/ai-tutor")
+    public String showAiTutorPage() {
+        return "users/ai-tutor-test";
+    }
 }

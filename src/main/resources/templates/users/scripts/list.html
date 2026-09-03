@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách Kịch bản Luyện nói</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a1a;
+            --secondary: #666666;
+            --surface: #ffffff;
+            --background: #f7f7f9;
+            --border: #eaeaea;
+            --hover: #f1f1f1;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--background); color: var(--primary); -webkit-font-smoothing: antialiased; padding: 2rem; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { margin-bottom: 3rem; text-align: center; }
+        .header h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+        .header p { color: var(--secondary); font-size: 1.1rem; }
+        .script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .script-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .script-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: transparent; }
+        .card-title { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+        .card-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--secondary); }
+        .badge { background: var(--background); padding: 0.25rem 0.75rem; border-radius: 999px; font-weight: 500; }
+        .empty-state { text-align: center; color: var(--secondary); padding: 4rem; background: var(--surface); border-radius: 12px; border: 1px dashed var(--border); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Luyện nói AI</h1>
+            <p>Chọn một chủ đề để bắt đầu luyện tập (Giai đoạn <span th:text="${phase != null ? phase : 1}">1</span>)</p>
+        </header>
+        
+        <div th:if="${scripts != null and !scripts.isEmpty()}" class="script-grid">
+            <a th:each="script : ${scripts}" 
+               th:href="@{/practice/scripts/{id}(id=${script.id}, phase=${phase != null ? phase : 1})}" 
+               class="script-card">
+                <div class="card-title" th:text="${script.title}">Tiêu đề kịch bản</div>
+                <div class="card-meta">
+                    <span class="badge" th:if="${script.targetDuration != null}" th:text="${script.targetDuration + ' giây'}">60 giây</span>
+                    <span class="badge" th:if="${script.language != null}" th:text="${script.language}">JA</span>
+                </div>
+            </a>
+        </div>
+
+        <div th:if="${scripts == null or scripts.isEmpty()}" class="empty-state">
+            <p>Chưa có kịch bản nào cho chủ đề này.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -44,10 +44,6 @@
 
 ## 7. Module-specific Rules (áp dụng cho code hiện tại -- mục 2)
 
-### AI Features (Kiến trúc mục tiêu -- chưa có trong code hiện tại)
-- Dùng Claude API (`claude-sonnet-4-6`) qua HTTP thuần, không thêm SDK ngoài
-- Bắt buộc fallback mock response khi `CLAUDE_API_KEY` rỗng hoặc lỗi
-
 ## 8. Session Management
 Cuối mỗi session, tự động tạo summary với format:
 - Đang làm gì?
