@@ -22,3 +22,76 @@
         </tr></tbody>
     </table></div>
 </section></body></html>
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Rubric – Admin</title>
+</head>
+<body>
+<th:block th:fragment="content">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">📋 Quản lý Rubric</h4>
+        <span class="badge bg-secondary">7 tiêu chí cố định</span>
+    </div>
+
+    <!-- ── THÔNG BÁO ────────────────────────────────────────── -->
+    <div th:if="${param.success != null}"
+         class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:if="${param.success[0] == 'edit'}">✅ Cập nhật Rubric thành công!</span>
+        <span th:if="${param.success[0] == 'toggle'}">✅ Đã thay đổi trạng thái Rubric!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- ── BẢNG RUBRIC ───────────────────────────────────────── -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                <tr>
+                    <th style="width:40px">#</th>
+                    <th>Mã (Criteria)</th>
+                    <th>Tên hiển thị</th>
+                    <th>Mô tả</th>
+                    <th style="width:100px" class="text-center">Trạng thái</th>
+                    <th style="width:130px" class="text-center">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rubric : ${rubrics}">
+                    <td class="text-muted small" th:text="${rubric.id}"></td>
+                    <td>
+                        <code class="text-primary" th:text="${rubric.criteria}"></code>
+                    </td>
+                    <td class="fw-semibold" th:text="${rubric.displayName}"></td>
+                    <td class="text-muted small" th:text="${rubric.description}"></td>
+                    <td class="text-center">
+                        <span th:if="${rubric.active}" class="badge bg-success">Active</span>
+                        <span th:unless="${rubric.active}" class="badge bg-secondary">Inactive</span>
+                    </td>
+                    <td class="text-center">
+                        <!-- Sửa -->
+                        <a th:href="@{/admin/rubrics/edit/{id}(id=${rubric.id})}"
+                           class="btn btn-warning btn-sm me-1">✏️</a>
+                        <!-- Toggle -->
+                        <form th:action="@{/admin/rubrics/toggle/{id}(id=${rubric.id})}"
+                              method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-sm"
+                                    th:classappend="${rubric.active} ? 'btn-outline-secondary' : 'btn-outline-success'"
+                                    th:title="${rubric.active} ? 'Tắt' : 'Bật'"
+                                    th:text="${rubric.active} ? '🔕' : '🔔'">
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <p class="text-muted small mt-3">
+        💡 Rubric không thể bị xóa để bảo toàn lịch sử đánh giá. Dùng nút toggle để bật/tắt.
+    </p>
+
+</th:block>
+</body>
+</html>

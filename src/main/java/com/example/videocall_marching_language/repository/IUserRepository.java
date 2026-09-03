@@ -20,9 +20,7 @@ public interface IUserRepository extends JpaRepository<User, Long>, JpaSpecifica
     List<User> findAllByIdForUpdate(@Param("userIds") List<Long> userIds);
 
     Optional<User> findByEmail(String email);
-
     boolean existsByEmail(String email);
-
     boolean existsByUsername(String username);
 
     long countByRole(UserRole role);

@@ -16,18 +16,26 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Rubric {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Mã tiêu chí ổn định — không bao giờ thay đổi để không làm sai lịch sử rating.
+     * Admin chỉ được sửa displayName / description / active.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true, length = 40, updatable = false)
     private RubricCriteria criteria;
 
+    /**
+     * Tên hiển thị — admin có thể sửa tự do.
+     */
     @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
 
-    @Column(length = 1000)
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Builder.Default

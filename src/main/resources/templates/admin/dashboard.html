@@ -1,12 +1,72 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
-<head><title>Dashboard Admin</title></head>
-<body><section>
-    <h1 class="h3 mb-4">Tổng quan</h1>
-    <div class="row g-3">
-        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Người dùng</div><div class="display-6" th:text="${dashboard.totalUsers}">0</div></div></div></div>
-        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Chủ đề</div><div class="display-6" th:text="${dashboard.totalTags}">0</div></div></div></div>
-        <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Rubric đang bật</div><div class="display-6" th:text="${dashboard.activeRubrics}">0</div></div></div></div>
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+<head>
+    <title>Dashboard – Admin</title>
+</head>
+<body>
+<th:block th:fragment="content">
+
+    <h4 class="mb-4 fw-bold">📊 Tổng quan hệ thống</h4>
+
+    <!-- ── STAT CARDS ──────────────────────────────────────── -->
+    <div class="row g-4 mb-5">
+
+        <!-- Users -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:56px;height:56px;background:#eff6ff;font-size:1.6rem;">👥</div>
+                    <div>
+                        <div class="text-muted small">Tổng số User</div>
+                        <div class="fs-3 fw-bold text-primary" th:text="${totalUsers}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tags -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:56px;height:56px;background:#f0fdf4;font-size:1.6rem;">🏷️</div>
+                    <div>
+                        <div class="text-muted small">Tổng số Tag</div>
+                        <div class="fs-3 fw-bold text-success" th:text="${totalTags}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Rubrics -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:56px;height:56px;background:#fefce8;font-size:1.6rem;">📋</div>
+                    <div>
+                        <div class="text-muted small">Rubric đang active</div>
+                        <div class="fs-3 fw-bold text-warning" th:text="${activeRubrics}">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
-</section></body></html>
+
+    <!-- ── QUICK LINKS ──────────────────────────────────────── -->
+    <h6 class="text-muted mb-3 text-uppercase fw-semibold" style="font-size:.75rem;letter-spacing:.08em;">Truy cập nhanh</h6>
+    <div class="d-flex gap-3 flex-wrap">
+        <a th:href="@{/admin/rubrics}" class="btn btn-outline-warning">
+            📋 Quản lý Rubric
+        </a>
+        <a th:href="@{/users}" class="btn btn-outline-primary">
+            👥 Quản lý User
+        </a>
+    </div>
+
+</th:block>
+</body>
+</html>

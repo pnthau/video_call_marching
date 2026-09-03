@@ -15,4 +15,6 @@ public interface IRubricRepository extends JpaRepository<Rubric, Long> {
 
     @Query(value = "SELECT criteria FROM rubrics", nativeQuery = true)
     List<String> findAllCriteriaCodes();
+
+    List<Rubric> findByIsActiveTrueOrderByIdAsc();
 }

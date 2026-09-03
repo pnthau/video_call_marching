@@ -41,6 +41,7 @@ public class DataInitializer {
                         .name("Hình thức học").type(TagCategoryType.ACTIVITY).displayOrder(2).build());
                 TagCategory topic = categoryRepository.save(TagCategory.builder()
                         .name("Chủ đề bài học").type(TagCategoryType.TOPIC).displayOrder(3).build());
+                
                 tagRepository.saveAll(List.of(
                         Tag.builder().name("N5").tagCategory(level).build(),
                         Tag.builder().name("N4").tagCategory(level).build(),
@@ -48,6 +49,7 @@ public class DataInitializer {
                         Tag.builder().name("Đóng vai (Roleplay)").tagCategory(activity).build(),
                         Tag.builder().name("Giới thiệu bản thân").tagCategory(topic).build()));
             }
+
             validateRubricCriteria(rubricRepository.findAllCriteriaCodes());
             RUBRIC_SEEDS.forEach(seed -> seedIfMissing(rubricRepository, seed));
             validateCompleteRubricSet(rubricRepository.findAllCriteriaCodes());
