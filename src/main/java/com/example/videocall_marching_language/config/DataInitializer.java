@@ -15,14 +15,12 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class DataInitializer {
-
     @Bean
     public CommandLineRunner initData(
             ITagCategoryRepository tagCategoryRepository,
             ITagRepository tagRepository) {
 
         return args -> {
-            // ── TAGS ─────────────────────────────────────────────────────────
             // Kiểm tra nếu DB chưa có dữ liệu mới khởi tạo (tránh trùng lặp khi restart)
             if (tagCategoryRepository.count() == 0) {
 
