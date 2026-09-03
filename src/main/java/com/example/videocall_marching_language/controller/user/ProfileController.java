@@ -5,7 +5,7 @@ import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
 import com.example.videocall_marching_language.exception.AvatarUploadException;
 import com.example.videocall_marching_language.exception.InvalidAvatarException;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 @RequiredArgsConstructor
 public class ProfileController {
 
-    private final UserService userService;
+    private final IUserService userService;
 
     @GetMapping("/profile")
     public String showProfile(Authentication authentication, Model model) {

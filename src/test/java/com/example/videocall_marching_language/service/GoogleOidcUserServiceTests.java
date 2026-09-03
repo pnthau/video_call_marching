@@ -3,6 +3,7 @@ package com.example.videocall_marching_language.service;
 import com.example.videocall_marching_language.entity.SocialAccount;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.UserStatus;
+import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.repository.SocialAccountRepository;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.impl.GoogleOidcUserService;
@@ -12,6 +13,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.boot.test.system.CapturedOutput;
+import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
@@ -25,6 +28,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
@@ -32,7 +36,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})
 @MockitoSettings(strictness = Strictness.LENIENT)
 class GoogleOidcUserServiceTests {
 
@@ -59,14 +63,55 @@ class GoogleOidcUserServiceTests {
     @Test
     void repeatLoginDoesNotCreateDuplicateUser() {
         OidcUser google = googleUser(true);
-        User user = User.builder().email("learner@example.com").status(UserStatus.ACTIVE).build();
+        User user = User.builder()
+                .email("learner@example.com")
+                .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
+                .build();
+        when(socialAccountRepository.findByProviderAndProviderId("GOOGLE", "google-sub"))
+                .thenReturn(Optional.of(SocialAccount.builder().user(user).build()));
+
+        OidcUser result = serviceReturning(google).loadUser(mock(OidcUserRequest.class));
+
+        verify(userRepository, never()).save(any());
+        verify(socialAccountRepository, never()).save(any());
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_USER".equals(authority.getAuthority())));
+    }
+
+    @Test
+    void loginDoesNotLogOidcIdentity(CapturedOutput output) {
+        OidcUser google = googleUser(true);
+        User user = User.builder()
+                .email("learner@example.com")
+                .role(UserRole.USER)
+                .status(UserStatus.ACTIVE)
+                .build();
         when(socialAccountRepository.findByProviderAndProviderId("GOOGLE", "google-sub"))
                 .thenReturn(Optional.of(SocialAccount.builder().user(user).build()));
 
         serviceReturning(google).loadUser(mock(OidcUserRequest.class));
 
-        verify(userRepository, never()).save(any());
-        verify(socialAccountRepository, never()).save(any());
+        assertTrue(!output.getAll().contains("google-sub"));
+        assertTrue(!output.getAll().contains("learner@example.com"));
+        assertTrue(!output.getAll().contains("token-value"));
+    }
+
+    @Test
+    void activeAdminLoginKeepsAdminAuthority() {
+        OidcUser google = googleUser(true);
+        User admin = User.builder()
+                .email("learner@example.com")
+                .role(UserRole.ADMIN)
+                .status(UserStatus.ACTIVE)
+                .build();
+        when(socialAccountRepository.findByProviderAndProviderId("GOOGLE", "google-sub"))
+                .thenReturn(Optional.of(SocialAccount.builder().user(admin).build()));
+
+        OidcUser result = serviceReturning(google).loadUser(mock(OidcUserRequest.class));
+
+        assertTrue(result.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority())));
     }
 
     @Test

@@ -7,12 +7,11 @@
 
 ## 2. Quy tắc
 
-- Không hardcode token, channel hoặc UID.
-- Khi match, gọi `GET /api/sessions/{sessionId}/token`.
-- Join bằng dữ liệu response; chỉ report `join-agora` sau khi `client.join` thành công.
-- Leave endpoint phải idempotent.
-- POST gửi CSRF token theo Spring Security.
-- Backend bỏ qua identity/level/channel do JavaScript gửi.
+# rules (quy tắc nghiệp vụ)
+- Sử dụng Agora Web SDK (phiên bản 4.x) thông qua CDN.
+- Gọi API Backend `GET /api/agora/token` để lấy RTC token động, tuyệt đối không hardcode token trên JS.
+- Giao diện tối giản gồm 2 màn hình video: Local (của bản thân) và Remote (của đối tác).
+- Hỗ trợ các nút điều khiển cơ bản: Join (Tham gia), Leave (Rời phòng), Toggle Mic (Bật/Tắt Mic), Toggle Camera (Bật/Tắt Camera).
 
 ## 3. UI state
 
