@@ -1,10 +1,8 @@
 package com.example.videocall_marching_language.controller.user;
 
 import com.example.videocall_marching_language.dto.MatchRequestDTO;
-import com.example.videocall_marching_language.dto.MatchResultDTO;
 import com.example.videocall_marching_language.entity.User;
-import com.example.videocall_marching_language.enums.JapaneseLevel;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import com.example.videocall_marching_language.service.MatchMakingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -17,7 +15,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class MatchMakingController {
     private final MatchMakingService matchMakingService;
-    private final UserService userService;
+    private final IUserService userService;
 
     private User getCurrentUser(SimpMessageHeaderAccessor headerAccessor) {
         String email = headerAccessor.getUser() != null ? headerAccessor.getUser().getName() : null;

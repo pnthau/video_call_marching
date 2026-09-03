@@ -9,7 +9,7 @@ import com.example.videocall_marching_language.exception.SessionAccessDeniedExce
 import com.example.videocall_marching_language.exception.SessionConflictException;
 import com.example.videocall_marching_language.exception.SessionNotFoundException;
 import com.example.videocall_marching_language.service.ILearningSessionService;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class LearningSessionController {
 
     private final ILearningSessionService learningSessionService;
-    private final UserService userService;
+    private final IUserService userService;
 
     @GetMapping("/active")
     public ResponseEntity<LearningSessionResponse> getActiveSession(Authentication authentication) {

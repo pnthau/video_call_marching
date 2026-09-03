@@ -1,6 +1,5 @@
 package com.example.videocall_marching_language.service;
 
-
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
@@ -11,12 +10,17 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IUserService {
-    // --- Profile Management ---
+
+    // ==================== PROFILE MANAGEMENT ====================
+
     UserProfileResponse getCurrentProfile(String email);
 
     UserProfileResponse updateCurrentProfile(String email, UpdateProfileRequest request);
 
-    // --- CRUD Operations ---
+    Optional<User> findByEmail(String email);
+
+    // ==================== CRUD OPERATIONS ====================
+
     List<User> findAll();
 
     Optional<User> findById(Long id);
@@ -27,10 +31,7 @@ public interface IUserService {
 
     void deleteById(Long id);
 
-    // --- Search & Pagination ---
-    Page<User> searchUsers(
-            String username,
-            String email,
-            Pageable pageable
-    );
+    // ==================== SEARCH & PAGINATION ====================
+
+    Page<User> searchUsers(String username, String email, Pageable pageable);
 }

@@ -9,12 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IRubricRepository extends JpaRepository<Rubric, Long> {
+
     List<Rubric> findAllByOrderByIdAsc();
+
     Optional<Rubric> findByCriteria(RubricCriteria criteria);
+
     long countByActiveTrue();
 
     @Query(value = "SELECT criteria FROM rubrics", nativeQuery = true)
     List<String> findAllCriteriaCodes();
 
-    List<Rubric> findByIsActiveTrueOrderByIdAsc();
+    // Sửa findByIsActiveTrue... -> findByActiveTrue...
+    List<Rubric> findByActiveTrueOrderByIdAsc();
 }

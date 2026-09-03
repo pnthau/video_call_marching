@@ -25,7 +25,8 @@ public class AdminUserServiceImpl implements AdminUserService {
     @Transactional(readOnly = true)
     public Page<AdminUserResponse> search(String search, Pageable pageable) {
         String cleanSearch = search == null ? "" : search.trim();
-        return userRepository.searchByRole(UserRole.USER, cleanSearch, pageable).map(this::toResponse);
+        return userRepository.searchByRole(UserRole.USER, cleanSearch, pageable)
+                .map(this::toResponse);
     }
 
     @Override
