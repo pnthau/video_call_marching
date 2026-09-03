@@ -1,94 +1,66 @@
-# Spec: Authenticated Session Video Call Frontend
+# Spec: Session-driven Frontend Video Call
 
 ## 1. Trạng thái
 
-- **IMPLEMENTED — Giai đoạn 1 nghiệm thu PASS ngày 2026-08-30**.
-- Frontend dùng `LearningSession` do backend tạo; không nhận hoặc hardcode identity, channel hay Agora UID.
+- **PARTIAL — đã gọi được Agora, còn thiếu CSRF/reconnect hardening**.
+- UI do matchmaking và `sessionId` dẫn dắt; user không nhập channel/UID.
 
-## 2. Phạm vi
+## 2. Quy tắc
 
-- Hai authenticated user chọn level, topic và activity để matchmaking 1-1.
-- Nhận `sessionId` từ backend/WebSocket rồi lấy Agora token theo session.
-- Hiển thị local/remote media và điều khiển mic/camera độc lập.
-- Khôi phục active session sau reload hoặc WebSocket reconnect.
-- Hiển thị trạng thái peer reconnecting/recovered và terminal notification.
+# rules (quy tắc nghiệp vụ)
+- Sử dụng Agora Web SDK (phiên bản 4.x) thông qua CDN.
+- Gọi API Backend `GET /api/agora/token` để lấy RTC token động, tuyệt đối không hardcode token trên JS.
+- Giao diện tối giản gồm 2 màn hình video: Local (của bản thân) và Remote (của đối tác).
+- Hỗ trợ các nút điều khiển cơ bản: Join (Tham gia), Leave (Rời phòng), Toggle Mic (Bật/Tắt Mic), Toggle Camera (Bật/Tắt Camera).
 
-Không thuộc phạm vi: group call, Buddy, recording, Redis/distributed matching và Peer Rating.
+## 3. UI state
 
-## 3. Contract backend
-
-Frontend chỉ gọi token bằng:
-
-```http
-GET /api/sessions/{sessionId}/token
+```text
+SETUP -> WAITING -> JOINING -> IN_CALL -> RECONNECTING | ENDED
 ```
 
-Frontend báo lifecycle bằng các endpoint participant-only có CSRF:
+- `WAITING`: queue, cho phép cancel.
+- `JOINING`: lấy token, mở thiết bị, join Agora.
+- `IN_CALL`: local/remote video, mic/camera.
+- `RECONNECTING`: mất kết nối trong grace 60 giây.
+- `ENDED`: kết quả session và điều hướng rating nếu đủ điều kiện.
 
-```http
-POST /api/sessions/{sessionId}/join-agora
-POST /api/sessions/{sessionId}/leave-agora
-```
+## 4. Luồng
 
-Khi page load, frontend resolve active session từ backend. `sessionId` phía client chỉ là hint; backend xác minh authenticated participant, status và reconnect deadline. `localStorage` không phải source of truth cho authorization.
+1. User chọn tag và vào queue qua STOMP.
+2. Backend lấy identity/level từ authenticated principal.
+3. Khi `MATCHED`, client nhận `sessionId` và peer display data.
+4. Client lấy token, join Agora, publish track khả dụng.
+5. Client report join kèm CSRF.
+6. Leave/end gửi event idempotent trước hoặc cùng cleanup local.
+7. Disconnect chuyển `RECONNECTING`, không tự kết thúc trước khi backend hết grace.
 
-HTTP contract:
+## 5. Error handling
 
-- Non-participant: `403`.
-- Missing session: `404`.
-- Terminal/expired token hoặc join: `409`.
-- Payload không hợp lệ: `400`.
+- Token fail: không join, hiển thị lỗi retry.
+- Thiếu mic/camera: dùng thiết bị còn khả dụng.
+- Backend report join fail sau Agora join: leave Agora và báo lỗi.
+- Không reset `currentSessionId` trước khi leave event được gửi an toàn.
+- `beforeunload` chỉ best-effort; backend dùng persisted state/finalizer.
 
-Endpoint legacy `/api/agora/token?channelName=...&uid=...` không được hỗ trợ.
+## 6. CSRF/WebSocket
 
-## 4. Matchmaking và recovery states
+- Template cung cấp CSRF header name/token.
+- Helper JavaScript thêm header cho mọi POST.
+- STOMP dùng principal của HTTP session; payload `userId` không có giá trị authorization.
 
-- `WAITING`: user có đúng một queue entry.
-- `MATCHED`: backend trả cùng `sessionId` cho hai participant.
-- `RECOVERING` / `RECONNECTING`: frontend đang resolve và join lại active session.
-- `PEER_RECONNECTING`: peer tạm rời nhưng còn trong grace period.
-- `PEER_RECOVERED`: peer đã join lại cùng session/channel.
-- `SESSION_ENDED`: backend đã finalize; UI rời call mà không cần reload.
+## 7. Acceptance criteria
 
-Page load không enqueue tự động khi user còn session `MATCHED`/`IN_PROGRESS`. Reconnect trong grace dùng cùng session, token mới và presence interval mới. Sau deadline, backend finalize trước rồi trả `409`; terminal session không reopen và frontend chỉ cho matchmaking lại sau khi hiển thị kết quả kết thúc.
-
-## 5. Agora/media
-
-- Dùng Agora Web SDK 4.x.
-- Backend trả `token`, `channelName`, `uid`; frontend không cho người dùng sửa các giá trị này.
-- Chỉ báo `join-agora` sau khi Agora join thành công.
-- Audio và video track được tạo độc lập để một thiết bị thiếu/lỗi không vô hiệu thiết bị còn lại.
-- Refresh/leave đóng presence hiện tại; rejoin tạo interval mới, không cộng trùng overlap.
-
-## 6. Cấu hình mặc định liên quan
-
-```properties
-learning-session.minimum-overlap-seconds=300
-learning-session.reconnect-grace-seconds=60
-learning-session.maximum-duration-seconds=3600
-matching.adjacent-level-after-seconds=120
-matching.match-timeout-seconds=600
-```
-
-## 7. Acceptance evidence
-
-- Hai Google account độc lập match và nhận cùng session/channel.
-- Chỉ khi cả hai join, session mới chuyển `IN_PROGRESS`.
-- Local/remote media và mic/camera toggle hoạt động.
-- Reload khôi phục cùng session, không tạo queue/session mới.
-- Reconnect trong grace tạo presence interval mới; peer nhận reconnecting/recovered.
-- Scheduler finalize sau deadline; peer nhận `SESSION_ENDED` và UI tự cập nhật.
-- Terminal token/join trả `409`; session không reopen.
-- Profile C bị từ chối truy cập session/token bằng `403`.
+- Không có input channel/UID.
+- Chỉ participant join đúng session.
+- Hai browser session match và gọi được.
+- POST join/leave không 403 vì thiếu CSRF.
+- Retry không cộng sai overlap.
+- Reconnect trong 60 giây giữ session; quá grace thì backend finalize.
+- Refresh/disconnect không làm UI/backend lệch vĩnh viễn.
 
 ## 8. Verification
 
-```powershell
-$env:SPRING_FLYWAY_ENABLED='false'
-.\gradlew.bat test
-Remove-Item Env:SPRING_FLYWAY_ENABLED
-
-$env:SPRING_FLYWAY_ENABLED='false'
-.\gradlew.bat build
-Remove-Item Env:SPRING_FLYWAY_ENABLED
-```
+- Security/controller test cho CSRF và authorization.
+- Manual test bằng hai browser profile/tài khoản Google khác nhau.
+- `.\gradlew.bat test` và `.\gradlew.bat build`.
