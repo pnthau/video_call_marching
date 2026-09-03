@@ -3,7 +3,7 @@ package com.example.videocall_marching_language.controller;
 import com.example.videocall_marching_language.controller.user.MatchMakingController;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.UserRole;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import com.example.videocall_marching_language.service.MatchMakingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
@@ -53,7 +53,7 @@ class MatchMakingControllerTests {
 
     private void assertAuthenticatedCancellation(UserRole role, Long userId, String email) {
         MatchMakingService matchMakingService = mock(MatchMakingService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         MatchMakingController controller = new MatchMakingController(matchMakingService, userService);
         SimpMessageHeaderAccessor headers = mock(SimpMessageHeaderAccessor.class);
         Principal principal = () -> email;
