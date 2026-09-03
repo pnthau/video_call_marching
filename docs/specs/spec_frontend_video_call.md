@@ -1,36 +1,94 @@
-# overview (mục tiêu)
-- Tạo giao diện Web (Frontend) cơ bản để 2 học viên có thể thực hiện Video Call 1-on-1 bằng Agora RTC.
-- Cho phép người dùng nhập Channel Name, User ID để lấy Token từ Backend và kết nối phòng gọi.
+# Spec: Authenticated Session Video Call Frontend
 
-# rules (quy tắc nghiệp vụ)
-- Sử dụng Agora Web SDK (phiên bản 4.x) thông qua CDN.
-- Gọi API Backend `GET /api/agora/token` để lấy RTC token động, tuyệt đối không hardcode token trên JS.
-- Giao diện tối giản gồm 2 màn hình video: Local (của bản thân) và Remote (của đối tác).
-- Hỗ trợ các nút điều khiển cơ bản: Join (Tham gia), Leave (Rời phòng), Toggle Mic (Bật/Tắt Mic), Toggle Camera (Bật/Tắt Camera).
+## 1. Trạng thái
 
-# technical design (thiết kế kĩ thuật)
-1. **Frontend Stack**: Sử dụng boostrap local, JavaScript (Vanilla), đặt tĩnh trong thư mục `src/main/resources/static/video_call`.
-2. **Cấu trúc file**:
-   - `src/main/resources/static/video_call.html`: Chứa giao diện.
-   - (**Lưu ý : ưu tiên sữ dụng boostrap) `src/main/resources/static/css/style.css`:  Chứa style cho khung video .
-   - (**Lưu ý : ưu tiên sữ dụng boostrap)`src/main/resources/static/js/video_call.js`: Chứa logic tương tác với Agora .
-3. **Giao diện (`video_call.html`)**:
-   - Thêm Agora SDK: `<script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>`
-   - Form nhập: Input cho `Channel Name` và `UID`.
-   - Vùng hiển thị video: `<div id="local-player"></div>` và `<div id="remote-player"></div>`.
-4. **Logic (`video_call.js`)**:
-   - Khởi tạo client: `const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });`
-   - Gọi API: Dùng `fetch()` gọi tới `/api/agora/token?channelName=...&uid=...`
-   - Tham gia phòng: `await client.join(appId, channelName, token, uid);`
-   - Bật Mic/Cam: `const [localAudioTrack, localVideoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks();`
-   - Lắng nghe event `client.on("user-published", async (user, mediaType) => {...})` để hiển thị luồng video của người kia.
+- **IMPLEMENTED — Giai đoạn 1 nghiệm thu PASS ngày 2026-08-30**.
+- Frontend dùng `LearningSession` do backend tạo; không nhận hoặc hardcode identity, channel hay Agora UID.
 
-# acceptance criteria (tiêu chí nghiệm thu)
-- Mở `http://localhost:8080/video-call` trên trình duyệt.
-- Mở Tab 1 (Nhập Channel: "room1", UID: 1) -> Tham gia thành công, thấy hình camera bản thân.
-- Mở Tab 2 (Nhập Channel: "room1", UID: 2) -> Tham gia thành công, 2 tab thấy hình và nghe được tiếng của nhau.
+## 2. Phạm vi
 
-# verification (kiểm tra)
-- **Bước 1**: Tạo file `video_call.html` trong thư mục `templates/users`, `style.css`, `video_call.js` trong thư mục `static/css` hoặc `static/js`.
-- **Bước 2**: Khởi động lại Spring Boot app.
-- **Bước 3**: Truy cập trình duyệt và test với 2 tab/cửa sổ khác nhau.
+- Hai authenticated user chọn level, topic và activity để matchmaking 1-1.
+- Nhận `sessionId` từ backend/WebSocket rồi lấy Agora token theo session.
+- Hiển thị local/remote media và điều khiển mic/camera độc lập.
+- Khôi phục active session sau reload hoặc WebSocket reconnect.
+- Hiển thị trạng thái peer reconnecting/recovered và terminal notification.
+
+Không thuộc phạm vi: group call, Buddy, recording, Redis/distributed matching và Peer Rating.
+
+## 3. Contract backend
+
+Frontend chỉ gọi token bằng:
+
+```http
+GET /api/sessions/{sessionId}/token
+```
+
+Frontend báo lifecycle bằng các endpoint participant-only có CSRF:
+
+```http
+POST /api/sessions/{sessionId}/join-agora
+POST /api/sessions/{sessionId}/leave-agora
+```
+
+Khi page load, frontend resolve active session từ backend. `sessionId` phía client chỉ là hint; backend xác minh authenticated participant, status và reconnect deadline. `localStorage` không phải source of truth cho authorization.
+
+HTTP contract:
+
+- Non-participant: `403`.
+- Missing session: `404`.
+- Terminal/expired token hoặc join: `409`.
+- Payload không hợp lệ: `400`.
+
+Endpoint legacy `/api/agora/token?channelName=...&uid=...` không được hỗ trợ.
+
+## 4. Matchmaking và recovery states
+
+- `WAITING`: user có đúng một queue entry.
+- `MATCHED`: backend trả cùng `sessionId` cho hai participant.
+- `RECOVERING` / `RECONNECTING`: frontend đang resolve và join lại active session.
+- `PEER_RECONNECTING`: peer tạm rời nhưng còn trong grace period.
+- `PEER_RECOVERED`: peer đã join lại cùng session/channel.
+- `SESSION_ENDED`: backend đã finalize; UI rời call mà không cần reload.
+
+Page load không enqueue tự động khi user còn session `MATCHED`/`IN_PROGRESS`. Reconnect trong grace dùng cùng session, token mới và presence interval mới. Sau deadline, backend finalize trước rồi trả `409`; terminal session không reopen và frontend chỉ cho matchmaking lại sau khi hiển thị kết quả kết thúc.
+
+## 5. Agora/media
+
+- Dùng Agora Web SDK 4.x.
+- Backend trả `token`, `channelName`, `uid`; frontend không cho người dùng sửa các giá trị này.
+- Chỉ báo `join-agora` sau khi Agora join thành công.
+- Audio và video track được tạo độc lập để một thiết bị thiếu/lỗi không vô hiệu thiết bị còn lại.
+- Refresh/leave đóng presence hiện tại; rejoin tạo interval mới, không cộng trùng overlap.
+
+## 6. Cấu hình mặc định liên quan
+
+```properties
+learning-session.minimum-overlap-seconds=300
+learning-session.reconnect-grace-seconds=60
+learning-session.maximum-duration-seconds=3600
+matching.adjacent-level-after-seconds=120
+matching.match-timeout-seconds=600
+```
+
+## 7. Acceptance evidence
+
+- Hai Google account độc lập match và nhận cùng session/channel.
+- Chỉ khi cả hai join, session mới chuyển `IN_PROGRESS`.
+- Local/remote media và mic/camera toggle hoạt động.
+- Reload khôi phục cùng session, không tạo queue/session mới.
+- Reconnect trong grace tạo presence interval mới; peer nhận reconnecting/recovered.
+- Scheduler finalize sau deadline; peer nhận `SESSION_ENDED` và UI tự cập nhật.
+- Terminal token/join trả `409`; session không reopen.
+- Profile C bị từ chối truy cập session/token bằng `403`.
+
+## 8. Verification
+
+```powershell
+$env:SPRING_FLYWAY_ENABLED='false'
+.\gradlew.bat test
+Remove-Item Env:SPRING_FLYWAY_ENABLED
+
+$env:SPRING_FLYWAY_ENABLED='false'
+.\gradlew.bat build
+Remove-Item Env:SPRING_FLYWAY_ENABLED
+```

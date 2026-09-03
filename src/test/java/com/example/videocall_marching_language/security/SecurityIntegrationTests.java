@@ -35,6 +35,22 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void guestIsRedirectedFromLearningSessionApiToLogin() throws Exception {
+        mockMvc.perform(get("/api/sessions/1"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+    }
+
+    @Test
+    void authenticatedUserCannotUseLegacyAgoraTokenEndpoint() throws Exception {
+        mockMvc.perform(get("/api/agora/token")
+                        .param("channelName", "client-controlled-channel")
+                        .param("uid", "123")
+                        .with(user("learner@example.com").roles("USER")))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void regularUserCannotAccessAdminRoutes() throws Exception {
         mockMvc.perform(get("/admin/users").with(user("learner@example.com").roles("USER")))
                 .andExpect(status().isForbidden());
