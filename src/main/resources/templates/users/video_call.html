@@ -7,7 +7,9 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link rel="stylesheet" href="/css/style.css">
         <!-- Thư viện Agora SDK -->
-    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N-4.24.7.js"
+            integrity="sha384-MBpKUUYG0z1jIM5tRY5ztT0dLJfW9FVxbKHGmzSm3QcK+EvqQcGl0lCFKQ3CZB3y"
+            crossorigin="anonymous"></script>
     <!-- Thư viện WebSocket STOMP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
@@ -59,6 +61,20 @@
             <button id="cancel-search-btn" style="background-color: #f44336; color: white;">Hủy tìm kiếm</button>
         </div>
 
+        <section id="precall-panel" class="controls" style="display: none;" aria-labelledby="precall-title">
+            <h3 id="precall-title">Chuẩn bị thiết bị</h3>
+            <p id="device-status" role="status" aria-live="polite">Kiểm tra microphone trước khi vào cuộc gọi.</p>
+            <label for="microphone-select">Microphone</label>
+            <select id="microphone-select" disabled></select>
+            <label for="camera-select">Camera</label>
+            <select id="camera-select" disabled></select>
+            <label for="playback-select" id="playback-label" style="display: none;">Loa</label>
+            <select id="playback-select" disabled style="display: none;"></select>
+            <button id="check-devices-btn">Kiểm tra thiết bị</button>
+            <button id="join-media-btn" disabled>Vào cuộc gọi</button>
+            <button id="cancel-precall-btn">Hủy</button>
+        </section>
+
         <!-- Trạng thái 3: Màn hình Video Call -->
         <div id="call-panel" class="controls" style="display: none;">
             <p id="room-info" style="font-weight: bold; color: green;"></p>
@@ -77,6 +93,8 @@
                 <div id="remote-player" class="player"></div>
             </div>
         </div>
+        <button id="enable-audio-btn" style="display: none;" aria-describedby="audio-recovery-help">Bật âm thanh</button>
+        <p id="audio-recovery-help" class="sr-only" aria-live="assertive">Âm thanh từ đối tác đang bị chặn. Chọn Bật âm thanh để tiếp tục.</p>
     </div>
 
     <!-- Truyền AppID và thông tin user đã xác thực từ Backend xuống JS -->
@@ -85,6 +103,8 @@
         const CURRENT_USER_ID = /*[[${currentUserId}]]*/ 0;
         const CURRENT_USER_LEVEL = /*[[${currentUserLevel}]]*/ 'N5';
     </script>
+    <script src="/js/agora_reliability.js"></script>
+    <script src="/js/video_call_flow.js"></script>
     <script src="/js/video_call.js"></script>
 </body>
 </html>
