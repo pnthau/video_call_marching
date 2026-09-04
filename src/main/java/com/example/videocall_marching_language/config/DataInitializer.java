@@ -73,6 +73,8 @@ public class DataInitializer {
                                     .language("ja")
                                     .targetDuration(45)
                                     .content("A: 初めまして、私は田中です。ベトナムから来ました。\nB: 初めまして、田中さん。どうぞよろしくお願いします。\nA: こちらこそ、よろしくお願いいたします。")
+                                    .phoneticContent("A: はじめまして、わたしはたなかです。べとなむからきました。\nB: はじめまして、たなかさん。どうぞよろしくおねがいします。\nA: こちらこそ、よろしくおねがいいたします。")
+                                    .meaningContent("A: Rất vui được gặp bạn, tôi là Tanaka. Tôi đến từ Việt Nam.\nB: Rất vui được gặp bạn, anh Tanaka. Rất mong được giúp đỡ.\nA: Chính tôi mới là người mong được giúp đỡ.")
                                     .build(),
 
                             Script.builder()
@@ -81,6 +83,8 @@ public class DataInitializer {
                                     .language("ja")
                                     .targetDuration(60)
                                     .content("A: いらっしゃいませ！お弁当を温めますか？\nB: はい、お願いします。\nA: レジ袋はご利用になりますか？\nB: いいえ、大丈夫です。\nA: お会計は500円になります。\nB: PayPayで払います。")
+                                    .phoneticContent("A: いらっしゃいませ！おべんとうをあたためますか？\nB: はい、おねがいします。\nA: レジぶくろはごりようになりますか？\nB: いいえ、だいじょうぶです。\nA: おかいけいはごひゃくえんになります。\nB: ペイペイではらいます。")
+                                    .meaningContent("A: Xin chào quý khách! Quý khách có muốn hâm nóng hộp cơm bento không?\nB: Vâng, xin vui lòng hâm giúp tôi.\nA: Quý khách có dùng túi nilon không ạ?\nB: Không, tôi không cần túi đâu.\nA: Tổng tiền thanh toán là 500 yên.\nB: Tôi sẽ thanh toán bằng PayPay.")
                                     .build(),
 
                             Script.builder()
@@ -89,6 +93,8 @@ public class DataInitializer {
                                     .language("ja")
                                     .targetDuration(60)
                                     .content("A: すみません、注文をお願いします。\nB: はい、何にいたしましょうか？\nA: ラーメン一つとギョーザをお願いします。\nB: かしこまりました。お飲み物はいかがですか？\nA: お水を一杯ください。")
+                                    .phoneticContent("A: すみません、ちゅうもんをおねがいします。\nB: はい、なににいたしましょうか？\nA: らーめんひとつとぎょーざをおねがいします。\nB: かしこまりました。お飲み物はいかがですか？\nA: おみずをいっぱいください。")
+                                    .meaningContent("A: Xin lỗi, cho tôi gọi món với.\nB: Vâng, quý khách muốn dùng món gì ạ?\nA: Cho tôi một bát ramen và một đĩa gyoza.\nB: Tôi đã hiểu. Quý khách có muốn gọi đồ uống gì không?\nA: Cho tôi một ly nước lọc.")
                                     .build(),
 
                             Script.builder()
@@ -97,6 +103,8 @@ public class DataInitializer {
                                     .language("ja")
                                     .targetDuration(50)
                                     .content("A: すみません、東京駅はどこですか？\nB: この道をまっすぐ行って、信号を右に曲がってください。\nA: 歩いてどれくらいかかりますか？\nB: だいたい5分くらいですよ。\nA: ありがとうございます。助かりました。")
+                                    .phoneticContent("A: すみません、とうきょうえきはどこですか？\nB: このみちをまっすぐいって、しんごうをみぎにまがってください。\nA: あるいてどれくらいかかりますか？\nB: だいたいごふんくらいですよ。\nA: ありがとうございます。たすかりました。")
+                                    .meaningContent("A: Xin lỗi, ga Tokyo ở đâu vậy ạ?\nB: Bạn đi thẳng con đường này, rồi rẽ phải ở cột đèn giao thông nhé.\nA: Đi bộ mất khoảng bao lâu vậy ạ?\nB: Tầm khoảng 5 phút thôi bạn.\nA: Xin cảm ơn bạn rất nhiều. May quá.")
                                     .build(),
 
                             Script.builder()
@@ -105,8 +113,50 @@ public class DataInitializer {
                                     .language("en")
                                     .targetDuration(45)
                                     .content("A: Hello! How are you doing today?\nB: Hi! I am doing well, thank you. How about you?\nA: I am pretty good. Are you free this afternoon?\nB: Yes, I am free. Let's grab a coffee together!\nA: That sounds wonderful!")
+                                    .phoneticContent("A: /həˈloʊ! haʊ ɑːr juː ˈduːɪŋ təˈdeɪ?/\nB: /haɪ! aɪ æm ˈduːɪŋ wɛl, θæŋk juː. haʊ əˈbaʊt juː?/\nA: /aɪ æm ˈprɪti ɡʊd. ɑːr juː friː ðɪs ˌæftərˈnuːn?/\nB: /jɛs, aɪ æm friː. lɛts ɡræb ə ˈkɔːfi təˈɡɛðər!/\nA: /ðæt saʊndz ˈwʌndərfəl!/")
+                                    .meaningContent("A: Xin chào! Hôm nay bạn thế nào?\nB: Chào bạn! Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?\nA: Tôi cũng rất ổn. Chiều nay bạn có rảnh không?\nB: Có, tôi rảnh. Cùng đi uống cà phê nhé!\nA: Nghe tuyệt vời đấy!")
                                     .build()
                     ));
+                }
+            } else {
+                // 3b. Nếu scripts đã có trong Database nhưng thiếu phoneticContent hoặc meaningContent -> Tự động bổ sung
+                List<Script> existingScripts = scriptRepository.findAll();
+                for (Script s : existingScripts) {
+                    boolean changed = false;
+                    String title = s.getTitle() != null ? s.getTitle() : "";
+                    if (s.getPhoneticContent() == null || s.getPhoneticContent().trim().isEmpty()) {
+                        if (title.contains("Giới thiệu bản thân")) {
+                            s.setPhoneticContent("A: はじめまして、わたしはたなかです。べとなむからきました。\nB: はじめまして、たなかさん。どうぞよろしくおねがいします。\nA: こちらこそ、よろしくおねがいいたします。");
+                        } else if (title.contains("Mua sắm") || title.contains("Combini")) {
+                            s.setPhoneticContent("A: いらっしゃいませ！おべんとうをあたためますか？\nB: はい、おねがいします。\nA: レジぶくろはごりようになりますか？\nB: いいえ、だいじょうぶです。\nA: おかいけいはごひゃくえんになります。\nB: ペイペイではらいます。");
+                        } else if (title.contains("Gọi món") || title.contains("quán ăn")) {
+                            s.setPhoneticContent("A: すみません、ちゅうもんをおねがいします。\nB: はい、なににいたしましょうか？\nA: らーめんひとつとぎょーざをおねがいします。\nB: かしこまりました。おのみものはいかがですか？\nA: おみずをいっぱいください。");
+                        } else if (title.contains("Hỏi đường") || title.contains("ga tàu")) {
+                            s.setPhoneticContent("A: すみません、とうきょうえきはどこですか？\nB: このみちをまっすぐいって、しんごうをみぎにまがってください。\nA: あるいてどれくらいかかりますか？\nB: だいたいごふんくらいですよ。\nA: ありがとうございます。たすかりました。");
+                        } else if (title.contains("English") || title.contains("Coffee") || "en".equalsIgnoreCase(s.getLanguage())) {
+                            s.setPhoneticContent("A: /həˈloʊ! haʊ ɑːr juː ˈduːɪŋ təˈdeɪ?/\nB: /haɪ! aɪ æm ˈduːɪŋ wɛl, θæŋk juː. haʊ əˈbaʊt juː?/\nA: /aɪ æm ˈprɪti ɡʊd. ɑːr juː friː ðɪs ˌæftərˈnuːn?/\nB: /jɛs, aɪ æm friː. lɛts ɡræb ə ˈkɔːfi təˈɡɛðər!/\nA: /ðæt saʊndz ˈwʌndərfəl!/");
+                        } else {
+                            s.setPhoneticContent(s.getContent());
+                        }
+                        changed = true;
+                    }
+                    if (s.getMeaningContent() == null || s.getMeaningContent().trim().isEmpty()) {
+                        if (title.contains("Giới thiệu bản thân")) {
+                            s.setMeaningContent("A: Rất vui được gặp bạn, tôi là Tanaka. Tôi đến từ Việt Nam.\nB: Rất vui được gặp bạn, anh Tanaka. Rất mong được giúp đỡ.\nA: Chính tôi mới là người mong được giúp đỡ.");
+                        } else if (title.contains("Mua sắm") || title.contains("Combini")) {
+                            s.setMeaningContent("A: Xin chào quý khách! Quý khách có muốn hâm nóng hộp cơm bento không?\nB: Vâng, xin vui lòng hâm giúp tôi.\nA: Quý khách có dùng túi nilon không ạ?\nB: Không, tôi không cần túi đâu.\nA: Tổng tiền thanh toán là 500 yên.\nB: Tôi sẽ thanh toán bằng PayPay.");
+                        } else if (title.contains("Gọi món") || title.contains("quán ăn")) {
+                            s.setMeaningContent("A: Xin lỗi, cho tôi gọi món với.\nB: Vâng, quý khách muốn dùng món gì ạ?\nA: Cho tôi một bát ramen và một đĩa gyoza.\nB: Tôi đã hiểu. Quý khách có muốn gọi đồ uống gì không?\nA: Cho tôi một ly nước lọc.");
+                        } else if (title.contains("Hỏi đường") || title.contains("ga tàu")) {
+                            s.setMeaningContent("A: Xin lỗi, ga Tokyo ở đâu vậy ạ?\nB: Bạn đi thẳng con đường này, rồi rẽ phải ở cột đèn giao thông nhé.\nA: Đi bộ mất khoảng bao lâu vậy ạ?\nB: Tầm khoảng 5 phút thôi bạn.\nA: Xin cảm ơn bạn rất nhiều. May quá.");
+                        } else if (title.contains("English") || title.contains("Coffee") || "en".equalsIgnoreCase(s.getLanguage())) {
+                            s.setMeaningContent("A: Xin chào! Hôm nay bạn thế nào?\nB: Chào bạn! Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?\nA: Tôi cũng rất ổn. Chiều nay bạn có rảnh không?\nB: Có, tôi rảnh. Cùng đi uống cà phê nhé!\nA: Nghe tuyệt vời đấy!");
+                        }
+                        changed = true;
+                    }
+                    if (changed) {
+                        scriptRepository.save(s);
+                    }
                 }
             }
         };

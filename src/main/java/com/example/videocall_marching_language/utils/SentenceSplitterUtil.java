@@ -48,7 +48,6 @@ public class SentenceSplitterUtil {
                 sentence = matcher.group(2).trim();
             }
 
-            // Nếu câu không rỗng sau khi bỏ chữ "A: ", ta đưa vào mảng
             if (!sentence.isEmpty()) {
                 result.add(SentenceRoleDTO.builder()
                         .role(currentRole)
@@ -57,5 +56,164 @@ public class SentenceSplitterUtil {
             }
         }
         return result;
+    }
+
+    public static List<SentenceRoleDTO> parseScriptLines(String content, String phoneticContent) {
+        return parseScriptLines(content, phoneticContent, null);
+    }
+
+    public static List<SentenceRoleDTO> parseScriptLines(String content, String phoneticContent, String meaningContent) {
+        List<SentenceRoleDTO> result = new ArrayList<>();
+        if (content == null || content.trim().isEmpty()) {
+            return result;
+        }
+
+        Pattern rolePattern = Pattern.compile("^([\\p{L}0-9_\\s]+)\\s*[:：]\\s*(.*)");
+
+        // 1. Tách content thành các dòng thoại
+        List<String> rawLines = splitDialogueTurns(content, rolePattern);
+
+        // 2. Bóc tách phoneticContent
+        String rawPhonetic = (phoneticContent != null) ? phoneticContent.trim() : "";
+        List<String> rawPhoneticLines = splitDialogueTurns(rawPhonetic, rolePattern);
+
+        java.util.Map<String, List<String>> roleToPhonetics = new java.util.HashMap<>();
+        List<String> cleanedPhoneticList = new ArrayList<>();
+
+        for (String pLine : rawPhoneticLines) {
+            String pTrim = pLine.trim();
+            if (pTrim.isEmpty()) continue;
+
+            Matcher pMatcher = rolePattern.matcher(pTrim);
+            if (pMatcher.find()) {
+                String pRole = pMatcher.group(1).trim().toUpperCase();
+                String pText = pMatcher.group(2).trim();
+                roleToPhonetics.computeIfAbsent(pRole, k -> new ArrayList<>()).add(pText);
+                cleanedPhoneticList.add(pText);
+            } else {
+                cleanedPhoneticList.add(pTrim);
+            }
+        }
+
+        // 3. Bóc tách meaningContent (Nghĩa tiếng Việt của script)
+        String rawMeaning = (meaningContent != null) ? meaningContent.trim() : "";
+        List<String> rawMeaningLines = splitDialogueTurns(rawMeaning, rolePattern);
+
+        java.util.Map<String, List<String>> roleToMeanings = new java.util.HashMap<>();
+        List<String> cleanedMeaningList = new ArrayList<>();
+
+        for (String mLine : rawMeaningLines) {
+            String mTrim = mLine.trim();
+            if (mTrim.isEmpty()) continue;
+
+            Matcher mMatcher = rolePattern.matcher(mTrim);
+            if (mMatcher.find()) {
+                String mRole = mMatcher.group(1).trim().toUpperCase();
+                String mText = mMatcher.group(2).trim();
+                roleToMeanings.computeIfAbsent(mRole, k -> new ArrayList<>()).add(mText);
+                cleanedMeaningList.add(mText);
+            } else {
+                cleanedMeaningList.add(mTrim);
+            }
+        }
+
+        // Đếm số lần xuất hiện của từng vai để map 1-1 với phonetic & meaning
+        java.util.Map<String, Integer> roleCounter = new java.util.HashMap<>();
+        String currentRole = "A";
+        int validLineCount = 0;
+
+        for (String rawLine : rawLines) {
+            String line = rawLine.trim();
+            if (line.isEmpty()) continue;
+
+            Matcher matcher = rolePattern.matcher(line);
+            if (matcher.find()) {
+                currentRole = matcher.group(1).trim();
+                line = matcher.group(2).trim();
+            } else if (rawLines.size() > 1) {
+                currentRole = (validLineCount % 2 == 0) ? "A" : "B";
+            }
+
+            if (!line.isEmpty()) {
+                String roleKey = currentRole.toUpperCase();
+                int turnIdx = roleCounter.getOrDefault(roleKey, 0);
+                roleCounter.put(roleKey, turnIdx + 1);
+
+                String phonetic = "";
+                // Ưu tiên 1: Lấy phonetic theo đúng vai và đúng lượt xuất hiện của vai đó
+                if (roleToPhonetics.containsKey(roleKey) && turnIdx < roleToPhonetics.get(roleKey).size()) {
+                    phonetic = roleToPhonetics.get(roleKey).get(turnIdx);
+                }
+                // Ưu tiên 2: Lấy phonetic theo thứ tự dòng tuần tự
+                else if (validLineCount < cleanedPhoneticList.size()) {
+                    phonetic = cleanedPhoneticList.get(validLineCount);
+                }
+                // Ưu tiên 3: Fallback lấy toàn bộ phoneticContent nếu chỉ có 1 khối
+                else if (!rawPhonetic.isEmpty()) {
+                    phonetic = rawPhonetic;
+                }
+
+                String meaning = "";
+                // Ưu tiên 1: Lấy meaning theo đúng vai và đúng lượt xuất hiện của vai đó
+                if (roleToMeanings.containsKey(roleKey) && turnIdx < roleToMeanings.get(roleKey).size()) {
+                    meaning = roleToMeanings.get(roleKey).get(turnIdx);
+                }
+                // Ưu tiên 2: Lấy meaning theo thứ tự dòng tuần tự
+                else if (validLineCount < cleanedMeaningList.size()) {
+                    meaning = cleanedMeaningList.get(validLineCount);
+                }
+                // Ưu tiên 3: Fallback lấy toàn bộ meaningContent
+                else if (!rawMeaning.isEmpty()) {
+                    meaning = rawMeaning;
+                }
+
+                result.add(SentenceRoleDTO.builder()
+                        .role(currentRole)
+                        .text(line)
+                        .phonetic(phonetic)
+                        .meaning(meaning)
+                        .build());
+                validLineCount++;
+            }
+        }
+
+        return result;
+    }
+
+    private static List<String> splitDialogueTurns(String text, Pattern rolePattern) {
+        List<String> list = new ArrayList<>();
+        if (text == null || text.trim().isEmpty()) {
+            return list;
+        }
+
+        // Nếu có dấu xuống dòng: tách theo xuống dòng
+        if (text.contains("\n")) {
+            for (String s : text.split("\\r?\\n")) {
+                if (!s.trim().isEmpty()) {
+                    list.add(s.trim());
+                }
+            }
+            return list;
+        }
+
+        // Nếu viết trên 1 dòng duy nhất, thử tách theo vị trí xuất hiện của vai
+        String[] byRoles = text.split("(?<=\\s|^)(?=[\\p{L}0-9_\\s]+[:：])");
+        if (byRoles.length > 1) {
+            for (String s : byRoles) {
+                if (!s.trim().isEmpty()) {
+                    list.add(s.trim());
+                }
+            }
+            return list;
+        }
+
+        // Nếu không có mốc vai, tách theo dấu chấm câu
+        String[] bySentences = text.split("(?<=[。！？!?.])\\s*");
+        for (String s : bySentences) {
+            if (!s.trim().isEmpty()) {
+                list.add(s.trim());
+            }
+        }
+        return list;
     }
 }

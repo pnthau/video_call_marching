@@ -16,4 +16,6 @@ public class ScriptDTO {
     
     private String language;
     private Integer targetDuration;
+    private String phoneticContent;
+    private String meaningContent;
 }

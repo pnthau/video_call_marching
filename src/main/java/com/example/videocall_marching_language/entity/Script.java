@@ -31,6 +31,9 @@ public class Script {
     @Column(name = "phonetic")
     private String phoneticContent;
 
+    @Column(name = "meaning_content", columnDefinition = "TEXT")
+    private String meaningContent;
+
     @Column(name = "target_duration")
     private Integer targetDuration;
 }

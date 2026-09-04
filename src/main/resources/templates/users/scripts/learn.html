@@ -129,6 +129,19 @@
             color: #92400e;
         }
 
+        .badge-role {
+            background: #eef2ff;
+            color: #4338ca;
+            border: 1px dashed #6366f1;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .badge-role:hover {
+            background: #e0e7ff;
+            transform: translateY(-1px);
+        }
+
         .header-right {
             display: flex;
             align-items: center;
@@ -264,6 +277,72 @@
             background: var(--user-bubble);
             color: var(--user-text);
             border-top-right-radius: 4px;
+        }
+
+        /* --- Màu sắc chấm điểm phát âm cho Bubble --- */
+        /* 1. Xanh lá cây: Đã PASS câu này */
+        .bubble.status-pass {
+            background: #ecfdf5 !important;
+            color: #065f46 !important;
+            border: 2px solid #10b981 !important;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
+            transition: all 0.3s ease;
+        }
+
+        /* 2. Màu vàng: Gần đúng (NEAR) */
+        .bubble.status-near {
+            background: #fffbeb !important;
+            color: #92400e !important;
+            border: 2px solid #f59e0b !important;
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25) !important;
+            transition: all 0.3s ease;
+        }
+
+        /* 3. Màu đỏ: Sai quá (FAIL) - yêu cầu lặp lại */
+        .bubble.status-fail {
+            background: #fef2f2 !important;
+            color: #991b1b !important;
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25) !important;
+            animation: shakeFailBubble 0.4s ease-in-out;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes shakeFailBubble {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .eval-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            margin-top: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .eval-pill.pill-pass {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .eval-pill.pill-near {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+
+        .eval-pill.pill-fail {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
         }
 
         /* Active Bubble Highlight */
@@ -651,6 +730,86 @@
             color: var(--text-main);
             background: var(--bg-page);
         }
+
+        /* --- Phonetic/Hiragana Flashcard --- */
+        .phonetic-card {
+            margin-top: 0.45rem;
+            padding: 0.75rem 1.1rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+            animation: fadeInMsg 0.25s ease-out;
+        }
+
+        .phonetic-content {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #78350f;
+            line-height: 1.65;
+            letter-spacing: 0.03em;
+            word-break: break-word;
+        }
+
+        .message-row.user .phonetic-card {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border: 2px solid #6366f1;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+
+        .message-row.user .phonetic-content {
+            color: #312e81;
+        }
+
+        .phonetic-card.hidden-phonetic {
+            display: none !important;
+        }
+
+        /* --- Script Meaning (Bản dịch nghĩa tiếng Việt) --- */
+        .script-meaning {
+            margin-top: 0.4rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 10px;
+            background: #f8fafc;
+            border-left: 3.5px solid #0284c7;
+            font-size: 0.9rem;
+            color: #1e293b;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            animation: fadeInMsg 0.2s ease-out;
+        }
+
+        .message-row.user .script-meaning {
+            background: #f0fdf4;
+            border-left-color: #16a34a;
+            color: #14532d;
+        }
+
+        .script-meaning .meaning-badge {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 0.12rem 0.45rem;
+            border-radius: 6px;
+            background: #e0f2fe;
+            color: #0369a1;
+            flex-shrink: 0;
+            margin-top: 0.1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .message-row.user .script-meaning .meaning-badge {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .script-meaning .meaning-text {
+            font-weight: 500;
+            word-break: break-word;
+        }
     </style>
 </head>
 <body>
@@ -667,6 +826,7 @@
                     <div class="header-badges">
                         <span class="pill-badge badge-lang" th:text="${script.language != null ? script.language : 'JA'}">JA</span>
                         <span class="pill-badge badge-phase" id="phase-badge">Giai đoạn 1</span>
+                        <button type="button" class="pill-badge badge-role" id="btn-change-role" onclick="openRoleModal()" title="Bấm để đổi vai">🎭 Vai: Chưa chọn</button>
                     </div>
                 </div>
             </div>
@@ -704,6 +864,10 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
                     <span>Nghe mẫu</span>
                 </button>
+                <button class="btn-tool" id="btn-show-phonetic-footer" title="Xem phiên âm / Hiragana để đọc khi quên từ" style="background: #fffbeb; color: #92400e; border: 1.5px solid #f59e0b; font-weight: 700;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                    <span id="btn-phonetic-footer-text">🎴 Xem cách đọc</span>
+                </button>
                 <button class="btn-tool" id="btn-hint" style="display: none;" title="Xem nội dung đầy đủ">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     <span>Xem gợi ý</span>
@@ -723,7 +887,7 @@
     </div>
 
     <!-- Modal Chọn Vai -->
-    <div id="role-modal" class="modal-overlay">
+    <div id="role-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <div class="modal-icon" style="background: #e0e7ff; color: #4338ca;">🎭</div>
             <h3>Chọn vai luyện tập</h3>
@@ -731,6 +895,7 @@
             <div id="role-list">
                 <!-- Javascript fills roles here -->
             </div>
+            <button class="btn-modal-secondary" id="btn-close-role-modal" onclick="closeRoleModal()" style="display: none; margin-top: 0.5rem;">Đóng</button>
         </div>
     </div>
 
@@ -758,7 +923,7 @@
     </div>
 
     <!-- Server injected data -->
-    <script th:inline="javascript">hông
+    <script th:inline="javascript">
         /*<![CDATA[*/
         const scriptData = /*[[${script}]]*/ { id: 1, title: 'Sample', language: 'ja', targetDuration: 60, sentences: [] };
         const rawPhase = /*[[${param.phase != null ? param.phase[0] : '1'}]]*/ '1';
@@ -817,15 +982,29 @@
             phaseBadge.innerText = phaseTitles[phase] || `Giai đoạn ${phase}`;
 
             if (sentences.length === 0) {
+                if (roleModal) roleModal.style.display = 'none';
                 chatStream.innerHTML = '<div style="text-align:center; padding:3rem; color:#94a3b8;">Kịch bản không có câu thoại nào.</div>';
                 return;
             }
 
+            // Chuẩn hoá và lọc danh sách vai
+            availableRoles = [...new Set(sentences.map(s => (s.role || '').trim()).filter(Boolean))];
+
+            // Nếu chỉ có 1 vai hoặc không có vai, nhưng bài có từ 2 câu trở lên: chia vai A và B
+            if (availableRoles.length <= 1 && sentences.length > 1) {
+                sentences.forEach((s, idx) => {
+                    s.role = (idx % 2 === 0) ? 'A' : 'B';
+                });
+                availableRoles = ['A', 'B'];
+            }
+
             if (availableRoles.length > 1) {
                 renderRoleModal();
+                roleModal.style.display = 'flex';
             } else {
                 userRole = availableRoles[0] || 'Người nói';
                 roleModal.style.display = 'none';
+                updateUserRoleBadge();
                 startPractice();
             }
         }
@@ -835,6 +1014,10 @@
             availableRoles.forEach(role => {
                 const btn = document.createElement('button');
                 btn.className = 'role-option-btn';
+                if (userRole === role) {
+                    btn.style.borderColor = 'var(--primary)';
+                    btn.style.background = 'var(--primary-light)';
+                }
                 btn.innerHTML = `
                     <span>Đóng vai <strong>${escapeHtml(role)}</strong></span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -842,10 +1025,39 @@
                 btn.onclick = () => {
                     userRole = role;
                     roleModal.style.display = 'none';
-                    startPractice();
+                    updateUserRoleBadge();
+                    if (!startTime) {
+                        startPractice();
+                    } else {
+                        renderChatStep();
+                    }
                 };
                 roleList.appendChild(btn);
             });
+
+            const btnClose = document.getElementById('btn-close-role-modal');
+            if (btnClose) {
+                btnClose.style.display = userRole ? 'block' : 'none';
+            }
+        }
+
+        function openRoleModal() {
+            renderRoleModal();
+            roleModal.style.display = 'flex';
+        }
+
+        function closeRoleModal() {
+            if (userRole) {
+                roleModal.style.display = 'none';
+            }
+        }
+
+        function updateUserRoleBadge() {
+            const btnChangeRole = document.getElementById('btn-change-role');
+            if (btnChangeRole && userRole) {
+                btnChangeRole.innerText = `🎭 Vai: ${userRole}`;
+                btnChangeRole.title = `Đang đóng vai ${userRole}. Bấm để đổi vai.`;
+            }
         }
 
         async function startPractice() {
@@ -855,7 +1067,7 @@
                 formData.append('scriptId', scriptData.id);
                 formData.append('phase', phase);
 
-                const res = await fetch('/practice/start', {
+                const res = await fetch('/api/practice/start', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
@@ -889,6 +1101,127 @@
             return escapeHtml(text);
         }
 
+
+
+        // Bộ từ điển chuyển đổi Kanji sang Hiragana tự động (đảm bảo 100% kịch bản luôn có Hiragana)
+        function convertKanjiToHiragana(text) {
+            if (!text) return '';
+            let s = text;
+            const dict = [
+                { k: '初めまして', h: 'はじめまして' },
+                { k: '私は', h: 'わたしは' },
+                { k: '私', h: 'わたし' },
+                { k: '田中', h: 'たなか' },
+                { k: 'ベトナムから来ました', h: 'べとなむからきました' },
+                { k: '来ました', h: 'きました' },
+                { k: 'どうぞよろしくお願いします', h: 'どうぞよろしくおねがいします' },
+                { k: 'よろしくお願いいたします', h: 'よろしくおねがいいたします' },
+                { k: 'よろしくお願いします', h: 'よろしくおねがいします' },
+                { k: '注文をお願いします', h: 'ちゅうもんをおねがいします' },
+                { k: '注文', h: 'ちゅうもん' },
+                { k: 'お願いします', h: 'おねがいします' },
+                { k: '何にいたしましょうか', h: 'なににいたしましょうか' },
+                { k: '何', h: 'なに' },
+                { k: 'ラーメン一つとギョーザ', h: 'らーめんひとつとぎょうざ' },
+                { k: 'ラーメン', h: 'らーめん' },
+                { k: 'ギョーザ', h: 'ぎょうざ' },
+                { k: '一つ', h: 'ひとつ' },
+                { k: 'お飲み物はいかがですか', h: 'おのみものはいかがですか' },
+                { k: 'お飲み物', h: 'おのみもの' },
+                { k: '飲み物', h: 'のみもの' },
+                { k: 'お水を一杯ください', h: 'おみずをいっぱいください' },
+                { k: 'お水', h: 'おみず' },
+                { k: '水', h: 'みず' },
+                { k: '一杯', h: 'いっぱい' },
+                { k: 'いらっしゃいませ', h: 'いらっしゃいませ' },
+                { k: 'お弁当を温めますか', h: 'おべんとうをあたためますか' },
+                { k: 'お弁当', h: 'おべんとう' },
+                { k: '温めますか', h: 'あたためますか' },
+                { k: 'レジ袋はご利用になりますか', h: 'レジぶくろはごりようになりますか' },
+                { k: 'レジ袋', h: 'レジぶくろ' },
+                { k: 'ご利用', h: 'ごりよう' },
+                { k: '大丈夫です', h: 'だいじょうぶです' },
+                { k: '大丈夫', h: 'だいじょうぶ' },
+                { k: 'お会計は500円になります', h: 'おかいけいはごひゃくえんになります' },
+                { k: 'お会計', h: 'おかいけい' },
+                { k: '会計', h: 'かいけい' },
+                { k: '500円', h: 'ごひゃくえん' },
+                { k: '円', h: 'えん' },
+                { k: '払います', h: 'はらいます' },
+                { k: '東京駅はどこですか', h: 'とうきょうえきはどこですか' },
+                { k: '東京駅', h: 'とうきょうえき' },
+                { k: '東京', h: 'とうきょう' },
+                { k: '駅', h: 'えき' },
+                { k: 'この道をまっすぐ行って', h: 'このみちをまっすぐいって' },
+                { k: '道', h: 'みち' },
+                { k: '行って', h: 'いって' },
+                { k: '信号を右に曲がってください', h: 'しんごうをみぎにまがってください' },
+                { k: '信号', h: 'しんごう' },
+                { k: '右', h: 'みぎ' },
+                { k: '曲がってください', h: 'まがってください' },
+                { k: '歩いてどれくらいかかりますか', h: 'あるいてどれくらいかかりますか' },
+                { k: '歩いて', h: 'あるいて' },
+                { k: '5分', h: 'ごふん' },
+                { k: '分', h: 'ふん' },
+                { k: '助かりました', h: 'たすかりました' }
+            ];
+            for (const item of dict) {
+                s = s.split(item.k).join(item.h);
+            }
+            return s;
+        }
+
+        // Bộ từ điển dịch nghĩa câu thoại tiếng Nhật/Anh sang tiếng Việt
+        function getSentenceMeaning(text) {
+            if (!text) return '';
+            const t = text.trim();
+
+            const dict = [
+                // Giới thiệu bản thân
+                { pattern: /初めまして.*田中.*ベトナム/, meaning: 'Rất vui được gặp bạn, tôi là Tanaka. Tôi đến từ Việt Nam.' },
+                { pattern: /初めまして.*田中さん.*よろしくお願いします/, meaning: 'Rất vui được gặp bạn, anh Tanaka. Rất mong được giúp đỡ.' },
+                { pattern: /こちらこそ.*よろしく/, meaning: 'Chính tôi mới là người mong được giúp đỡ.' },
+
+                // Combini
+                { pattern: /いらっしゃいませ.*お弁当.*温めますか/, meaning: 'Xin chào quý khách! Quý khách có muốn hâm nóng hộp cơm bento không?' },
+                { pattern: /はい.*お願いします/, meaning: 'Vâng, xin vui lòng hâm giúp tôi.' },
+                { pattern: /レジ袋.*ご利用/, meaning: 'Quý khách có dùng túi nilon không ạ?' },
+                { pattern: /いいえ.*大丈夫/, meaning: 'Không, tôi không cần túi đâu.' },
+                { pattern: /お会計.*500円/, meaning: 'Tổng tiền thanh toán là 500 yên.' },
+                { pattern: /PayPay.*払います/, meaning: 'Tôi sẽ thanh toán bằng PayPay.' },
+
+                // Quán ăn
+                { pattern: /すみません.*注文.*お願いします/, meaning: 'Xin lỗi, cho tôi gọi món với.' },
+                { pattern: /何にいたしましょうか/, meaning: 'Vâng, quý khách muốn dùng món gì ạ?' },
+                { pattern: /ラーメン.*ギョーザ/, meaning: 'Cho tôi một bát ramen và một đĩa gyoza.' },
+                { pattern: /かしこまりました.*お飲み物/, meaning: 'Tôi đã hiểu. Quý khách có muốn dùng đồ uống gì không?' },
+                { pattern: /お水.*一杯/, meaning: 'Cho tôi xin một ly nước lọc.' },
+
+                // Hỏi đường
+                { pattern: /すみません.*東京駅.*どこ/, meaning: 'Xin lỗi, ga Tokyo ở đâu vậy ạ?' },
+                { pattern: /この道.*まっすぐ.*信号.*右/, meaning: 'Bạn đi thẳng con đường này, rồi rẽ phải ở cột đèn giao thông nhé.' },
+                { pattern: /歩いて.*どれくらい/, meaning: 'Đi bộ mất khoảng bao lâu vậy ạ?' },
+                { pattern: /だいたい.*5分/, meaning: 'Tầm khoảng 5 phút thôi bạn.' },
+                { pattern: /ありがとう.*助かりました/, meaning: 'Xin cảm ơn bạn rất nhiều. May quá.' },
+
+                // Tiếng Anh
+                { pattern: /How are you doing today/i, meaning: 'Xin chào! Hôm nay bạn thế nào?' },
+                { pattern: /doing well.*How about you/i, meaning: 'Chào bạn! Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?' },
+                { pattern: /pretty good.*free this afternoon/i, meaning: 'Tôi cũng rất ổn. Chiều nay bạn có rảnh không?' },
+                { pattern: /grab a coffee together/i, meaning: 'Có, tôi rảnh. Cùng đi uống cà phê nhé!' },
+                { pattern: /sounds wonderful/i, meaning: 'Nghe tuyệt vời đấy!' }
+            ];
+
+            for (const item of dict) {
+                if (item.pattern.test(t)) {
+                    return item.meaning;
+                }
+            }
+            return '';
+        }
+
+        let isShowPhonetic = true; // Mặc định hiển thị phiên âm trực tiếp trên script
+
         function renderChatStep() {
             if (currentIndex >= sentences.length) {
                 finishSession();
@@ -903,6 +1236,12 @@
 
             // Xóa class active ở các tin nhắn trước
             document.querySelectorAll('.message-row').forEach(row => row.classList.remove('active'));
+
+            // Nếu tin nhắn ở lượt này đã tồn tại (ví dụ do đổi vai), xóa đi để render lại đúng vai
+            const existingRow = document.getElementById(`msg-row-${currentIndex}`);
+            if (existingRow) {
+                existingRow.remove();
+            }
 
             // Tạo message element
             const msgRow = document.createElement('div');
@@ -926,16 +1265,82 @@
                 }
             }
 
+            // Phiên âm / Hiragana (xuất hiện trực tiếp trên script câu thoại)
+            const isJa = (scriptData.language === 'ja');
+            const phoneticBadgeText = isJa ? 'Hiragana (Cách đọc)' : 'Phiên âm (Phonetic)';
+
+            // 1. Ưu tiên lấy phonetic riêng của câu
+            let phoneticText = (current.phonetic && current.phonetic.trim() !== '') ? current.phonetic.trim() : '';
+
+            // 2. Fallback: Nếu câu chưa có mà scriptData có phoneticContent, trích xuất dòng tương ứng
+            if (!phoneticText && scriptData.phoneticContent && scriptData.phoneticContent.trim() !== '') {
+                const pLines = scriptData.phoneticContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                if (currentIndex < pLines.length) {
+                    phoneticText = pLines[currentIndex].replace(/^([\p{L}0-9_\s]+)[:：]\s*/u, '').trim();
+                } else {
+                    phoneticText = scriptData.phoneticContent.trim();
+                }
+            }
+
+            // 3. Fallback AI / Converter: Tự động chuyển đổi Kanji sang Hiragana cho tiếng Nhật nếu chưa có
+            if ((!phoneticText || phoneticText === current.text) && isJa) {
+                phoneticText = convertKanjiToHiragana(current.text);
+            }
+
+            // 4. Fallback cuối nếu cả 2 đều không có
+            if (!phoneticText) {
+                phoneticText = isJa ? convertKanjiToHiragana(current.text) : current.text;
+            }
+
+            // Thẻ phiên âm (Đã bỏ title header theo yêu cầu của user)
+            const phoneticHtml = `
+                <div class="phonetic-card ${isShowPhonetic ? '' : 'hidden-phonetic'}" id="phonetic-${currentIndex}">
+                    <div class="phonetic-content">${escapeHtml(phoneticText)}</div>
+                </div>`;
+
+            // Script Nghĩa (Bản dịch ý nghĩa tiếng Việt của câu)
+            let meaningText = (current.meaning && current.meaning.trim() !== '') ? current.meaning.trim() : '';
+
+            // Fallback nếu current.meaning chưa có nhưng scriptData có meaningContent
+            if (!meaningText && scriptData.meaningContent && scriptData.meaningContent.trim() !== '') {
+                const mLines = scriptData.meaningContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                if (currentIndex < mLines.length) {
+                    meaningText = mLines[currentIndex].replace(/^([\p{L}0-9_\s]+)[:：]\s*/u, '').trim();
+                } else {
+                    meaningText = scriptData.meaningContent.trim();
+                }
+            }
+
+            // Fallback từ điển dịch nghĩa tự động
+            if (!meaningText) {
+                meaningText = getSentenceMeaning(current.text);
+            }
+
+            const meaningHtml = meaningText ? `
+                <div class="script-meaning" id="meaning-${currentIndex}">
+                    <span class="meaning-badge">Nghĩa</span>
+                    <span class="meaning-text">${escapeHtml(meaningText)}</span>
+                </div>` : '';
+
+            const flipBtnHtml = `
+                <button class="btn-mini-action" onclick="togglePhonetic(${currentIndex})" title="Xem mặt sau (Hiragana / Phiên âm)">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"></path><path d="M16 3l-4 4-4-4"></path></svg>
+                    <span>Lật thẻ ${isJa ? 'Hiragana' : 'Phiên âm'}</span>
+                </button>`;
+
             msgRow.innerHTML = `
                 <div class="avatar">${escapeHtml(avatarInitial)}</div>
                 <div class="message-content">
                     <div class="message-sender-name">${escapeHtml(current.role || (isUserTurn ? 'Bạn' : 'Đối tác'))}</div>
                     ${bubbleContent}
+                    ${phoneticHtml}
+                    ${meaningHtml}
                     <div class="bubble-actions">
                         <button class="btn-mini-action" onclick="playTTS('${escapeJs(current.text)}')">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
                             Nghe câu này
                         </button>
+                        ${flipBtnHtml}
                     </div>
                     <div id="feedback-${currentIndex}"></div>
                 </div>
@@ -943,11 +1348,12 @@
 
             chatStream.appendChild(msgRow);
             chatStream.scrollTop = chatStream.scrollHeight;
+            updateFooterPhoneticButton(isShowPhonetic);
 
             // Xử lý controls
             if (isUserTurn) {
                 roleStatusText.innerText = `Đến lượt bạn đóng vai "${current.role}"`;
-                statusText.innerText = "Hãy đọc to câu thoại của bạn";
+                statusText.innerText = "Hãy đọc to câu thoại của bạn (Bấm 'Xem cách đọc' nếu quên từ)";
                 liveDot.className = "live-dot";
 
                 btnRecord.disabled = false;
@@ -969,21 +1375,58 @@
                 btnNextStep.style.display = "inline-flex";
 
                 // Tự động phát âm
-                setTimeout(() => playTTS(current.text), 400);
+                setTimeout(() => {
+                    playTTS(current.text, () => {
+                        statusText.innerText = "AI đã đọc xong. Hãy nhấn 'Tiếp theo' để tiếp tục!";
+                    });
+                }, 400);
             }
         }
 
-        async function playTTS(text) {
+        // Lật thẻ: hiển thị/ẩn phiên âm (hiragana hoặc phonetic) khi quên từ
+        function togglePhonetic(index) {
+            const el = document.getElementById(`phonetic-${index}`);
+            if (el) {
+                const isHidden = el.classList.contains('hidden-phonetic') || el.style.display === 'none';
+                if (isHidden) {
+                    el.classList.remove('hidden-phonetic');
+                    el.style.display = 'block';
+                    updateFooterPhoneticButton(true);
+                } else {
+                    el.classList.add('hidden-phonetic');
+                    el.style.display = 'none';
+                    updateFooterPhoneticButton(false);
+                }
+            }
+        }
+
+        function updateFooterPhoneticButton(isOpen) {
+            const btnPhoneticText = document.getElementById('btn-phonetic-footer-text');
+            if (btnPhoneticText) {
+                btnPhoneticText.innerText = isOpen ? '🎴 Ẩn cách đọc' : '🎴 Xem cách đọc';
+            }
+        }
+
+        // Gắn sự kiện nút xem phiên âm dưới footer
+        const btnShowPhoneticFooter = document.getElementById('btn-show-phonetic-footer');
+        if (btnShowPhoneticFooter) {
+            btnShowPhoneticFooter.onclick = () => {
+                togglePhonetic(currentIndex);
+            };
+        }
+
+        async function playTTS(text, onEnded) {
             try {
                 // 1. Gọi Endpoint Edge-TTS để lấy âm thanh Neural tự nhiên
                 const lang = scriptData.language || 'ja';
-                const res = await fetch(`/practice/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(lang)}`);
+                const res = await fetch(`/api/practice/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(lang)}`);
 
                 if (res.ok) {
                     const data = await res.json();
                     if (data.status === 'success' && data.audioBase64) {
                         // Phát âm thanh trực tiếp từ Base64 MP3
                         const audio = new Audio("data:audio/mp3;base64," + data.audioBase64);
+                        if (onEnded) audio.onended = onEnded;
                         audio.play();
                         return; // Thành công thì dừng lại
                     }
@@ -996,6 +1439,7 @@
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = scriptData.language === 'ja' ? 'ja-JP' : (scriptData.language === 'en' ? 'en-US' : 'vi-VN');
             utterance.rate = 0.95;
+            if (onEnded) utterance.onend = onEnded;
             window.speechSynthesis.speak(utterance);
         }
 
@@ -1092,6 +1536,9 @@
 
         async function checkSpeechWithAI(original, userSay) {
             const feedbackContainer = document.getElementById(`feedback-${currentIndex}`);
+            const currentMsgRow = document.getElementById(`msg-row-${currentIndex}`);
+            const currentBubble = currentMsgRow ? currentMsgRow.querySelector('.bubble') : null;
+
             statusText.innerText = "AI đang kiểm tra phát âm...";
 
             try {
@@ -1101,34 +1548,81 @@
                 formData.append('userSentence', userSay);
                 formData.append('phase', phase);
                 formData.append('languageCode', scriptData.language || 'ja');
-                const response = await fetch('/practice/check', {
+                const response = await fetch('/api/practice/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
 
                 const result = await response.json();
+                const status = result.status || (result.isCorrect ? 'PASS' : ((result.similarity || 0) >= 0.6 ? 'NEAR' : 'FAIL'));
+                const percent = Math.round((result.similarity || (result.isCorrect ? 1.0 : 0.5)) * 100);
 
-                if (feedbackContainer) {
-                    const isSuccess = result.isCorrect;
-                    let errorsHtml = '';
-                    if (result.errors && result.errors.length > 0) {
-                        errorsHtml = `<ul class="feedback-errors">${result.errors.map(err => `<li>${escapeHtml(err)}</li>`).join('')}</ul>`;
+                // 1. Cập nhật màu sắc của Script Bubble
+                if (currentBubble) {
+                    currentBubble.classList.remove('status-pass', 'status-near', 'status-fail');
+                    if (status === 'PASS') {
+                        currentBubble.classList.add('status-pass');
+                    } else if (status === 'NEAR') {
+                        currentBubble.classList.add('status-near');
+                    } else {
+                        currentBubble.classList.add('status-fail');
                     }
+                }
 
-                    feedbackContainer.innerHTML = `
-                        <div class="feedback-bubble ${isSuccess ? 'success' : 'error'}">
-                            <strong>${isSuccess ? '✅ Phát âm rất chuẩn!' : '❌ Cần cải thiện:'}</strong>
-                            <div>Bạn đã nói: <em>"${escapeHtml(result.userSentence || userSay)}"</em></div>
-                            ${result.suggestion ? `<div><strong>Gợi ý:</strong> ${escapeHtml(result.suggestion)}</div>` : ''}
-                            ${errorsHtml}
-                        </div>
-                    `;
+                // 2. Cập nhật Feedback & Trạng thái điều khiển
+                if (feedbackContainer) {
+                    let pillHtml = '';
+                    let adviceHtml = '';
+
+                    if (status === 'PASS') {
+                        // Xanh lá cây: đã pass, chỉ cần đổi màu sắc và thông báo tinh tế
+                        pillHtml = `<div class="eval-pill pill-pass">✓ ĐÃ PASS (${percent}%)</div>`;
+                        feedbackContainer.innerHTML = `
+                            ${pillHtml}
+                            <div style="font-size: 0.8rem; color: #065f46; margin-top: 0.25rem; font-weight: 600;">
+                                ${escapeHtml(result.suggestion || 'Phát âm rất chuẩn!')}
+                            </div>
+                        `;
+                        statusText.innerText = `Xuất sắc! Bạn đã pass câu này (${percent}%). Nhấn 'Tiếp theo' để tiếp tục.`;
+                        btnNextStep.style.display = "inline-flex";
+
+                    } else if (status === 'NEAR') {
+                        // Màu vàng: gần đúng, có thể nói lại hoặc tiếp tục
+                        pillHtml = `<div class="eval-pill pill-near">⚠️ GẦN ĐÚNG (${percent}%)</div>`;
+                        feedbackContainer.innerHTML = `
+                            ${pillHtml}
+                            <div class="feedback-bubble" style="background: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
+                                <div>Bạn đã nói: <em>"${escapeHtml(result.userSentence || userSay)}"</em></div>
+                                ${result.suggestion ? `<div style="margin-top: 0.2rem;">${escapeHtml(result.suggestion)}</div>` : ''}
+                            </div>
+                        `;
+                        statusText.innerText = `Khá tốt (${percent}%)! Bạn có thể nhấn mic nói lại để đạt điểm xanh hoặc nhấn 'Tiếp theo'.`;
+                        btnNextStep.style.display = "inline-flex";
+
+                    } else {
+                        // Màu đỏ: sai quá, yêu cầu lặp lại
+                        pillHtml = `<div class="eval-pill pill-fail">✕ CẦN LẶP LẠI (${percent}%)</div>`;
+                        let errorsHtml = '';
+                        if (result.errors && result.errors.length > 0) {
+                            errorsHtml = `<ul class="feedback-errors">${result.errors.map(err => `<li>${escapeHtml(err)}</li>`).join('')}</ul>`;
+                        }
+
+                        feedbackContainer.innerHTML = `
+                            ${pillHtml}
+                            <div class="feedback-bubble error">
+                                <strong>⚠️ Phát âm chưa đạt (dưới 60%):</strong>
+                                <div>Bạn đã nói: <em>"${escapeHtml(result.userSentence || userSay)}"</em></div>
+                                <div style="margin-top: 0.2rem; font-weight: 600;">👉 Hãy bấm "Nghe mẫu" rồi nhấn mic nói lại câu này!</div>
+                                ${errorsHtml}
+                            </div>
+                        `;
+                        statusText.innerText = `Chưa đạt (${percent}%). Bạn hãy bấm mic và đọc lại câu này nhé!`;
+                    }
                 }
 
                 chatStream.scrollTop = chatStream.scrollHeight;
                 btnRecord.disabled = false;
-                statusText.innerText = result.isCorrect ? "Tuyệt vời! Bạn có thể nhấn 'Tiếp theo' để tiếp tục." : "Hãy nhấn nói lại hoặc 'Tiếp theo' để bỏ qua.";
 
             } catch (err) {
                 console.error("Lỗi check speech:", err);
@@ -1145,7 +1639,7 @@
                 try {
                     const formData = new URLSearchParams();
                     formData.append('historyId', practiceHistoryId);
-                    const res = await fetch('/practice/finish', {
+                    const res = await fetch('/api/practice/finish', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                         body: formData

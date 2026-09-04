@@ -27,4 +27,10 @@ public class SpeechEvaluationDTO {
 
     // Gợi ý / lời khuyên từ AI để cải thiện
     private String suggestion;
+
+    // Tỷ lệ tương đồng / độ chính xác (0.0 -> 1.0)
+    private Double similarity;
+
+    // Trạng thái đánh giá 3 cấp độ: "PASS" (Xanh lá cây), "NEAR" (Vàng - Gần đúng), "FAIL" (Đỏ - Sai quá, cần lặp lại)
+    private String status;
 }
