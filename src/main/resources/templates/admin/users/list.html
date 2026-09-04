@@ -1,0 +1,107 @@
+﻿<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Quan ly Users</title></head>
+<body><section>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0">Quan ly nguoi dung</h4>
+        <span class="badge bg-secondary">Chi quan ly tai khoan USER</span>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    <div th:if="${param.updated != null}"
+         class="alert alert-success alert-dismissible fade show" role="alert">
+        Cap nhat thanh cong!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- TIM KIEM -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
+                <div class="col-md-8">
+                    <input type="text"
+                           name="search"
+                           class="form-control"
+                           placeholder="Tim theo username hoac email..."
+                           th:value="${search}" />
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">Tim kiem</button>
+                    <a th:href="@{/admin/users}" class="btn btn-outline-secondary">Xoa loc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BANG USERS -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3" style="width:60px">ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th style="width:120px">Trinh do</th>
+                        <th style="width:120px" class="text-center">Thao tac</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users.content}">
+                        <td class="ps-3 text-muted small" th:text="${user.id}"></td>
+                        <td class="fw-semibold" th:text="${user.username}"></td>
+                        <td class="text-muted" th:text="${user.email}"></td>
+                        <td>
+                            <span class="badge bg-info text-dark" th:text="${user.currentLevel}"></span>
+                        </td>
+                        <td class="text-center">
+                            <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                               class="btn btn-outline-info btn-sm me-1" title="Xem chi tiet">Xem</a>
+                            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+                               class="btn btn-warning btn-sm" title="Chinh sua">Sua</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${users.content.isEmpty()}">
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            Khong tim thay nguoi dung nao phu hop
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="d-flex justify-content-between align-items-center mt-4"
+         th:if="${users.totalPages > 1}">
+        <div class="text-muted small">
+            Trang <strong th:text="${users.number + 1}">1</strong>
+            / <strong th:text="${users.totalPages}">1</strong>
+            (Tong <strong th:text="${users.totalElements}">0</strong> ban ghi)
+        </div>
+        <nav>
+            <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" th:classappend="${users.first} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${users.number - 1}, search=${search})}">&laquo;</a>
+                </li>
+                <li class="page-item"
+                    th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                    th:classappend="${i == users.number} ? 'active'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${i}, search=${search})}"
+                       th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${users.last} ? 'disabled'">
+                    <a class="page-link"
+                       th:href="@{/admin/users(page=${users.number + 1}, search=${search})}">&raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+</section></body></html>

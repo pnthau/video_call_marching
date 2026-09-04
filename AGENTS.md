@@ -11,11 +11,11 @@
 
 ## 2. Trạng thái hiện tại (Current State) -- đã xác minh trong code
 - Package gốc thực tế: `com.example.videocall_marching_language` 
-- Entity hiện có: -- CHƯA có `User`, `Tag`, 
-- Cấu trúc hiện tại: , -- CHƯA có `service/`, `service/impl/`, `dto/`, `repository/`,`controller/`,`entity/`
-- Business logic 
+- Entity hiện có gồm `User`, `SocialAccount`, `Tag`, `TagCategory`, `PeerRating`, `LearningSession` và `SessionPresence`.
+- Cấu trúc hiện tại đã có `service/`, `service/impl/`, `dto/`, `repository/`, `controller/` và `entity/`.
+- Authentication dùng Spring Security/Google OIDC; Lifecycle V2 dùng persistent presence, authenticated matchmaking, Agora token theo session, scheduler/finalizer và WebSocket recovery.
 - Lombok đang dùng `@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder` (không dùng `@Data`)
-- `application.properties` (profile mặc định) trỏ MySQL, Cloudinary; 
+- `application.properties` (profile mặc định) trỏ MySQL/Cloudinary, chạy Flyway V1-V3 và dùng Hibernate `ddl-auto=validate`.
 
 ## 3. Kiến trúc mục tiêu (Target Architecture) -- CHƯA triển khai, chỉ dùng làm định hướng khi refactor
 - Package chuẩn hoá: `com.codegym.videocall_marching_language`

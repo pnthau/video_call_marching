@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isView} ? 'Chi tiết User' : (${user.id} != null ? 'Sửa User' : 'Thêm User')">Form User</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body class="bg-light">
+<div class="container mt-4" style="max-width: 600px;">
+
+    <!-- TIÊU ĐỀ BẢNG FORM -->
+    <h3 class="mb-4 fw-bold"
+        th:text="${isView} ? '👁️ Chi tiết User' : (${user.id} != null ? '✏️ Chỉnh sửa User' : '➕ Thêm User mới')">
+    </h3>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+
+            <form th:action="@{${user.id != null ? '/admin/users/edit/' + user.id : '/admin/users/add'}}"
+                  th:object="${user}"
+                  method="post">
+
+                <!-- ID FIELD -->
+                <div class="mb-3" th:if="${user.id != null}">
+                    <label class="form-label fw-semibold">ID</label>
+                    <input type="text"
+                           th:field="*{id}"
+                           class="form-control bg-light"
+                           readonly />
+                </div>
+
+                <!-- USERNAME FIELD -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Username <span class="text-danger" th:if="${!isView}">*</span>
+                    </label>
+                    <input type="text"
+                           th:field="*{username}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                           placeholder="Nhập username..."
+                           th:disabled="${isView}" />
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('username')}"
+                         th:errors="*{username}">
+                    </div>
+                </div>
+
+                <!-- EMAIL FIELD -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Email <span class="text-danger" th:if="${!isView}">*</span>
+                    </label>
+                    <input type="email"
+                           th:field="*{email}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                           placeholder="Nhập email..."
+                           th:disabled="${isView}" />
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('email')}"
+                         th:errors="*{email}">
+                    </div>
+                </div>
+
+                <!-- JAPANESE LEVEL SELECT -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Trình độ tiếng Nhật <span class="text-danger" th:if="${!isView}">*</span>
+                    </label>
+                    <select th:field="*{currentLevel}"
+                            class="form-select"
+                            th:classappend="${#fields.hasErrors('currentLevel')} ? 'is-invalid'"
+                            th:disabled="${isView}">
+                        <option value="">-- Chọn Level --</option>
+                        <option th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+                    </select>
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('currentLevel')}"
+                         th:errors="*{currentLevel}">
+                    </div>
+                </div>
+
+                <!-- TRUST SCORE FIELD -->
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Trust Score (0 - 10)</label>
+                    <input type="number"
+                           th:field="*{trustScore}"
+                           class="form-control"
+                           th:classappend="${#fields.hasErrors('trustScore')} ? 'is-invalid'"
+                           step="0.1"
+                           min="0"
+                           max="10"
+                           th:disabled="${isView}" />
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('trustScore')}"
+                         th:errors="*{trustScore}">
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a th:href="@{/admin/users}" class="btn btn-secondary px-4">
+                        <span th:text="${isView} ? '⬅️ Quay lại' : '❌ Hủy'"></span>
+                    </a>
+
+                    <button th:if="${!isView}"
+                            type="submit"
+                            class="btn px-4"
+                            th:classappend="${user.id != null} ? 'btn-warning' : 'btn-success'">
+                        <span th:text="${user.id != null} ? '💾 Lưu thay đổi' : '➕ Thêm mới'"></span>
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

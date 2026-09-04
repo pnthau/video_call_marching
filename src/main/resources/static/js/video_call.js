@@ -1,11 +1,11 @@
-window.onload = function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const uidFromUrl = urlParams.get('uid');
-    if (uidFromUrl) {
-        document.getElementById("uid").value = uidFromUrl;
-    } else {
-        document.getElementById("uid").value = "1";
+function getCsrfHeaders() {
+    const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+    const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+    const headers = {};
+    if (token && header) {
+        headers[header] = token;
     }
+    return headers;
 }
 
 // --- CẤU HÌNH AGORA ---
@@ -17,8 +17,12 @@ let isVideoMuted = false;
 
 // --- CẤU HÌNH WEBSOCKET (STOMP) ---
 let stompClient = null;
-let currentUserId = null;
+let currentSessionId = null;
+let currentChannelName = null;
+let currentPeerId = null;
 let currentTagKey = null;
+let recoveryInProgress = false;
+let recoveryJoinStarted = false;
 
 // --- CHẾ ĐỘ CUỘC GỌI ---
 let isAiCall = false;
@@ -40,13 +44,101 @@ const aiStatusText = document.getElementById("ai-status-text");
 const subtitlesOverlay = document.getElementById("subtitles-overlay");
 const feedbackCard = document.getElementById("feedback-card");
 
+const topicTagSelect = document.getElementById("tag-select-topic");
+const levelTagSelect = document.getElementById("tag-select-level");
+const activityTagSelect = document.getElementById("tag-select-activity");
+
 // --- GẮN SỰ KIỆN NÚT BẤM ---
-document.getElementById("call-ai-btn").addEventListener("click", startAiCall);
-document.getElementById("find-partner-btn").addEventListener("click", startSearch);
-document.getElementById("cancel-search-btn").addEventListener("click", cancelSearch);
-document.getElementById("end-call-btn").addEventListener("click", endCall);
-document.getElementById("mic-btn").addEventListener("click", toggleMic);
-document.getElementById("cam-btn").addEventListener("click", toggleCam);
+document.getElementById("call-ai-btn")?.addEventListener("click", startAiCall);
+document.getElementById("find-partner-btn")?.addEventListener("click", startSearch);
+document.getElementById("cancel-search-btn")?.addEventListener("click", cancelSearch);
+document.getElementById("end-call-btn")?.addEventListener("click", endCall);
+document.getElementById("mic-btn")?.addEventListener("click", toggleMic);
+document.getElementById("cam-btn")?.addEventListener("click", toggleCam);
+window.addEventListener("load", recoverActiveSession);
+
+function connectWebSocket(onConnected) {
+    if (stompClient && stompClient.connected) {
+        onConnected();
+        return;
+    }
+    const socket = new SockJS('/ws');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function () {
+        stompClient.subscribe('/topic/match/' + CURRENT_USER_ID, function (message) {
+            handleMatchMessage(JSON.parse(message.body));
+        });
+        onConnected();
+    }, function () {
+        showSetupPanel();
+        alert("Unable to connect to the server. Please try again.");
+    });
+}
+
+async function recoverActiveSession() {
+    recoveryInProgress = true;
+    recoveryJoinStarted = false;
+    setupPanel.style.display = "none";
+    waitingPanel.style.display = "block";
+    waitingPanel.querySelector("p").innerText = "RECOVERING: restoring the active call...";
+    try {
+        const response = await fetch('/api/sessions/active', { credentials: 'include' });
+        if (response.status === 204) {
+            showSetupPanel();
+            return;
+        }
+        if (!response.ok) {
+            throw new Error("Unable to resolve the active session");
+        }
+        const session = await response.json();
+        currentSessionId = session.id;
+        currentChannelName = session.channelName;
+        currentPeerId = session.currentUserId === session.user1Id ? session.user2Id : session.user1Id;
+        connectWebSocket(function () {
+            waitingPanel.querySelector("p").innerText = "RECONNECTING: joining the previous call...";
+            stompClient.send('/app/recover-session', {}, JSON.stringify({}));
+        });
+    } catch (error) {
+        recoveryInProgress = false;
+        showSetupPanel();
+        alert(error.message);
+    }
+}
+
+function showSetupPanel() {
+    recoveryInProgress = false;
+    recoveryJoinStarted = false;
+    waitingPanel.style.display = "none";
+    callPanel.style.display = "none";
+    videoContainer.style.display = "none";
+    if (feedbackCard) feedbackCard.style.display = "none";
+    if (aiPlayerScreen) aiPlayerScreen.style.display = "none";
+    if (remotePlayer) remotePlayer.style.display = "block";
+    if (remoteLabel) remoteLabel.innerText = "Đối tác (Remote)";
+    setupPanel.style.display = "block";
+
+    currentSessionId = null;
+    currentChannelName = null;
+    currentPeerId = null;
+    currentTagKey = null;
+}
+
+function cleanupMedia() {
+    if (localAudioTrack) {
+        localAudioTrack.stop();
+        localAudioTrack.close();
+        localAudioTrack = null;
+    }
+    if (localVideoTrack) {
+        localVideoTrack.stop();
+        localVideoTrack.close();
+        localVideoTrack = null;
+    }
+    const localContainer = document.getElementById("local-player");
+    if (localContainer) localContainer.innerHTML = "";
+    const remoteContainer = document.getElementById("remote-player");
+    if (remoteContainer) remoteContainer.innerHTML = "";
+}
 
 // ==========================================
 // 1. CHẾ ĐỘ GỌI 1-1 VỚI AI SENSEI (0 ĐỒNG)
@@ -54,16 +146,17 @@ document.getElementById("cam-btn").addEventListener("click", toggleCam);
 
 async function startAiCall() {
     isAiCall = true;
-    currentUserId = document.getElementById("uid").value || "1";
+    currentSessionId = null;
 
     // 1. Chuyển UI sang màn hình Call
     setupPanel.style.display = "none";
     callPanel.style.display = "flex";
-    videoContainer.style.display = "grid";
+    videoContainer.style.display = "flex";
     remotePlayer.style.display = "none";
     aiPlayerScreen.style.display = "flex";
     remoteLabel.innerText = "🤖 AI Sensei (Tanaka)";
-    roomInfo.innerText = "Phòng học 1-1 với AI Sensei (Chế độ: " + document.getElementById("ai-mode").value + ")";
+    const modeSelect = document.getElementById("ai-mode");
+    roomInfo.innerText = "Phòng học 1-1 với AI Sensei (Chế độ: " + (modeSelect ? modeSelect.value : "ROLEPLAY") + ")";
 
     // 2. Mở Camera & Mic của User (Local Agora Track)
     try {
@@ -78,7 +171,6 @@ async function startAiCall() {
     initSpeechRecognition();
 
     // 4. AI Sensei chào mở đầu
-    const scenario = document.getElementById("ai-scenario").value;
     const greeting = "こんにちは！田中先生です。練習を始めましょう！";
     speakAiResponse({
         replyText: greeting,
@@ -110,7 +202,6 @@ function initSpeechRecognition() {
     };
 
     recognition.onend = function() {
-        // Tự động lắng nghe lại nếu vẫn đang trong cuộc gọi và AI không đang nói
         if (isAiCall && !synth.speaking) {
             try { recognition.start(); } catch (e) {}
         }
@@ -124,22 +215,23 @@ function initSpeechRecognition() {
 }
 
 async function sendToAiBackend(userMessage) {
-    const mode = document.getElementById("ai-mode").value;
-    const scenario = document.getElementById("ai-scenario").value;
+    const mode = document.getElementById("ai-mode") ? document.getElementById("ai-mode").value : "ROLEPLAY";
+    const scenario = document.getElementById("ai-scenario") ? document.getElementById("ai-scenario").value : "Hội thoại";
 
     const requestDTO = {
         userMessage: userMessage,
         mode: mode,
         language: "ja",
         scenario: scenario,
-        targetLevel: "N5",
+        targetLevel: CURRENT_USER_LEVEL || "N5",
         history: aiChatHistory.slice(-4)
     };
 
     try {
-        const response = await fetch(`/api/ai-tutor/chat?userId=${currentUserId}`, {
+        const headers = { 'Content-Type': 'application/json', ...getCsrfHeaders() };
+        const response = await fetch(`/api/ai-tutor/chat?userId=${CURRENT_USER_ID}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify(requestDTO)
         });
 
@@ -149,10 +241,8 @@ async function sendToAiBackend(userMessage) {
         aiChatHistory.push({ role: 'user', text: userMessage });
         aiChatHistory.push({ role: 'model', text: data.replyText });
 
-        // AI nói và hiển thị phụ đề
         speakAiResponse(data);
 
-        // Hiển thị feedback sửa lỗi ngữ pháp
         if (data.feedback) {
             feedbackCard.style.display = "block";
             document.getElementById("feedback-content").innerText = data.feedback;
@@ -168,7 +258,6 @@ async function sendToAiBackend(userMessage) {
 function speakAiResponse(data) {
     synth.cancel();
 
-    // Hiển thị phụ đề
     subtitlesOverlay.style.display = "block";
     document.getElementById("sub-jp").innerText = data.replyText;
     document.getElementById("sub-reading").innerText = data.reading ? "📝 " + data.reading : "";
@@ -176,7 +265,7 @@ function speakAiResponse(data) {
 
     const utterance = new SpeechSynthesisUtterance(data.replyText);
     utterance.lang = 'ja-JP';
-    utterance.rate = 0.95; // Tốc độ tự nhiên
+    utterance.rate = 0.95;
 
     utterance.onstart = function() {
         aiStatusText.innerText = "🗣️ Tanaka Sensei đang nói...";
@@ -201,140 +290,222 @@ function speakAiResponse(data) {
 
 function startSearch() {
     isAiCall = false;
-    currentUserId = document.getElementById("uid").value;
-    currentTagKey = document.getElementById("tag-key").value;
+    const topicTagId = topicTagSelect ? topicTagSelect.value : null;
+    const levelTagId = levelTagSelect ? levelTagSelect.value : null;
+    const activityTagId = activityTagSelect ? activityTagSelect.value : null;
+    currentTagKey = `${topicTagId}:${levelTagId}:${activityTagId}`;
 
-    if (!currentUserId || !currentTagKey) {
-        alert("Vui lòng nhập ID và Tag!");
+    if (!CURRENT_USER_ID || !topicTagId || !levelTagId || !activityTagId) {
+        alert("Vui lòng chọn đủ chủ đề, trình độ và hình thức học!");
         return;
     }
 
-    if (!stompClient || !stompClient.connected) {
-        const socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
-
-        stompClient.connect({}, function (frame) {
-            stompClient.subscribe('/topic/match/' + currentUserId, function (message) {
-                handleMatchMessage(JSON.parse(message.body));
-            });
-            sendJoinRequest();
-        }, function(error) {
-            alert("Lỗi kết nối Server! Vui lòng kiểm tra lại kết nối mạng.");
-        });
-    } else {
-        sendJoinRequest();
-    }
+    connectWebSocket(sendJoinRequest);
 }
 
 function sendJoinRequest() {
     setupPanel.style.display = "none";
     waitingPanel.style.display = "block";
-    
+
     stompClient.send("/app/join", {}, JSON.stringify({ 
-        'userId': parseInt(currentUserId), 
-        'tagKey': currentTagKey 
+        'userId': CURRENT_USER_ID,
+        'tagKey': currentTagKey,
+        'topicTagId': Number(topicTagSelect.value),
+        'levelTagId': Number(levelTagSelect.value),
+        'activityTagId': Number(activityTagSelect.value),
+        'level': CURRENT_USER_LEVEL
     }));
 }
 
 function cancelSearch() {
     if (stompClient && stompClient.connected) {
-        stompClient.send("/app/cancel-search", {}, JSON.stringify({ 
-            'userId': parseInt(currentUserId), 
-            'tagKey': currentTagKey 
-        }));
+        stompClient.send("/app/cancel-search", {}, JSON.stringify({}));
     }
-    waitingPanel.style.display = "none";
-    setupPanel.style.display = "block";
+    showSetupPanel();
 }
 
 function endCall() {
     if (isAiCall) {
-        // Dừng AI
         isAiCall = false;
         synth.cancel();
         if (recognition) { try { recognition.stop(); } catch(e){} }
         cleanupMedia();
-        resetToSetupUI();
+        showSetupPanel();
     } else {
-        if (stompClient && stompClient.connected) {
-            stompClient.send("/app/cancel-search", {}, JSON.stringify({ 
-                'userId': parseInt(currentUserId), 
-                'tagKey': currentTagKey 
+        if (stompClient && stompClient.connected && currentSessionId) {
+            stompClient.send("/app/end-call", {}, JSON.stringify({
+                'userId': CURRENT_USER_ID
             }));
         }
-        client.leave();
-        cleanupMedia();
-        resetToSetupUI();
+        if (currentSessionId) {
+            fetch(`/api/sessions/${currentSessionId}/leave-agora`, {
+                method: 'POST',
+                headers: getCsrfHeaders(),
+                credentials: 'include'
+            }).catch(err => console.error("Leave agora error:", err));
+        }
+        leaveAgoraCall();
     }
 }
 
-function cleanupMedia() {
-    if (localAudioTrack) {
-        localAudioTrack.stop();
-        localAudioTrack.close();
-        localAudioTrack = null;
+// Xử lý gói tin trả về từ Server
+function handleMatchMessage(message) {
+    if (message.status === "WAITING") {
+        console.log("Server báo: Đang đợi đối tác...");
     }
-    if (localVideoTrack) {
-        localVideoTrack.stop();
-        localVideoTrack.close();
-        localVideoTrack = null;
-    }
-}
+    else if (message.status === "MATCHED") {
+        console.log("Server báo: Đã tìm thấy! Vào phòng: " + message.channelName);
 
-function resetToSetupUI() {
-    callPanel.style.display = "none";
-    videoContainer.style.display = "none";
-    feedbackCard.style.display = "none";
-    setupPanel.style.display = "block";
-    aiPlayerScreen.style.display = "none";
-    remotePlayer.style.display = "block";
-    remoteLabel.innerText = "Đối tác (Remote)";
-}
+        currentSessionId = message.sessionId;
+        currentChannelName = message.channelName;
+        currentPeerId = message.peerId;
 
-// ==========================================
-// 3. XỬ LÝ AGORA KHI MATCH NGƯỜI THẬT
-// ==========================================
-
-function handleMatchMessage(data) {
-    if (data.status === "MATCHED") {
         waitingPanel.style.display = "none";
         callPanel.style.display = "flex";
-        videoContainer.style.display = "grid";
-        remotePlayer.style.display = "block";
-        aiPlayerScreen.style.display = "none";
-        remoteLabel.innerText = "Đối tác (ID: " + data.peerId + ")";
-        roomInfo.innerText = "Đã kết nối với Bạn học (ID: " + data.peerId + ")";
+        videoContainer.style.display = "flex";
 
-        joinAgoraRoom(data.channelName);
+        roomInfo.innerText = "Phòng: " + message.channelName + " | Đối tác: " + message.peerUserName + " (ID: " + message.peerId + ")";
+
+        joinAgoraCall(message.channelName, message.sessionId);
+    }
+    else if (message.status === "RECOVERY_READY") {
+        if (recoveryJoinStarted) {
+            return;
+        }
+        recoveryJoinStarted = true;
+        currentSessionId = message.sessionId;
+        currentChannelName = message.channelName;
+        currentPeerId = message.peerId;
+        waitingPanel.style.display = "none";
+        callPanel.style.display = "flex";
+        videoContainer.style.display = "flex";
+        roomInfo.innerText = "Room: " + message.channelName + " | Reconnecting to peer";
+        joinAgoraCall(message.channelName, message.sessionId);
+    }
+    else if (message.status === "ACTIVE_SESSION_EXISTS") {
+        recoverActiveSession();
+    }
+    else if (message.status === "PEER_RECONNECTING") {
+        roomInfo.innerText = "Peer is reconnecting...";
+    }
+    else if (message.status === "PEER_RECOVERED") {
+        roomInfo.innerText = "Room: " + currentChannelName + " | Peer reconnected";
+    }
+    else if (message.status === "SESSION_ENDED" || message.status === "NO_ACTIVE_SESSION") {
+        alert("The previous call has ended. You can start matchmaking again.");
+        showSetupPanel();
+    }
+    else if (message.status === "PEER_DISCONNECTED") {
+        alert("Đối tác đã rời phòng!");
+        leaveAgoraCall();
     }
 }
 
-async function joinAgoraRoom(channelName) {
+// ==========================================
+// 3. LOGIC GỌI VIDEO (AGORA SDK)
+// ==========================================
+
+async function joinAgoraCall(channelName, sessionId) {
     try {
-        const response = await fetch(`/api/agora/token?channelName=${channelName}&uid=${currentUserId}`);
-        const token = await response.text();
-
-        await client.join(AGORA_APP_ID, channelName, token, parseInt(currentUserId));
-
-        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
-
-        localVideoTrack.play("local-player");
-        await client.publish([localAudioTrack, localVideoTrack]);
-
-        client.on("user-published", async (user, mediaType) => {
-            await client.subscribe(user, mediaType);
-            if (mediaType === "video") {
-                user.videoTrack.play("remote-player");
-            }
-            if (mediaType === "audio") {
-                user.audioTrack.play();
-            }
+        const response = await fetch(`/api/sessions/${sessionId}/token`, {
+            credentials: 'include'
         });
+        if (response.status === 409) {
+            throw new Error("The call has ended or the reconnect deadline has passed");
+        }
+        if (!response.ok) throw new Error("Không thể lấy token từ server");
+        const tokenData = await response.json();
 
+        await client.join(AGORA_APP_ID, tokenData.channelName, tokenData.token, tokenData.uid);
+
+        const localTracks = await createAvailableLocalTracks();
+        if (localVideoTrack) {
+            localVideoTrack.play("local-player");
+        }
+        if (localTracks.length > 0) {
+            await client.publish(localTracks);
+        }
+
+        const joinResponse = await fetch(`/api/sessions/${sessionId}/join-agora`, {
+            method: 'POST',
+            headers: getCsrfHeaders(),
+            credentials: 'include'
+        });
+        if (joinResponse.status === 409) {
+            throw new Error("The call has ended or the reconnect deadline has passed");
+        }
+        if (!joinResponse.ok) {
+            throw new Error("Unable to confirm the Agora join");
+        }
+        if (recoveryInProgress && stompClient && stompClient.connected) {
+            recoveryInProgress = false;
+            stompClient.send('/app/recovery-complete', {}, JSON.stringify({}));
+        }
     } catch (error) {
-        console.error("Lỗi Agora:", error);
+        console.error("Lỗi khi tham gia Agora:", error);
+        alert("Có lỗi xảy ra với camera/mic (Hãy đảm bảo trình duyệt cho phép truy cập): " + error.message);
+        if (recoveryInProgress && stompClient && stompClient.connected) {
+            stompClient.send('/app/recovery-failed', {}, JSON.stringify({}));
+        }
+        recoveryInProgress = false;
+        recoveryJoinStarted = false;
+        leaveAgoraCall();
     }
+}
+
+async function createAvailableLocalTracks() {
+    const tracks = [];
+    const unavailableDevices = [];
+
+    try {
+        localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        tracks.push(localAudioTrack);
+        document.getElementById("mic-btn").disabled = false;
+    } catch (error) {
+        localAudioTrack = null;
+        unavailableDevices.push("microphone");
+        document.getElementById("mic-btn").disabled = true;
+        console.warn("Không thể mở microphone:", error);
+    }
+
+    try {
+        localVideoTrack = await AgoraRTC.createCameraVideoTrack();
+        tracks.push(localVideoTrack);
+        document.getElementById("cam-btn").disabled = false;
+    } catch (error) {
+        localVideoTrack = null;
+        unavailableDevices.push("camera");
+        document.getElementById("cam-btn").disabled = true;
+        console.warn("Không thể mở camera:", error);
+    }
+
+    if (unavailableDevices.length > 0) {
+        alert("Không tìm thấy hoặc không truy cập được " + unavailableDevices.join(" và ")
+                + ". Bạn vẫn được kết nối vào phòng với các thiết bị còn khả dụng.");
+    }
+
+    return tracks;
+}
+
+async function leaveAgoraCall() {
+    if (localAudioTrack) { localAudioTrack.close(); localAudioTrack = null; }
+    if (localVideoTrack) { localVideoTrack.close(); localVideoTrack = null; }
+    const micBtn = document.getElementById("mic-btn");
+    if (micBtn) micBtn.disabled = false;
+    const camBtn = document.getElementById("cam-btn");
+    if (camBtn) camBtn.disabled = false;
+
+    try {
+        await client.leave();
+    } catch (e) {
+        console.warn("Error leaving Agora:", e);
+    }
+    const localContainer = document.getElementById("local-player");
+    if (localContainer) localContainer.innerHTML = "";
+    const remoteContainer = document.getElementById("remote-player");
+    if (remoteContainer) remoteContainer.innerHTML = "";
+
+    showSetupPanel();
 }
 
 function toggleMic() {

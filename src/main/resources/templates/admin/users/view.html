@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+<head><title>Chi tiết người dùng</title></head><body><section>
+    <h1 class="h3">Chi tiết người dùng</h1><div class="alert alert-success" th:if="${param.updated != null}">Đã cập nhật người dùng.</div>
+    <dl class="row card card-body"><dt class="col-sm-3">ID</dt><dd class="col-sm-9" th:text="${user.id}">1</dd><dt class="col-sm-3">Username</dt><dd class="col-sm-9" th:text="${user.username}">user</dd><dt class="col-sm-3">Email</dt><dd class="col-sm-9" th:text="${user.email}">email</dd><dt class="col-sm-3">Trình độ</dt><dd class="col-sm-9" th:text="${user.currentLevel}">N5</dd></dl>
+    <a class="btn btn-primary" th:href="@{/admin/users/{id}/edit(id=${user.id})}">Sửa</a> <a class="btn btn-secondary" th:href="@{/admin/users}">Quay lại</a>
+</section></body></html>
