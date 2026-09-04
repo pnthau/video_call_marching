@@ -115,6 +115,8 @@ function showSetupPanel() {
     if (aiPlayerScreen) aiPlayerScreen.style.display = "none";
     if (remotePlayer) remotePlayer.style.display = "block";
     if (remoteLabel) remoteLabel.innerText = "Đối tác (Remote)";
+    const csDrawer = document.getElementById("cheatsheet-drawer");
+    if (csDrawer) csDrawer.style.display = "none";
     setupPanel.style.display = "block";
 
     currentSessionId = null;
@@ -523,3 +525,11 @@ function toggleCam() {
         document.getElementById("cam-btn").innerText = isVideoMuted ? "📷 Bật Camera" : "📷 Tắt Camera";
     }
 }
+
+function toggleCheatSheet() {
+    const drawer = document.getElementById("cheatsheet-drawer");
+    if (drawer) {
+        drawer.style.display = (drawer.style.display === "none" || drawer.style.display === "") ? "flex" : "none";
+    }
+}
+

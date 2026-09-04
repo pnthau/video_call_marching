@@ -83,7 +83,8 @@
         <!-- Trạng thái 3: Thanh điều khiển cuộc gọi -->
         <div id="call-panel" class="controls" style="display: none; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
             <div id="room-info" style="font-weight: 600; color: #0284c7;"></div>
-            <div style="display: flex; gap: 10px;">
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="btn-toggle-cheatsheet" class="btn btn-secondary" style="background: #0284c7; color: white;" onclick="toggleCheatSheet()" title="Mở sổ tay gợi ý câu thoại">📖 Phao Cứu Sinh (Gợi ý)</button>
                 <button id="mic-btn" class="btn btn-secondary">🎤 Tắt Mic</button>
                 <button id="cam-btn" class="btn btn-secondary">📷 Tắt Camera</button>
                 <button id="end-call-btn" class="btn btn-danger">🔴 Kết thúc cuộc gọi</button>
@@ -129,6 +130,53 @@
             <h4>💡 Nhận xét từ AI Sensei:</h4>
             <p id="feedback-content" style="color: #cbd5e1; margin-bottom: 6px;"></p>
             <p id="suggested-reply" style="color: #38bdf8; font-size: 14px;"></p>
+        </div>
+    </div>
+
+    <!-- Drawer Sổ Tay Phao Cứu Sinh (In-Call Cheat Sheet) -->
+    <div id="cheatsheet-drawer" class="cheatsheet-drawer" style="display: none;">
+        <div class="cheatsheet-header">
+            <h4>📖 Sổ Tay Phao Cứu Sinh</h4>
+            <button type="button" class="btn-close-cheatsheet" onclick="toggleCheatSheet()">✕</button>
+        </div>
+        <div class="cheatsheet-body">
+            <div class="cheat-block">
+                <h5>💡 Khi cần xin đối tác nói lại hoặc chờ một chút:</h5>
+                <div class="cheat-item">
+                    <div class="cheat-main">すみません、もう一度お願いします。</div>
+                    <div class="cheat-sub">Sumimasen, mou ichido onegaishimasu.</div>
+                    <div class="cheat-vi">Xin lỗi, bạn nhắc lại một lần nữa được không?</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">なるほど！そうですね。</div>
+                    <div class="cheat-sub">Naruhodo! Sou desu ne.</div>
+                    <div class="cheat-vi">Ra là vậy! Đúng như thế nhỉ.</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">ちょっと待ってください。</div>
+                    <div class="cheat-sub">Chotto matte kudasai.</div>
+                    <div class="cheat-vi">Xin đợi tôi một chút nhé.</div>
+                </div>
+            </div>
+
+            <div class="cheat-block">
+                <h5>🎯 Mẫu câu bắt đầu &amp; duy trì hội thoại:</h5>
+                <div class="cheat-item">
+                    <div class="cheat-main">はじめまして、よろしくお願いします。</div>
+                    <div class="cheat-sub">Hajimemashite, yoroshiku onegaishimasu.</div>
+                    <div class="cheat-vi">Rất vui được gặp bạn, mong được giúp đỡ.</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">〜はどう思いますか？</div>
+                    <div class="cheat-sub">... wa dou omoimasu ka?</div>
+                    <div class="cheat-vi">Bạn thấy thế nào về ...?</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">〜をお願いします。</div>
+                    <div class="cheat-sub">... o onegaishimasu.</div>
+                    <div class="cheat-vi">Làm ơn cho tôi xin ...</div>
+                </div>
+            </div>
         </div>
     </div>
 

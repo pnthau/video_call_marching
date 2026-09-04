@@ -26,6 +26,7 @@
             --danger-bg: #fef2f2;
             --danger-border: #fecaca;
             --warning: #f59e0b;
+            --warning-bg: #fffbeb;
         }
 
         * {
@@ -47,21 +48,21 @@
 
         .chat-app-container {
             width: 100%;
-            max-width: 820px;
-            height: 94vh;
-            max-height: 900px;
+            max-width: 900px;
+            height: 95vh;
+            max-height: 940px;
             background: var(--surface);
             border-radius: 24px;
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08), 0 0 1px 1px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             border: 1px solid var(--border-color);
         }
 
-        /* --- Header --- */
+        /* --- Top Header --- */
         .chat-header {
-            padding: 1rem 1.5rem;
+            padding: 0.85rem 1.5rem;
             background: #ffffff;
             border-bottom: 1px solid var(--border-color);
             display: flex;
@@ -97,7 +98,7 @@
         }
 
         .header-title-group h2 {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             line-height: 1.3;
             color: var(--text-main);
@@ -119,16 +120,8 @@
             letter-spacing: 0.03em;
         }
 
-        .badge-lang {
-            background: #e0e7ff;
-            color: #4338ca;
-        }
-
-        .badge-phase {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
+        .badge-lang { background: #e0e7ff; color: #4338ca; }
+        .badge-phase { background: #fef3c7; color: #92400e; }
         .badge-role {
             background: #eef2ff;
             color: #4338ca;
@@ -136,11 +129,7 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .badge-role:hover {
-            background: #e0e7ff;
-            transform: translateY(-1px);
-        }
+        .badge-role:hover { background: #e0e7ff; transform: translateY(-1px); }
 
         .header-right {
             display: flex;
@@ -149,18 +138,15 @@
         }
 
         .stat-card {
-            background: var(--bg-page);
-            border: 1px solid var(--border-color);
-            padding: 0.35rem 0.75rem;
-            border-radius: 12px;
-            text-align: right;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
 
         .stat-label {
-            font-size: 0.68rem;
+            font-size: 0.7rem;
             color: var(--text-sub);
-            font-weight: 600;
-            text-transform: uppercase;
+            font-weight: 500;
         }
 
         .stat-value {
@@ -170,106 +156,395 @@
             font-variant-numeric: tabular-nums;
         }
 
-        /* --- Chat Messages Area --- */
-        .chat-body {
+        /* --- 3-Step Navigation Bar --- */
+        .step-nav-bar {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid var(--border-color);
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .step-tab-btn {
             flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            background: #fafafa;
-            scroll-behavior: smooth;
-        }
-
-        .chat-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .chat-body::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
-        /* Message Rows */
-        .message-row {
-            display: flex;
-            gap: 0.75rem;
-            max-width: 82%;
-            animation: fadeInMsg 0.3s ease-out;
-        }
-
-        @keyframes fadeInMsg {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .message-row.bot {
-            align-self: flex-start;
-        }
-
-        .message-row.user {
-            align-self: flex-end;
-            flex-direction: row-reverse;
-        }
-
-        /* Avatars */
-        .avatar {
-            width: 38px;
-            height: 38px;
+            padding: 10px 12px;
+            border: none;
+            background: transparent;
             border-radius: 12px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
-            font-weight: 700;
-            flex-shrink: 0;
-            user-select: none;
+            gap: 8px;
         }
 
-        .message-row.bot .avatar {
+        .step-tab-btn .step-number {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
             background: #e2e8f0;
-            color: #334155;
-            border: 1px solid #cbd5e1;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 800;
         }
 
-        .message-row.user .avatar {
+        .step-tab-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .step-tab-btn.active .step-number {
             background: var(--primary);
             color: #ffffff;
         }
 
-        /* Message Bubble */
-        .message-content {
+        /* --- Main Content Panel Wrapper --- */
+        .tab-panel-container {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tab-panel {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .tab-panel.active {
+            display: flex;
+        }
+
+        /* ==========================================================================
+           TAB 1: NẠP KIẾN THỨC (INPUT & VOCAB DECK)
+           ========================================================================== */
+        .deck-wrapper {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .deck-hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 18px;
+            padding: 1.5rem;
+            color: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.25);
+        }
+
+        .deck-hero h3 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            margin-bottom: 0.35rem;
+        }
+
+        .deck-hero p {
+            font-size: 0.9rem;
+            color: #e0e7ff;
+            max-width: 520px;
+            line-height: 1.5;
+        }
+
+        .btn-play-all {
+            padding: 12px 22px;
+            background: #ffffff;
+            color: #4f46e5;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-play-all:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-play-all.playing {
+            background: #fef2f2;
+            color: #ef4444;
+        }
+
+        /* Vocab & Patterns Section */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-header h4 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vocab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .vocab-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            position: relative;
+        }
+
+        .vocab-card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .vocab-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .vocab-word {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .btn-mini-audio {
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-sub);
+            transition: all 0.15s;
+        }
+
+        .btn-mini-audio:hover {
+            background: var(--primary-light);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .vocab-reading {
+            font-size: 0.85rem;
+            color: #78350f;
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            width: fit-content;
+            font-weight: 600;
+        }
+
+        .vocab-meaning {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+
+        /* Bilingual Dialogue Table */
+        .dialogue-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .dialogue-item {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: all 0.2s;
+        }
+
+        .dialogue-item.active-playing {
+            border-color: var(--primary);
+            background: #f5f3ff;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        .dialogue-role-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .dialogue-role-badge.role-b {
+            background: #fdf2f8;
+            color: #db2777;
+        }
+
+        .dialogue-content {
+            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 0.35rem;
         }
 
-        .message-sender-name {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-sub);
-            padding: 0 0.25rem;
+        .dialogue-jp {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1.45;
         }
 
-        .message-row.user .message-sender-name {
-            text-align: right;
+        .dialogue-reading {
+            font-size: 0.88rem;
+            color: #78350f;
+            background: #fef3c7;
+            padding: 2px 8px;
+            border-radius: 6px;
+            width: fit-content;
+            font-weight: 600;
+        }
+
+        .dialogue-vi {
+            font-size: 0.88rem;
+            color: #15803d;
+            background: #f0fdf4;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            width: fit-content;
+        }
+
+        .deck-bottom-cta {
+            padding: 1.5rem 0 0.5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .btn-cta-next-tab {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.02rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .btn-cta-next-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -5px rgba(79, 70, 229, 0.5);
+        }
+
+        /* ==========================================================================
+           TAB 2: LUYỆN NÓI CÙNG AI (CHAT & FLASHCARDS)
+           ========================================================================== */
+        .chat-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 0.75rem;
+            max-width: 85%;
+            animation: fadeInMsg 0.25s ease-out;
+        }
+
+        @keyframes fadeInMsg {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-row.bot { align-self: flex-start; }
+        .message-row.user { align-self: flex-end; flex-direction: row-reverse; }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .message-row.bot .message-avatar { background: #e0e7ff; color: #4338ca; }
+        .message-row.user .message-avatar { background: #ecfdf5; color: #059669; }
+
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            max-width: 100%;
         }
 
         .bubble {
-            padding: 0.9rem 1.15rem;
+            padding: 0.85rem 1.15rem;
             border-radius: 18px;
-            font-size: 1.05rem;
-            line-height: 1.5;
-            position: relative;
+            font-size: 0.98rem;
+            line-height: 1.55;
             word-break: break-word;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+            position: relative;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
         .message-row.bot .bubble {
-            background: var(--surface);
+            background: var(--bot-bubble);
             color: var(--bot-text);
-            border: 1px solid var(--border-color);
             border-top-left-radius: 4px;
         }
 
@@ -279,192 +554,95 @@
             border-top-right-radius: 4px;
         }
 
-        /* --- Màu sắc chấm điểm phát âm cho Bubble --- */
-        /* 1. Xanh lá cây: Đã PASS câu này */
-        .bubble.status-pass {
-            background: #ecfdf5 !important;
-            color: #065f46 !important;
-            border: 2px solid #10b981 !important;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
-            transition: all 0.3s ease;
-        }
-
-        /* 2. Màu vàng: Gần đúng (NEAR) */
-        .bubble.status-near {
-            background: #fffbeb !important;
-            color: #92400e !important;
-            border: 2px solid #f59e0b !important;
-            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.25) !important;
-            transition: all 0.3s ease;
-        }
-
-        /* 3. Màu đỏ: Sai quá (FAIL) - yêu cầu lặp lại */
-        .bubble.status-fail {
-            background: #fef2f2 !important;
-            color: #991b1b !important;
-            border: 2px solid #ef4444 !important;
-            box-shadow: 0 4px 16px rgba(239, 68, 68, 0.25) !important;
-            animation: shakeFailBubble 0.4s ease-in-out;
-            transition: all 0.3s ease;
-        }
-
-        @keyframes shakeFailBubble {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-6px); }
-            40%, 80% { transform: translateX(6px); }
-        }
-
-        .eval-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 0.2rem 0.55rem;
-            border-radius: 999px;
-            margin-top: 0.35rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .eval-pill.pill-pass {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-
-        .eval-pill.pill-near {
-            background: #fef3c7;
-            color: #92400e;
-            border: 1px solid #f59e0b;
-        }
-
-        .eval-pill.pill-fail {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        /* Active Bubble Highlight */
-        .message-row.active .bubble {
-            outline: 2.5px solid var(--primary);
-            outline-offset: 2px;
-        }
-
-        .message-row.active.user .bubble {
-            box-shadow: 0 0 16px rgba(79, 70, 229, 0.25);
-        }
-
-        /* Masked / Blur text effects */
-        .text-masked {
-            font-family: monospace;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 0.1rem 0.4rem;
-            border-radius: 4px;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-        }
+        .bubble.correct { background: var(--success) !important; color: #ffffff !important; }
+        .bubble.almost { background: var(--warning) !important; color: #ffffff !important; }
+        .bubble.incorrect { background: var(--danger) !important; color: #ffffff !important; }
 
         .text-blur {
-            filter: blur(6px);
+            filter: blur(5px);
             user-select: none;
-            opacity: 0.7;
             transition: filter 0.3s;
         }
+        .text-blur:hover { filter: blur(0); }
 
-        .text-revealed {
-            filter: none !important;
-            opacity: 1 !important;
-        }
-
-        /* Message Action Buttons (Audio replay / Hint) */
-        .bubble-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
+        .phonetic-card {
             margin-top: 0.35rem;
+            padding: 0.75rem 1.1rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 2px solid #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
         }
 
-        .message-row.user .bubble-actions {
-            justify-content: flex-end;
-        }
-
-        .btn-mini-action {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            color: var(--text-sub);
-            font-size: 0.75rem;
-            padding: 0.25rem 0.55rem;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.3rem;
-            font-weight: 500;
-            transition: all 0.15s;
-        }
-
-        .btn-mini-action:hover {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        /* Inline Evaluation Feedback Box */
-        .feedback-bubble {
-            margin-top: 0.4rem;
-            padding: 0.65rem 0.85rem;
-            border-radius: 12px;
-            font-size: 0.82rem;
-            line-height: 1.4;
-            display: flex;
-            flex-direction: column;
-            gap: 0.2rem;
-        }
-
-        .feedback-bubble.success {
-            background: var(--success-bg);
-            border: 1px solid var(--success-border);
-            color: #065f46;
-        }
-
-        .feedback-bubble.error {
-            background: var(--danger-bg);
-            border: 1px solid var(--danger-border);
-            color: #991b1b;
-        }
-
-        .feedback-bubble strong {
+        .phonetic-content {
+            font-size: 1.1rem;
             font-weight: 700;
+            color: #78350f;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+
+        .message-row.user .phonetic-card {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border: 2px solid #6366f1;
+        }
+        .message-row.user .phonetic-content { color: #312e81; }
+
+        .phonetic-card.hidden-phonetic { display: none !important; }
+
+        .script-meaning {
+            margin-top: 0.35rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 10px;
+            background: #f8fafc;
+            border-left: 3.5px solid #0284c7;
+            font-size: 0.88rem;
+            color: #1e293b;
             display: flex;
             align-items: center;
-            gap: 0.3rem;
+            gap: 0.5rem;
         }
-
-        .feedback-errors {
-            margin-top: 0.25rem;
-            padding-left: 1rem;
+        .message-row.user .script-meaning { background: #f0fdf4; border-left-color: #16a34a; color: #14532d; }
+        .script-meaning .meaning-badge {
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 0.1rem 0.45rem;
+            border-radius: 6px;
+            background: #e0f2fe;
+            color: #0369a1;
+            flex-shrink: 0;
+            text-transform: uppercase;
         }
+        .message-row.user .script-meaning .meaning-badge { background: #dcfce7; color: #15803d; }
 
-        /* --- Live Status Indicator Banner --- */
-        .status-banner {
-            padding: 0.5rem 1.5rem;
+        /* AI Feedback Box */
+        .ai-feedback-box {
+            margin-top: 0.35rem;
+            padding: 0.55rem 0.9rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
             font-size: 0.82rem;
-            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        /* Status Banner */
+        .status-banner {
+            padding: 0.55rem 1.5rem;
+            background: #ffffff;
+            border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: #f8fafc;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-sub);
         }
 
         .live-speech-box {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
         }
 
         .live-dot {
@@ -473,28 +651,21 @@
             border-radius: 50%;
             background: #94a3b8;
         }
-
-        .live-dot.active {
+        .live-dot.recording {
             background: var(--danger);
-            animation: livePulse 1.2s infinite;
+            animation: pulseRecord 1s infinite alternate;
         }
+        @keyframes pulseRecord { from { opacity: 0.4; } to { opacity: 1; } }
 
-        @keyframes livePulse {
-            0% { transform: scale(0.9); opacity: 1; }
-            50% { transform: scale(1.4); opacity: 0.5; }
-            100% { transform: scale(0.9); opacity: 1; }
-        }
-
-        /* --- Footer Control Bar --- */
+        /* Footer Controls */
         .chat-footer {
-            padding: 1rem 1.5rem 1.25rem;
+            padding: 0.9rem 1.5rem;
             background: #ffffff;
             border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            z-index: 10;
         }
 
         .footer-tools {
@@ -504,197 +675,249 @@
         }
 
         .btn-tool {
-            background: var(--bg-page);
-            border: 1px solid var(--border-color);
-            color: var(--text-main);
-            padding: 0.65rem 0.95rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 0.4rem;
-            transition: all 0.2s;
+            padding: 0.55rem 0.85rem;
+            border-radius: 10px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-color);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all 0.15s;
         }
-
-        .btn-tool:hover:not(:disabled) {
-            background: #e2e8f0;
-        }
-
-        .btn-tool:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
+        .btn-tool:hover { background: #e2e8f0; color: var(--text-main); }
 
         .btn-mic-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 16px;
             background: var(--primary);
             color: #ffffff;
             border: none;
-            padding: 0.75rem 1.6rem;
-            border-radius: 999px;
             font-size: 0.95rem;
             font-weight: 700;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
             transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
-
         .btn-mic-main:hover:not(:disabled) {
             background: var(--primary-hover);
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.45);
         }
-
+        .btn-mic-main.recording {
+            background: var(--danger);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
         .btn-mic-main:disabled {
-            background: #94a3b8;
-            box-shadow: none;
+            opacity: 0.45;
             cursor: not-allowed;
         }
 
-        .btn-mic-main.recording {
-            background: var(--danger);
-            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
-            animation: micPulse 1.4s infinite;
-        }
-
-        @keyframes micPulse {
-            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-            70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-        }
-
         .btn-next-action {
-            background: #0f172a;
-            color: #ffffff;
-            border: none;
-            padding: 0.65rem 1.1rem;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 0.4rem;
+            padding: 0.65rem 1.15rem;
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
             transition: all 0.2s;
         }
+        .btn-next-action:hover { background: #e2e8f0; }
 
-        .btn-next-action:hover {
-            background: #334155;
+        /* ==========================================================================
+           TAB 3: SẴN SÀNG THỰC CHIẾN (READINESS & P2P CALL)
+           ========================================================================== */
+        .readiness-wrapper {
+            padding: 2.5rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 1.5rem;
+            max-width: 680px;
+            margin: 0 auto;
         }
 
-        /* --- Modals --- */
+        .readiness-trophy {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #ecfdf5;
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2);
+            animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes bounceIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .readiness-wrapper h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .readiness-wrapper p.desc {
+            font-size: 0.95rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        .stats-summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .summary-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.15rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .summary-box span.title { font-size: 0.75rem; color: var(--text-sub); font-weight: 600; text-transform: uppercase; }
+        .summary-box span.val { font-size: 1.35rem; font-weight: 800; color: var(--text-main); }
+
+        .action-call-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .call-card-link {
+            background: #ffffff;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .call-card-link:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .call-card-link.primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            border-color: transparent;
+            color: #ffffff;
+            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
+        }
+        .call-card-link.primary:hover {
+            box-shadow: 0 14px 28px -5px rgba(79, 70, 229, 0.5);
+        }
+
+        .call-card-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .call-card-sub {
+            font-size: 0.85rem;
+            opacity: 0.85;
+            margin-top: 0.2rem;
+        }
+
+        .sub-action-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .btn-link:hover { background: var(--primary-light); }
+
+        /* Modals */
         .modal-overlay {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
             padding: 1rem;
-            animation: modalFadeIn 0.25s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .modal-card {
             background: #ffffff;
-            border-radius: 24px;
-            padding: 2.2rem;
-            width: 100%;
+            border-radius: 20px;
+            padding: 2rem;
             max-width: 440px;
+            width: 100%;
             text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes modalPop {
-            from { transform: scale(0.92); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
         }
 
         .modal-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 20px;
-            margin: 0 auto 1.25rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
-        }
-
-        .modal-card h3 {
-            font-size: 1.35rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            color: var(--text-main);
-        }
-
-        .modal-card p {
-            font-size: 0.9rem;
-            color: var(--text-sub);
-            line-height: 1.5;
-            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+            margin: 0 auto 1rem;
         }
 
         .role-option-btn {
             width: 100%;
-            padding: 1rem 1.25rem;
-            margin-bottom: 0.75rem;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
             border-radius: 14px;
-            border: 1.5px solid var(--border-color);
-            background: var(--bg-page);
-            font-size: 0.95rem;
+            background: #ffffff;
+            font-size: 1rem;
             font-weight: 700;
             color: var(--text-main);
             cursor: pointer;
-            text-align: left;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s;
         }
-
-        .role-option-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-            color: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .modal-stat-box {
-            background: var(--bg-page);
-            border-radius: 14px;
-            padding: 1rem;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-            text-align: left;
-        }
-
-        .modal-stat-item .stat-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-sub);
-            text-transform: uppercase;
-        }
-
-        .modal-stat-item .stat-data {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--text-main);
-            margin-top: 0.15rem;
-        }
+        .role-option-btn:hover { border-color: var(--primary); background: var(--primary-light); }
 
         .btn-modal-primary {
             width: 100%;
@@ -709,10 +932,7 @@
             margin-bottom: 0.5rem;
             transition: all 0.2s;
         }
-
-        .btn-modal-primary:hover {
-            background: var(--primary-hover);
-        }
+        .btn-modal-primary:hover { background: var(--primary-hover); }
 
         .btn-modal-secondary {
             width: 100%;
@@ -725,100 +945,22 @@
             font-weight: 600;
             cursor: pointer;
         }
+        .btn-modal-secondary:hover { color: var(--text-main); background: var(--bg-page); }
 
-        .btn-modal-secondary:hover {
-            color: var(--text-main);
-            background: var(--bg-page);
-        }
-
-        /* --- Phonetic/Hiragana Flashcard --- */
-        .phonetic-card {
-            margin-top: 0.45rem;
-            padding: 0.75rem 1.1rem;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border: 2px solid #f59e0b;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
-            animation: fadeInMsg 0.25s ease-out;
-        }
-
-        .phonetic-content {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #78350f;
-            line-height: 1.65;
-            letter-spacing: 0.03em;
-            word-break: break-word;
-        }
-
-        .message-row.user .phonetic-card {
-            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-            border: 2px solid #6366f1;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-        }
-
-        .message-row.user .phonetic-content {
-            color: #312e81;
-        }
-
-        .phonetic-card.hidden-phonetic {
-            display: none !important;
-        }
-
-        /* --- Script Meaning (Bản dịch nghĩa tiếng Việt) --- */
-        .script-meaning {
-            margin-top: 0.4rem;
-            padding: 0.45rem 0.85rem;
-            border-radius: 10px;
-            background: #f8fafc;
-            border-left: 3.5px solid #0284c7;
-            font-size: 0.9rem;
-            color: #1e293b;
-            line-height: 1.5;
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-            animation: fadeInMsg 0.2s ease-out;
-        }
-
-        .message-row.user .script-meaning {
-            background: #f0fdf4;
-            border-left-color: #16a34a;
-            color: #14532d;
-        }
-
-        .script-meaning .meaning-badge {
-            font-size: 0.72rem;
-            font-weight: 800;
-            padding: 0.12rem 0.45rem;
-            border-radius: 6px;
-            background: #e0f2fe;
-            color: #0369a1;
-            flex-shrink: 0;
-            margin-top: 0.1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .message-row.user .script-meaning .meaning-badge {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .script-meaning .meaning-text {
-            font-weight: 500;
-            word-break: break-word;
+        @media (max-width: 640px) {
+            .chat-app-container { height: 100vh; max-height: 100vh; border-radius: 0; border: none; }
+            .stats-summary-grid { grid-template-columns: 1fr; }
+            .step-tab-btn span.tab-label { font-size: 0.78rem; }
         }
     </style>
 </head>
 <body>
 
     <div class="chat-app-container">
-        <!-- Chat Header -->
+        <!-- Top Header -->
         <header class="chat-header">
             <div class="header-left">
-                <a th:href="@{/practice/scripts(phase=${param.phase != null ? param.phase[0] : 1})}" class="btn-back" title="Quay lại danh sách">
+                <a th:href="@{/practice/scripts(phase=${param.phase != null ? param.phase[0] : 1})}" class="btn-back" title="Quay lại danh sách kịch bản">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
                 </a>
                 <div class="header-title-group">
@@ -826,14 +968,14 @@
                     <div class="header-badges">
                         <span class="pill-badge badge-lang" th:text="${script.language != null ? script.language : 'JA'}">JA</span>
                         <span class="pill-badge badge-phase" id="phase-badge">Giai đoạn 1</span>
-                        <button type="button" class="pill-badge badge-role" id="btn-change-role" onclick="openRoleModal()" title="Bấm để đổi vai">🎭 Vai: Chưa chọn</button>
+                        <button type="button" class="pill-badge badge-role" id="btn-change-role" onclick="openRoleModal()" title="Bấm để đổi vai">🎭 Vai: Đang chọn...</button>
                     </div>
                 </div>
             </div>
 
             <div class="header-right">
                 <div class="stat-card">
-                    <div class="stat-label">Tiến trình</div>
+                    <div class="stat-label">Tiến trình câu</div>
                     <div class="stat-value" id="progress-text">0/0</div>
                 </div>
                 <div class="stat-card">
@@ -843,47 +985,170 @@
             </div>
         </header>
 
-        <!-- Chat Stream Body -->
-        <main class="chat-body" id="chat-stream">
-            <!-- Messages will be rendered dynamically here -->
-        </main>
+        <!-- 3-Step Navigation Tabs -->
+        <nav class="step-nav-bar" aria-label="Các bước học tập">
+            <button type="button" class="step-tab-btn active" id="tab-btn-input" onclick="switchTab('input')">
+                <span class="step-number">1</span>
+                <span class="tab-label">📖 Nạp Kiến Thức</span>
+            </button>
+            <button type="button" class="step-tab-btn" id="tab-btn-practice" onclick="switchTab('practice')">
+                <span class="step-number">2</span>
+                <span class="tab-label">🎙️ Luyện Nói Cùng AI</span>
+            </button>
+            <button type="button" class="step-tab-btn" id="tab-btn-readiness" onclick="switchTab('readiness')">
+                <span class="step-number">3</span>
+                <span class="tab-label">🚀 Sẵn Sàng Thực Chiến</span>
+            </button>
+        </nav>
 
-        <!-- Live STT / Status Banner -->
-        <div class="status-banner" id="status-banner">
-            <div class="live-speech-box">
-                <div class="live-dot" id="live-dot"></div>
-                <span id="status-text">Sẵn sàng luyện tập</span>
-            </div>
-            <div id="role-status-text" style="font-size: 0.75rem; color: var(--text-sub);"></div>
+        <!-- Tab Panels Container -->
+        <div class="tab-panel-container">
+            <!-- =======================================================
+                 TAB 1: NẠP KIẾN THỨC (STUDY DECK & PREVIEW)
+                 ======================================================= -->
+            <section id="tab-panel-input" class="tab-panel active">
+                <div class="deck-wrapper">
+                    <!-- Hero Banner with Audio -->
+                    <div class="deck-hero">
+                        <div class="deck-hero-text">
+                            <h3 th:text="${script.title}">Chủ đề Luyện Nói</h3>
+                            <p>Hãy nghe toàn bộ đoạn hội thoại một lượt và xem kỹ từ vựng trước khi bật mic luyện tập nhé!</p>
+                        </div>
+                        <button type="button" class="btn-play-all" id="btn-play-all" onclick="togglePlayFullDialogue()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            <span id="btn-play-all-text">Nghe toàn bộ hội thoại</span>
+                        </button>
+                    </div>
+
+                    <!-- Key Vocabulary / Patterns Section -->
+                    <div class="vocab-section">
+                        <div class="section-header">
+                            <h4>💡 Từ vựng &amp; Mẫu câu cốt lõi của bài:</h4>
+                            <span style="font-size: 0.8rem; color: var(--text-sub);">Bấm vào loa để nghe phát âm</span>
+                        </div>
+                        <div class="vocab-grid" id="vocab-grid-container">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Full Bilingual Dialogue Preview -->
+                    <div class="dialogue-section">
+                        <div class="section-header">
+                            <h4>📜 Kịch bản song ngữ chi tiết:</h4>
+                            <span style="font-size: 0.8rem; color: var(--text-sub);">Đọc kỹ từng câu để nắm ngữ cảnh</span>
+                        </div>
+                        <div class="dialogue-list" id="dialogue-list-container">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- CTA to Practice -->
+                    <div class="deck-bottom-cta">
+                        <button type="button" class="btn-cta-next-tab" onclick="switchTab('practice')">
+                            <span>Tôi đã nạp đủ kiến thức ➔ Bắt đầu Luyện Nói Cùng AI</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =======================================================
+                 TAB 2: LUYỆN NÓI CÙNG AI (INTERACTIVE CHAT PRACTICE)
+                 ======================================================= -->
+            <section id="tab-panel-practice" class="tab-panel">
+                <main class="chat-body" id="chat-stream">
+                    <!-- Dynamic chat messages will appear here -->
+                </main>
+
+                <!-- Status Banner -->
+                <div class="status-banner" id="status-banner">
+                    <div class="live-speech-box">
+                        <div class="live-dot" id="live-dot"></div>
+                        <span id="status-text">Sẵn sàng luyện tập</span>
+                    </div>
+                    <div id="role-status-text" style="font-size: 0.78rem; color: var(--text-sub);"></div>
+                </div>
+
+                <!-- Footer Action Bar -->
+                <footer class="chat-footer">
+                    <div class="footer-tools">
+                        <button class="btn-tool" id="btn-listen-sample" title="Nghe AI đọc mẫu câu này">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
+                            <span>Nghe mẫu</span>
+                        </button>
+                        <button class="btn-tool" id="btn-show-phonetic-footer" title="Xem phiên âm / Hiragana để đọc khi quên từ" style="background: #fffbeb; color: #92400e; border: 1.5px solid #f59e0b; font-weight: 700;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            <span id="btn-phonetic-footer-text">🎴 Xem cách đọc</span>
+                        </button>
+                        <button class="btn-tool" id="btn-hint" style="display: none;" title="Xem nội dung đầy đủ">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            <span>Xem gợi ý</span>
+                        </button>
+                    </div>
+
+                    <button class="btn-mic-main" id="btn-record" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+                        <span id="btn-mic-text">Nhấn để nói</span>
+                    </button>
+
+                    <button class="btn-next-action" id="btn-next-step">
+                        <span>Tiếp theo</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </button>
+                </footer>
+            </section>
+
+            <!-- =======================================================
+                 TAB 3: SẴN SÀNG THỰC CHIẾN (READINESS & LIVE CALL MATCH)
+                 ======================================================= -->
+            <section id="tab-panel-readiness" class="tab-panel">
+                <div class="readiness-wrapper">
+                    <div class="readiness-trophy">🎉</div>
+                    <h2>CHÚC MỪNG! BẠN ĐÃ SẴN SÀNG!</h2>
+                    <p class="desc">Bạn đã nạp vững từ vựng và hoàn thành luyện tập phản xạ cùng AI cho chủ đề này. Giờ là lúc đưa kiến thức vào giao tiếp thực tế với bạn học!</p>
+
+                    <div class="stats-summary-grid">
+                        <div class="summary-box">
+                            <span class="title">Thời gian luyện</span>
+                            <span class="val" id="r-stat-time">00:45</span>
+                        </div>
+                        <div class="summary-box">
+                            <span class="title">Mục tiêu</span>
+                            <span class="val" th:text="${script.targetDuration != null ? (script.targetDuration + 's') : '60s'}">60s</span>
+                        </div>
+                        <div class="summary-box">
+                            <span class="title">Độ sẵn sàng</span>
+                            <span class="val" style="color: #10b981;">100% Đạt</span>
+                        </div>
+                    </div>
+
+                    <div class="action-call-cards">
+                        <!-- Nút ghép đôi người thật -->
+                        <a th:href="@{/video-call}" class="call-card-link primary">
+                            <div>
+                                <div class="call-card-title">👥 Ghép Đôi Gọi Video 1-1 Với Bạn Học Thật</div>
+                                <div class="call-card-sub">Hệ thống sẽ tự động ghép với đối tác có cùng trình độ và mục tiêu</div>
+                            </div>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+
+                        <!-- Nút gọi AI Sensei -->
+                        <a th:href="@{/video-call}" class="call-card-link">
+                            <div>
+                                <div class="call-card-title">🤖 Thử Thách Hội Thoại Với AI Sensei Tanaka (0 Đồng)</div>
+                                <div class="call-card-sub">Tập dượt mô phỏng 1-1 không giới hạn trước khi gặp bạn học</div>
+                            </div>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                        </a>
+                    </div>
+
+                    <div class="sub-action-links">
+                        <button type="button" class="btn-link" onclick="restartPractice()">🔄 Luyện tập lại bài này</button>
+                        <button type="button" class="btn-link" id="btn-next-phase-r" onclick="goToNextPhase()">⏩ Lên Giai đoạn tiếp theo</button>
+                    </div>
+                </div>
+            </section>
         </div>
-
-        <!-- Chat Footer Controls -->
-        <footer class="chat-footer">
-            <div class="footer-tools">
-                <button class="btn-tool" id="btn-listen-sample" title="Nghe AI đọc mẫu câu này">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>
-                    <span>Nghe mẫu</span>
-                </button>
-                <button class="btn-tool" id="btn-show-phonetic-footer" title="Xem phiên âm / Hiragana để đọc khi quên từ" style="background: #fffbeb; color: #92400e; border: 1.5px solid #f59e0b; font-weight: 700;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    <span id="btn-phonetic-footer-text">🎴 Xem cách đọc</span>
-                </button>
-                <button class="btn-tool" id="btn-hint" style="display: none;" title="Xem nội dung đầy đủ">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <span>Xem gợi ý</span>
-                </button>
-            </div>
-
-            <button class="btn-mic-main" id="btn-record" disabled>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
-                <span id="btn-mic-text">Nhấn để nói</span>
-            </button>
-
-            <button class="btn-next-action" id="btn-next-step">
-                <span>Tiếp theo</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </button>
-        </footer>
     </div>
 
     <!-- Modal Chọn Vai -->
@@ -891,33 +1156,33 @@
         <div class="modal-card">
             <div class="modal-icon" style="background: #e0e7ff; color: #4338ca;">🎭</div>
             <h3>Chọn vai luyện tập</h3>
-            <p>Chọn nhân vật mà bạn muốn đóng vai trong đoạn hội thoại này. AI sẽ tự động đóng các vai còn lại.</p>
+            <p style="color: var(--text-sub); font-size: 0.9rem; margin-bottom: 1.25rem;">Chọn nhân vật bạn muốn đóng vai. AI sẽ tự động đóng các vai còn lại.</p>
             <div id="role-list">
-                <!-- Javascript fills roles here -->
+                <!-- Populated by JS -->
             </div>
             <button class="btn-modal-secondary" id="btn-close-role-modal" onclick="closeRoleModal()" style="display: none; margin-top: 0.5rem;">Đóng</button>
         </div>
     </div>
 
-    <!-- Modal Kết Thúc -->
+    <!-- Modal Kết Thúc Bài Luyện -->
     <div id="finish-modal" class="modal-overlay" style="display: none;">
         <div class="modal-card">
             <div class="modal-icon" id="finish-icon" style="background: #ecfdf5; color: #10b981;">🎉</div>
             <h3 id="finish-title">Hoàn thành bài luyện!</h3>
-            <p id="finish-desc">Bạn đã hoàn thành kịch bản luyện nói.</p>
+            <p id="finish-desc" style="color: var(--text-sub); font-size: 0.9rem; margin-bottom: 1rem;">Bạn đã hoàn thành kịch bản luyện nói.</p>
 
-            <div class="modal-stat-box">
-                <div class="modal-stat-item">
-                    <div class="stat-title">Thời gian của bạn</div>
-                    <div class="stat-data" id="finish-time">00:00</div>
+            <div style="display: flex; justify-content: space-around; background: #f8fafc; border-radius: 12px; padding: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-sub);">Thời gian của bạn</div>
+                    <div style="font-size: 1.25rem; font-weight: 800;" id="finish-time">00:00</div>
                 </div>
-                <div class="modal-stat-item">
-                    <div class="stat-title">Mục tiêu</div>
-                    <div class="stat-data" th:text="${script.targetDuration != null ? (script.targetDuration + 's') : '--'}">60s</div>
+                <div>
+                    <div style="font-size: 0.75rem; color: var(--text-sub);">Mục tiêu</div>
+                    <div style="font-size: 1.25rem; font-weight: 800;" th:text="${script.targetDuration != null ? (script.targetDuration + 's') : '--'}">60s</div>
                 </div>
             </div>
 
-            <button class="btn-modal-primary" id="btn-next-phase-action" onclick="goToNextPhase()">Luyện Giai đoạn tiếp theo</button>
+            <button class="btn-modal-primary" onclick="proceedToReadinessTab()">🚀 Xem Đánh Giá &amp; Sẵn Sàng Ghép Đôi</button>
             <button class="btn-modal-secondary" onclick="window.location.href='/practice/scripts'">Về danh sách kịch bản</button>
         </div>
     </div>
@@ -933,53 +1198,244 @@
     </script>
 
     <script>
-        // State
+        // --- Core State ---
         const sentences = scriptData.sentences || [];
         let currentIndex = 0;
         let userRole = null;
-        let availableRoles = [...new Set(sentences.map(s => s.role).filter(Boolean))];
+        let availableRoles = [...new Set(sentences.map(s => (s.role || '').trim()).filter(Boolean))];
         let practiceHistoryId = null;
         let startTime = null;
         let timerInterval = null;
         let isRevealedHint = false;
         let isPassedSession = false;
+        let isShowPhonetic = true;
+        let isPlayingFullDialogue = false;
+        let fullDialogueIndex = 0;
 
-        // DOM elements
+        // --- DOM Elements ---
         const chatStream = document.getElementById('chat-stream');
         const roleModal = document.getElementById('role-modal');
         const roleList = document.getElementById('role-list');
-        const finishModal = document.getElementById('finish-modal');
         const progressText = document.getElementById('progress-text');
         const timerDisplay = document.getElementById('timer-display');
-        const phaseBadge = document.getElementById('phase-badge');
-        const statusBanner = document.getElementById('status-banner');
         const statusText = document.getElementById('status-text');
-        const liveDot = document.getElementById('live-dot');
         const roleStatusText = document.getElementById('role-status-text');
-        const btnListenSample = document.getElementById('btn-listen-sample');
-        const btnHint = document.getElementById('btn-hint');
+        const liveDot = document.getElementById('live-dot');
         const btnRecord = document.getElementById('btn-record');
         const btnMicText = document.getElementById('btn-mic-text');
         const btnNextStep = document.getElementById('btn-next-step');
+        const btnListenSample = document.getElementById('btn-listen-sample');
+        const btnHint = document.getElementById('btn-hint');
+        const finishModal = document.getElementById('finish-modal');
+        const phaseBadge = document.getElementById('phase-badge');
+        const btnChangeRole = document.getElementById('btn-change-role');
+        const btnShowPhoneticFooter = document.getElementById('btn-show-phonetic-footer');
+        const btnPhoneticFooterText = document.getElementById('btn-phonetic-footer-text');
 
-        // Setup Web Speech API
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;;
-        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-        if (recognition) {
-            recognition.lang = scriptData.language === 'ja' ? 'ja-JP' : (scriptData.language === 'en' ? 'en-US' : 'vi-VN');
+        // Speech Recognition Setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isRecording = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
+            recognition.continuous = false;
             recognition.interimResults = true;
             recognition.maxAlternatives = 1;
         }
 
-        // Initialize App
+        // ==========================================
+        // 1. TAB SWITCHING SYSTEM
+        // ==========================================
+        function switchTab(tabName) {
+            document.querySelectorAll('.step-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+            const tabBtn = document.getElementById(`tab-btn-${tabName}`);
+            const tabPanel = document.getElementById(`tab-panel-${tabName}`);
+            if (tabBtn) tabBtn.classList.add('active');
+            if (tabPanel) tabPanel.classList.add('active');
+
+            if (tabName !== 'input' && isPlayingFullDialogue) {
+                stopFullDialogueAudio();
+            }
+
+            if (tabName === 'practice') {
+                if (!timerInterval && currentIndex === 0) {
+                    startPractice();
+                }
+            }
+        }
+
+        function proceedToReadinessTab() {
+            if (finishModal) finishModal.style.display = 'none';
+            switchTab('readiness');
+        }
+
+        // ==========================================
+        // 2. TAB 1: POPULATE STUDY DECK & VOCAB
+        // ==========================================
+        function initStudyDeck() {
+            populateVocabCards();
+            populateDialoguePreview();
+        }
+
+        function populateVocabCards() {
+            const container = document.getElementById('vocab-grid-container');
+            if (!container) return;
+
+            // Extract useful patterns/vocab based on language and text
+            const isJa = (scriptData.language === 'ja');
+            let vocabList = [];
+
+            if (isJa) {
+                vocabList = [
+                    { word: '初めまして', reading: 'はじめまして', meaning: 'Rất vui được gặp bạn' },
+                    { word: 'よろしくお願いします', reading: 'よろしくおねがいします', meaning: 'Rất mong được giúp đỡ' },
+                    { word: '温めますか', reading: 'あたためますか', meaning: 'Có muốn hâm nóng không?' },
+                    { word: 'お会計', reading: 'おかいけい', meaning: 'Thanh toán tiền' },
+                    { word: '注文をお願いします', reading: 'ちゅうもんをおねがいします', meaning: 'Cho tôi gọi món' },
+                    { word: '東京駅', reading: 'とうきょうえき', meaning: 'Ga Tokyo' },
+                    { word: '曲がってください', reading: 'まがってください', meaning: 'Hãy rẽ / quẹo' },
+                    { word: '助かりました', reading: 'たすかりました', meaning: 'May quá / Cảm ơn đã giúp' }
+                ];
+            } else {
+                vocabList = [
+                    { word: 'How are you doing?', reading: '/haʊ ɑːr juː ˈduːɪŋ/', meaning: 'Hôm nay bạn thế nào?' },
+                    { word: 'Pretty good', reading: '/ˈprɪti ɡʊd/', meaning: 'Rất ổn / khá tốt' },
+                    { word: 'Free this afternoon', reading: '/friː ðɪs ˌæftərˈnuːn/', meaning: 'Chiều nay có rảnh không' },
+                    { word: 'Grab a coffee', reading: '/ɡræb ə ˈkɔːfi/', meaning: 'Cùng đi uống cà phê' },
+                    { word: 'Sounds wonderful', reading: '/saʊndz ˈwʌndərfəl/', meaning: 'Nghe tuyệt vời đấy!' }
+                ];
+            }
+
+            container.innerHTML = vocabList.map(item => `
+                <div class="vocab-card">
+                    <div class="vocab-top">
+                        <div class="vocab-word">${escapeHtml(item.word)}</div>
+                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(item.word)}')">🔊</button>
+                    </div>
+                    <div class="vocab-reading">${escapeHtml(item.reading)}</div>
+                    <div class="vocab-meaning">${escapeHtml(item.meaning)}</div>
+                </div>
+            `).join('');
+        }
+
+        function populateDialoguePreview() {
+            const container = document.getElementById('dialogue-list-container');
+            if (!container) return;
+
+            container.innerHTML = sentences.map((s, idx) => {
+                const isJa = (scriptData.language === 'ja');
+                let reading = s.phonetic || (isJa ? convertKanjiToHiragana(s.text) : '');
+                let meaning = s.meaning || getSentenceMeaning(s.text);
+                const roleClass = (s.role === 'B' || idx % 2 === 1) ? 'role-b' : '';
+
+                return `
+                    <div class="dialogue-item" id="dialogue-card-${idx}">
+                        <div class="dialogue-role-badge ${roleClass}">${escapeHtml(s.role || 'A')}</div>
+                        <div class="dialogue-content">
+                            <div class="dialogue-jp">${escapeHtml(s.text)}</div>
+                            ${reading ? `<div class="dialogue-reading">🎴 ${escapeHtml(reading)}</div>` : ''}
+                            ${meaning ? `<div class="dialogue-vi">🇻🇳 ${escapeHtml(meaning)}</div>` : ''}
+                        </div>
+                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(s.text)}')">🔊</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Full dialogue sequential TTS audio
+        function togglePlayFullDialogue() {
+            if (isPlayingFullDialogue) {
+                stopFullDialogueAudio();
+            } else {
+                startFullDialogueAudio();
+            }
+        }
+
+        function startFullDialogueAudio() {
+            if (sentences.length === 0) return;
+            isPlayingFullDialogue = true;
+            fullDialogueIndex = 0;
+            updatePlayAllBtn(true);
+            playNextSentenceInDeck();
+        }
+
+        function playNextSentenceInDeck() {
+            if (!isPlayingFullDialogue || fullDialogueIndex >= sentences.length) {
+                stopFullDialogueAudio();
+                return;
+            }
+
+            document.querySelectorAll('.dialogue-item').forEach(item => item.classList.remove('active-playing'));
+            const activeCard = document.getElementById(`dialogue-card-${fullDialogueIndex}`);
+            if (activeCard) {
+                activeCard.classList.add('active-playing');
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            const sentence = sentences[fullDialogueIndex];
+            const utterance = new SpeechSynthesisUtterance(sentence.text);
+            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
+            utterance.rate = 0.92;
+
+            utterance.onend = function() {
+                if (isPlayingFullDialogue) {
+                    fullDialogueIndex++;
+                    setTimeout(playNextSentenceInDeck, 600);
+                }
+            };
+
+            utterance.onerror = function() {
+                stopFullDialogueAudio();
+            };
+
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function stopFullDialogueAudio() {
+            isPlayingFullDialogue = false;
+            window.speechSynthesis.cancel();
+            updatePlayAllBtn(false);
+            document.querySelectorAll('.dialogue-item').forEach(item => item.classList.remove('active-playing'));
+        }
+
+        function updatePlayAllBtn(isPlaying) {
+            const btn = document.getElementById('btn-play-all');
+            const text = document.getElementById('btn-play-all-text');
+            if (!btn) return;
+            if (isPlaying) {
+                btn.classList.add('playing');
+                text.innerText = '⏸️ Tạm dừng phát';
+            } else {
+                btn.classList.remove('playing');
+                text.innerText = '▶️ Nghe toàn bộ hội thoại';
+            }
+        }
+
+        function playSingleTts(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
+            utterance.rate = 0.92;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // ==========================================
+        // 3. TAB 2: INTERACTIVE PRACTICE LOGIC
+        // ==========================================
         function initApp() {
-            // Update Phase Badge
             const phaseTitles = {
-                1: 'Giai đoạn 1: Nghe & Lặp lại',
+                1: 'Giai đoạn 1: Nghe & Nhại âm',
                 2: 'Giai đoạn 2: Điền từ khuyết',
                 3: 'Giai đoạn 3: Nói tự do'
             };
-            phaseBadge.innerText = phaseTitles[phase] || `Giai đoạn ${phase}`;
+            if (phaseBadge) phaseBadge.innerText = phaseTitles[phase] || `Giai đoạn ${phase}`;
+
+            initStudyDeck();
 
             if (sentences.length === 0) {
                 if (roleModal) roleModal.style.display = 'none';
@@ -987,10 +1443,7 @@
                 return;
             }
 
-            // Chuẩn hoá và lọc danh sách vai
             availableRoles = [...new Set(sentences.map(s => (s.role || '').trim()).filter(Boolean))];
-
-            // Nếu chỉ có 1 vai hoặc không có vai, nhưng bài có từ 2 câu trở lên: chia vai A và B
             if (availableRoles.length <= 1 && sentences.length > 1) {
                 sentences.forEach((s, idx) => {
                     s.role = (idx % 2 === 0) ? 'A' : 'B';
@@ -1005,7 +1458,6 @@
                 userRole = availableRoles[0] || 'Người nói';
                 roleModal.style.display = 'none';
                 updateUserRoleBadge();
-                startPractice();
             }
         }
 
@@ -1018,151 +1470,101 @@
                     btn.style.borderColor = 'var(--primary)';
                     btn.style.background = 'var(--primary-light)';
                 }
-                btn.innerHTML = `
-                    <span>Đóng vai <strong>${escapeHtml(role)}</strong></span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                `;
-                btn.onclick = () => {
-                    userRole = role;
-                    roleModal.style.display = 'none';
-                    updateUserRoleBadge();
-                    if (!startTime) {
-                        startPractice();
-                    } else {
-                        renderChatStep();
-                    }
-                };
+                btn.innerHTML = `<span>Đóng vai: <strong>${escapeHtml(role)}</strong></span> <span>👉</span>`;
+                btn.onclick = () => selectRole(role);
                 roleList.appendChild(btn);
             });
-
-            const btnClose = document.getElementById('btn-close-role-modal');
-            if (btnClose) {
-                btnClose.style.display = userRole ? 'block' : 'none';
-            }
         }
 
         function openRoleModal() {
             renderRoleModal();
+            document.getElementById('btn-close-role-modal').style.display = 'block';
             roleModal.style.display = 'flex';
         }
 
         function closeRoleModal() {
-            if (userRole) {
-                roleModal.style.display = 'none';
-            }
+            roleModal.style.display = 'none';
+        }
+
+        function selectRole(role) {
+            userRole = role;
+            roleModal.style.display = 'none';
+            updateUserRoleBadge();
+
+            chatStream.innerHTML = '';
+            currentIndex = 0;
+            switchTab('practice');
+            startPractice();
         }
 
         function updateUserRoleBadge() {
-            const btnChangeRole = document.getElementById('btn-change-role');
-            if (btnChangeRole && userRole) {
-                btnChangeRole.innerText = `🎭 Vai: ${userRole}`;
-                btnChangeRole.title = `Đang đóng vai ${userRole}. Bấm để đổi vai.`;
-            }
+            if (btnChangeRole) btnChangeRole.innerText = `🎭 Vai: ${userRole}`;
+            if (roleStatusText) roleStatusText.innerText = `Bạn đang đóng vai: [${userRole}]`;
         }
 
-        async function startPractice() {
-            try {
-                const formData = new URLSearchParams();
-                formData.append('userId', currentUserId);
-                formData.append('scriptId', scriptData.id);
-                formData.append('phase', phase);
-
-                const res = await fetch('/api/practice/start', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData
-                });
-                practiceHistoryId = await res.text();
-            } catch (err) {
-                console.error("Lỗi khởi tạo session:", err);
+        function startPractice() {
+            if (!startTime) {
+                startTime = new Date();
+                timerInterval = setInterval(updateTimer, 1000);
             }
-
-            startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 1000);
             renderChatStep();
         }
 
         function updateTimer() {
-            const diff = Math.floor((Date.now() - startTime) / 1000);
-            const m = String(Math.floor(diff / 60)).padStart(2, '0');
-            const s = String(diff % 60).padStart(2, '0');
-            timerDisplay.innerText = `${m}:${s}`;
+            if (!startTime) return;
+            const now = new Date();
+            const elapsedSeconds = Math.floor((now - startTime) / 1000);
+            const mins = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const secs = String(elapsedSeconds % 60).padStart(2, '0');
+            timerDisplay.innerText = `${mins}:${secs}`;
         }
 
         function getMaskedDisplay(text) {
-            if (phase === 2) {
-                // Che các từ có độ dài phù hợp
-                const words = text.split(/\s+/);
-                if (words.length > 1) {
-                    return words.map((w, idx) => (w.length >= 3 && idx % 2 === 1) ? '<span class="text-masked">____</span>' : escapeHtml(w)).join(' ');
-                }
-                return '<span class="text-masked">________</span>';
+            const words = text.split(/\s+/);
+            if (words.length > 1) {
+                return words.map((w, i) => (i % 2 === 1 ? `<span class="masked-word" style="background:#cbd5e1; border-radius:4px; padding:0 4px;">____</span>` : escapeHtml(w))).join(' ');
+            } else {
+                return `<span class="masked-word" style="background:#cbd5e1; border-radius:4px; padding:0 4px;">____</span>`;
             }
-            return escapeHtml(text);
         }
 
-
-
-        // Bộ từ điển chuyển đổi Kanji sang Hiragana tự động (đảm bảo 100% kịch bản luôn có Hiragana)
         function convertKanjiToHiragana(text) {
             if (!text) return '';
             let s = text;
             const dict = [
                 { k: '初めまして', h: 'はじめまして' },
-                { k: '私は', h: 'わたしは' },
                 { k: '私', h: 'わたし' },
                 { k: '田中', h: 'たなか' },
-                { k: 'ベトナムから来ました', h: 'べとなむからきました' },
                 { k: '来ました', h: 'きました' },
-                { k: 'どうぞよろしくお願いします', h: 'どうぞよろしくおねがいします' },
-                { k: 'よろしくお願いいたします', h: 'よろしくおねがいいたします' },
-                { k: 'よろしくお願いします', h: 'よろしくおねがいします' },
-                { k: '注文をお願いします', h: 'ちゅうもんをおねがいします' },
-                { k: '注文', h: 'ちゅうもん' },
                 { k: 'お願いします', h: 'おねがいします' },
-                { k: '何にいたしましょうか', h: 'なににいたしましょうか' },
-                { k: '何', h: 'なに' },
-                { k: 'ラーメン一つとギョーザ', h: 'らーめんひとつとぎょうざ' },
-                { k: 'ラーメン', h: 'らーめん' },
-                { k: 'ギョーザ', h: 'ぎょうざ' },
-                { k: '一つ', h: 'ひとつ' },
-                { k: 'お飲み物はいかがですか', h: 'おのみものはいかがですか' },
-                { k: 'お飲み物', h: 'おのみもの' },
-                { k: '飲み物', h: 'のみもの' },
-                { k: 'お水を一杯ください', h: 'おみずをいっぱいください' },
-                { k: 'お水', h: 'おみず' },
-                { k: '水', h: 'みず' },
-                { k: '一杯', h: 'いっぱい' },
-                { k: 'いらっしゃいませ', h: 'いらっしゃいませ' },
-                { k: 'お弁当を温めますか', h: 'おべんとうをあたためますか' },
+                { k: 'お願いいたします', h: 'おねがいいたします' },
+                { k: '弁当', h: 'べんとう' },
                 { k: 'お弁当', h: 'おべんとう' },
                 { k: '温めますか', h: 'あたためますか' },
-                { k: 'レジ袋はご利用になりますか', h: 'レジぶくろはごりようになりますか' },
+                { k: '袋', h: 'ふくろ' },
                 { k: 'レジ袋', h: 'レジぶくろ' },
                 { k: 'ご利用', h: 'ごりよう' },
-                { k: '大丈夫です', h: 'だいじょうぶです' },
                 { k: '大丈夫', h: 'だいじょうぶ' },
-                { k: 'お会計は500円になります', h: 'おかいけいはごひゃくえんになります' },
-                { k: 'お会計', h: 'おかいけい' },
                 { k: '会計', h: 'かいけい' },
+                { k: 'お会計', h: 'おかいけい' },
                 { k: '500円', h: 'ごひゃくえん' },
                 { k: '円', h: 'えん' },
+                { k: '注文', h: 'ちゅうもん' },
+                { k: '何', h: 'なに' },
+                { k: '飲み物', h: 'のみもの' },
+                { k: 'お飲み物', h: 'おのみもの' },
+                { k: '水', h: 'みず' },
+                { k: 'お水', h: 'おみず' },
+                { k: '一杯', h: 'いっぱい' },
                 { k: '払います', h: 'はらいます' },
-                { k: '東京駅はどこですか', h: 'とうきょうえきはどこですか' },
                 { k: '東京駅', h: 'とうきょうえき' },
-                { k: '東京', h: 'とうきょう' },
-                { k: '駅', h: 'えき' },
-                { k: 'この道をまっすぐ行って', h: 'このみちをまっすぐいって' },
                 { k: '道', h: 'みち' },
                 { k: '行って', h: 'いって' },
-                { k: '信号を右に曲がってください', h: 'しんごうをみぎにまがってください' },
                 { k: '信号', h: 'しんごう' },
                 { k: '右', h: 'みぎ' },
                 { k: '曲がってください', h: 'まがってください' },
-                { k: '歩いてどれくらいかかりますか', h: 'あるいてどれくらいかかりますか' },
                 { k: '歩いて', h: 'あるいて' },
                 { k: '5分', h: 'ごふん' },
-                { k: '分', h: 'ふん' },
                 { k: '助かりました', h: 'たすかりました' }
             ];
             for (const item of dict) {
@@ -1171,56 +1573,40 @@
             return s;
         }
 
-        // Bộ từ điển dịch nghĩa câu thoại tiếng Nhật/Anh sang tiếng Việt
         function getSentenceMeaning(text) {
             if (!text) return '';
             const t = text.trim();
-
             const dict = [
-                // Giới thiệu bản thân
                 { pattern: /初めまして.*田中.*ベトナム/, meaning: 'Rất vui được gặp bạn, tôi là Tanaka. Tôi đến từ Việt Nam.' },
                 { pattern: /初めまして.*田中さん.*よろしくお願いします/, meaning: 'Rất vui được gặp bạn, anh Tanaka. Rất mong được giúp đỡ.' },
                 { pattern: /こちらこそ.*よろしく/, meaning: 'Chính tôi mới là người mong được giúp đỡ.' },
-
-                // Combini
                 { pattern: /いらっしゃいませ.*お弁当.*温めますか/, meaning: 'Xin chào quý khách! Quý khách có muốn hâm nóng hộp cơm bento không?' },
                 { pattern: /はい.*お願いします/, meaning: 'Vâng, xin vui lòng hâm giúp tôi.' },
                 { pattern: /レジ袋.*ご利用/, meaning: 'Quý khách có dùng túi nilon không ạ?' },
                 { pattern: /いいえ.*大丈夫/, meaning: 'Không, tôi không cần túi đâu.' },
                 { pattern: /お会計.*500円/, meaning: 'Tổng tiền thanh toán là 500 yên.' },
                 { pattern: /PayPay.*払います/, meaning: 'Tôi sẽ thanh toán bằng PayPay.' },
-
-                // Quán ăn
                 { pattern: /すみません.*注文.*お願いします/, meaning: 'Xin lỗi, cho tôi gọi món với.' },
                 { pattern: /何にいたしましょうか/, meaning: 'Vâng, quý khách muốn dùng món gì ạ?' },
                 { pattern: /ラーメン.*ギョーザ/, meaning: 'Cho tôi một bát ramen và một đĩa gyoza.' },
                 { pattern: /かしこまりました.*お飲み物/, meaning: 'Tôi đã hiểu. Quý khách có muốn dùng đồ uống gì không?' },
                 { pattern: /お水.*一杯/, meaning: 'Cho tôi xin một ly nước lọc.' },
-
-                // Hỏi đường
                 { pattern: /すみません.*東京駅.*どこ/, meaning: 'Xin lỗi, ga Tokyo ở đâu vậy ạ?' },
                 { pattern: /この道.*まっすぐ.*信号.*右/, meaning: 'Bạn đi thẳng con đường này, rồi rẽ phải ở cột đèn giao thông nhé.' },
                 { pattern: /歩いて.*どれくらい/, meaning: 'Đi bộ mất khoảng bao lâu vậy ạ?' },
                 { pattern: /だいたい.*5分/, meaning: 'Tầm khoảng 5 phút thôi bạn.' },
                 { pattern: /ありがとう.*助かりました/, meaning: 'Xin cảm ơn bạn rất nhiều. May quá.' },
-
-                // Tiếng Anh
                 { pattern: /How are you doing today/i, meaning: 'Xin chào! Hôm nay bạn thế nào?' },
                 { pattern: /doing well.*How about you/i, meaning: 'Chào bạn! Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?' },
                 { pattern: /pretty good.*free this afternoon/i, meaning: 'Tôi cũng rất ổn. Chiều nay bạn có rảnh không?' },
                 { pattern: /grab a coffee together/i, meaning: 'Có, tôi rảnh. Cùng đi uống cà phê nhé!' },
                 { pattern: /sounds wonderful/i, meaning: 'Nghe tuyệt vời đấy!' }
             ];
-
             for (const item of dict) {
-                if (item.pattern.test(t)) {
-                    return item.meaning;
-                }
+                if (item.pattern.test(t)) return item.meaning;
             }
             return '';
         }
-
-        let isShowPhonetic = true; // Mặc định hiển thị phiên âm trực tiếp trên script
 
         function renderChatStep() {
             if (currentIndex >= sentences.length) {
@@ -1234,16 +1620,11 @@
             const current = sentences[currentIndex];
             const isUserTurn = (current.role === userRole);
 
-            // Xóa class active ở các tin nhắn trước
             document.querySelectorAll('.message-row').forEach(row => row.classList.remove('active'));
 
-            // Nếu tin nhắn ở lượt này đã tồn tại (ví dụ do đổi vai), xóa đi để render lại đúng vai
             const existingRow = document.getElementById(`msg-row-${currentIndex}`);
-            if (existingRow) {
-                existingRow.remove();
-            }
+            if (existingRow) existingRow.remove();
 
-            // Tạo message element
             const msgRow = document.createElement('div');
             msgRow.id = `msg-row-${currentIndex}`;
             msgRow.className = `message-row ${isUserTurn ? 'user' : 'bot'} active`;
@@ -1252,10 +1633,8 @@
 
             let bubbleContent = '';
             if (!isUserTurn) {
-                // Lời của AI/Đối tác
                 bubbleContent = `<div class="bubble">${escapeHtml(current.text)}</div>`;
             } else {
-                // Lời của User tùy theo Phase
                 if (phase === 1) {
                     bubbleContent = `<div class="bubble">${escapeHtml(current.text)}</div>`;
                 } else if (phase === 2) {
@@ -1265,239 +1644,108 @@
                 }
             }
 
-            // Phiên âm / Hiragana (xuất hiện trực tiếp trên script câu thoại)
             const isJa = (scriptData.language === 'ja');
-            const phoneticBadgeText = isJa ? 'Hiragana (Cách đọc)' : 'Phiên âm (Phonetic)';
-
-            // 1. Ưu tiên lấy phonetic riêng của câu
             let phoneticText = (current.phonetic && current.phonetic.trim() !== '') ? current.phonetic.trim() : '';
-
-            // 2. Fallback: Nếu câu chưa có mà scriptData có phoneticContent, trích xuất dòng tương ứng
-            if (!phoneticText && scriptData.phoneticContent && scriptData.phoneticContent.trim() !== '') {
-                const pLines = scriptData.phoneticContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-                if (currentIndex < pLines.length) {
-                    phoneticText = pLines[currentIndex].replace(/^([\p{L}0-9_\s]+)[:：]\s*/u, '').trim();
-                } else {
-                    phoneticText = scriptData.phoneticContent.trim();
-                }
-            }
-
-            // 3. Fallback AI / Converter: Tự động chuyển đổi Kanji sang Hiragana cho tiếng Nhật nếu chưa có
-            if ((!phoneticText || phoneticText === current.text) && isJa) {
+            if (!phoneticText && isJa) {
                 phoneticText = convertKanjiToHiragana(current.text);
             }
 
-            // 4. Fallback cuối nếu cả 2 đều không có
-            if (!phoneticText) {
-                phoneticText = isJa ? convertKanjiToHiragana(current.text) : current.text;
-            }
-
-            // Thẻ phiên âm (Đã bỏ title header theo yêu cầu của user)
             const phoneticHtml = `
                 <div class="phonetic-card ${isShowPhonetic ? '' : 'hidden-phonetic'}" id="phonetic-${currentIndex}">
                     <div class="phonetic-content">${escapeHtml(phoneticText)}</div>
                 </div>`;
 
-            // Script Nghĩa (Bản dịch ý nghĩa tiếng Việt của câu)
             let meaningText = (current.meaning && current.meaning.trim() !== '') ? current.meaning.trim() : '';
-
-            // Fallback nếu current.meaning chưa có nhưng scriptData có meaningContent
-            if (!meaningText && scriptData.meaningContent && scriptData.meaningContent.trim() !== '') {
-                const mLines = scriptData.meaningContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
-                if (currentIndex < mLines.length) {
-                    meaningText = mLines[currentIndex].replace(/^([\p{L}0-9_\s]+)[:：]\s*/u, '').trim();
-                } else {
-                    meaningText = scriptData.meaningContent.trim();
-                }
-            }
-
-            // Fallback từ điển dịch nghĩa tự động
             if (!meaningText) {
                 meaningText = getSentenceMeaning(current.text);
             }
-
             const meaningHtml = meaningText ? `
                 <div class="script-meaning" id="meaning-${currentIndex}">
                     <span class="meaning-badge">Nghĩa</span>
                     <span class="meaning-text">${escapeHtml(meaningText)}</span>
                 </div>` : '';
 
-            const flipBtnHtml = `
-                <button class="btn-mini-action" onclick="togglePhonetic(${currentIndex})" title="Xem mặt sau (Hiragana / Phiên âm)">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"></path><path d="M16 3l-4 4-4-4"></path></svg>
-                    <span>Lật thẻ ${isJa ? 'Hiragana' : 'Phiên âm'}</span>
-                </button>`;
-
             msgRow.innerHTML = `
-                <div class="avatar">${escapeHtml(avatarInitial)}</div>
+                <div class="message-avatar">${escapeHtml(avatarInitial)}</div>
                 <div class="message-content">
-                    <div class="message-sender-name">${escapeHtml(current.role || (isUserTurn ? 'Bạn' : 'Đối tác'))}</div>
                     ${bubbleContent}
                     ${phoneticHtml}
                     ${meaningHtml}
-                    <div class="bubble-actions">
-                        <button class="btn-mini-action" onclick="playTTS('${escapeJs(current.text)}')">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-                            Nghe câu này
-                        </button>
-                        ${flipBtnHtml}
-                    </div>
-                    <div id="feedback-${currentIndex}"></div>
+                    <div id="feedback-box-${currentIndex}"></div>
                 </div>
             `;
 
             chatStream.appendChild(msgRow);
             chatStream.scrollTop = chatStream.scrollHeight;
-            updateFooterPhoneticButton(isShowPhonetic);
 
-            // Xử lý controls
             if (isUserTurn) {
-                roleStatusText.innerText = `Đến lượt bạn đóng vai "${current.role}"`;
-                statusText.innerText = "Hãy đọc to câu thoại của bạn (Bấm 'Xem cách đọc' nếu quên từ)";
-                liveDot.className = "live-dot";
-
+                statusText.innerText = `Đến lượt bạn [${userRole}]. Nhấn mic để nói!`;
                 btnRecord.disabled = false;
-                btnNextStep.style.display = "inline-flex";
-
-                if (phase >= 2) {
-                    btnHint.style.display = "inline-flex";
-                } else {
-                    btnHint.style.display = "none";
-                }
+                btnNextStep.disabled = true;
+                if (phase >= 2) btnHint.style.display = 'flex';
+                else btnHint.style.display = 'none';
             } else {
-                // Đối tác nói
-                roleStatusText.innerText = `Lượt của "${current.role}" (AI)`;
-                statusText.innerText = "AI đang đọc câu thoại...";
-                liveDot.className = "live-dot";
-
+                statusText.innerText = `Đối tác [${current.role || 'AI'}] đang nói...`;
                 btnRecord.disabled = true;
-                btnHint.style.display = "none";
-                btnNextStep.style.display = "inline-flex";
+                btnNextStep.disabled = false;
+                btnHint.style.display = 'none';
 
-                // Tự động phát âm
                 setTimeout(() => {
-                    playTTS(current.text, () => {
-                        statusText.innerText = "AI đã đọc xong. Hãy nhấn 'Tiếp theo' để tiếp tục!";
+                    speakCurrentSentence(() => {
+                        statusText.innerText = `Đối tác [${current.role || 'AI'}] đã nói xong. Nhấn Tiếp theo.`;
+                        setTimeout(() => {
+                            if (currentIndex < sentences.length && sentences[currentIndex].role !== userRole) {
+                                nextStep();
+                            }
+                        }, 900);
                     });
-                }, 400);
+                }, 300);
             }
         }
 
-        // Lật thẻ: hiển thị/ẩn phiên âm (hiragana hoặc phonetic) khi quên từ
-        function togglePhonetic(index) {
-            const el = document.getElementById(`phonetic-${index}`);
-            if (el) {
-                const isHidden = el.classList.contains('hidden-phonetic') || el.style.display === 'none';
-                if (isHidden) {
-                    el.classList.remove('hidden-phonetic');
-                    el.style.display = 'block';
-                    updateFooterPhoneticButton(true);
-                } else {
-                    el.classList.add('hidden-phonetic');
-                    el.style.display = 'none';
-                    updateFooterPhoneticButton(false);
-                }
-            }
-        }
-
-        function updateFooterPhoneticButton(isOpen) {
-            const btnPhoneticText = document.getElementById('btn-phonetic-footer-text');
-            if (btnPhoneticText) {
-                btnPhoneticText.innerText = isOpen ? '🎴 Ẩn cách đọc' : '🎴 Xem cách đọc';
-            }
-        }
-
-        // Gắn sự kiện nút xem phiên âm dưới footer
-        const btnShowPhoneticFooter = document.getElementById('btn-show-phonetic-footer');
-        if (btnShowPhoneticFooter) {
-            btnShowPhoneticFooter.onclick = () => {
-                togglePhonetic(currentIndex);
-            };
-        }
-
-        async function playTTS(text, onEnded) {
-            try {
-                // 1. Gọi Endpoint Edge-TTS để lấy âm thanh Neural tự nhiên
-                const lang = scriptData.language || 'ja';
-                const res = await fetch(`/api/practice/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(lang)}`);
-
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.status === 'success' && data.audioBase64) {
-                        // Phát âm thanh trực tiếp từ Base64 MP3
-                        const audio = new Audio("data:audio/mp3;base64," + data.audioBase64);
-                        if (onEnded) audio.onended = onEnded;
-                        audio.play();
-                        return; // Thành công thì dừng lại
-                    }
-                }
-            } catch (err) {
-                console.warn("Edge TTS server chưa bật, chuyển sang dùng giọng mặc định của trình duyệt.");
-            }
-            if (!window.speechSynthesis) return;
+        function speakCurrentSentence(callback) {
+            if (currentIndex >= sentences.length) return;
+            const text = sentences[currentIndex].text;
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = scriptData.language === 'ja' ? 'ja-JP' : (scriptData.language === 'en' ? 'en-US' : 'vi-VN');
-            utterance.rate = 0.95;
-            if (onEnded) utterance.onend = onEnded;
+            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
+            utterance.rate = 0.92;
+            utterance.onend = () => { if (callback) callback(); };
+            utterance.onerror = () => { if (callback) callback(); };
             window.speechSynthesis.speak(utterance);
         }
 
-        // Hint button click
-        btnHint.onclick = () => {
-            const current = sentences[currentIndex];
-            const bubbleText = document.getElementById(`bubble-text-${currentIndex}`);
-            if (bubbleText) {
-                bubbleText.classList.remove('text-blur');
-                bubbleText.innerHTML = escapeHtml(current.text);
-                statusText.innerText = "Đã hiển thị gợi ý câu gốc";
-            }
-        };
-
-        // Listen sample button click
-        btnListenSample.onclick = () => {
-            if (currentIndex < sentences.length) {
-                playTTS(sentences[currentIndex].text);
-            }
-        };
-
-        // Next Step
-        btnNextStep.onclick = () => {
-            if (window.speechSynthesis) window.speechSynthesis.cancel();
-            currentIndex++;
-            renderChatStep();
-        };
-
-        // Record button click
-        btnRecord.onclick = () => {
-            if (!recognition) {
-                alert("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Vui lòng sử dụng Google Chrome.");
-                return;
-            }
-
-            if (btnRecord.classList.contains('recording')) {
-                recognition.stop();
-            } else {
-                try {
-                    recognition.start();
-                } catch (e) {
-                    recognition.stop();
+        // Mic Button
+        if (btnRecord) {
+            btnRecord.addEventListener('click', () => {
+                if (!recognition) {
+                    alert('Trình duyệt không hỗ trợ nhận diện giọng nói. Vui lòng sử dụng Chrome hoặc Edge.');
+                    return;
                 }
-            }
-        };
+                if (isRecording) {
+                    recognition.stop();
+                } else {
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        console.error('Recognition error:', e);
+                    }
+                }
+            });
+        }
 
         if (recognition) {
             recognition.onstart = () => {
+                isRecording = true;
                 btnRecord.classList.add('recording');
                 btnMicText.innerText = 'Đang nghe...';
-                liveDot.className = 'live-dot active';
+                liveDot.classList.add('recording');
                 statusText.innerText = 'Đang nhận diện giọng nói của bạn...';
             };
 
-            recognition.onresult = async (event) => {
+            recognition.onresult = (event) => {
                 let interimTranscript = '';
                 let finalTranscript = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         finalTranscript += event.results[i][0].transcript;
@@ -1505,178 +1753,147 @@
                         interimTranscript += event.results[i][0].transcript;
                     }
                 }
-
-                if (interimTranscript) {
-                    statusText.innerText = `Đang nghe: "${interimTranscript}"`;
-                }
-
-                if (finalTranscript) {
-                    statusText.innerText = `Đã thu âm: "${finalTranscript}"`;
-                    btnRecord.classList.remove('recording');
-                    btnMicText.innerText = 'Nhấn để nói';
-                    liveDot.className = 'live-dot';
-
-                    await checkSpeechWithAI(sentences[currentIndex].text, finalTranscript);
-                }
+                const spokenText = finalTranscript || interimTranscript;
+                if (spokenText) statusText.innerText = `Bạn nói: "${spokenText}"`;
+                if (finalTranscript) evaluateUserSpeech(finalTranscript.trim());
             };
 
-            recognition.onerror = (e) => {
-                btnRecord.classList.remove('recording');
-                btnMicText.innerText = 'Nhấn để nói';
-                liveDot.className = 'live-dot';
-                statusText.innerText = `Lỗi Microphone (${e.error}). Vui lòng thử lại.`;
+            recognition.onerror = (event) => {
+                console.warn('Speech Recognition error:', event.error);
+                statusText.innerText = `Lỗi nhận diện: ${event.error}. Vui lòng thử lại.`;
+                resetRecordingState();
             };
 
             recognition.onend = () => {
-                btnRecord.classList.remove('recording');
-                btnMicText.innerText = 'Nhấn để nói';
-                liveDot.className = 'live-dot';
+                resetRecordingState();
             };
         }
 
-        async function checkSpeechWithAI(original, userSay) {
-            const feedbackContainer = document.getElementById(`feedback-${currentIndex}`);
-            const currentMsgRow = document.getElementById(`msg-row-${currentIndex}`);
-            const currentBubble = currentMsgRow ? currentMsgRow.querySelector('.bubble') : null;
+        function resetRecordingState() {
+            isRecording = false;
+            btnRecord.classList.remove('recording');
+            btnMicText.innerText = 'Nhấn để nói';
+            liveDot.classList.remove('recording');
+        }
 
-            statusText.innerText = "AI đang kiểm tra phát âm...";
+        async function evaluateUserSpeech(spokenText) {
+            const current = sentences[currentIndex];
+            const msgRow = document.getElementById(`msg-row-${currentIndex}`);
+            const bubble = msgRow ? msgRow.querySelector('.bubble') : null;
+            const feedbackBox = document.getElementById(`feedback-box-${currentIndex}`);
+
+            statusText.innerText = 'AI đang chấm điểm phát âm...';
 
             try {
-                btnRecord.disabled = true;
                 const formData = new URLSearchParams();
-                formData.append('originalSentence', original);
-                formData.append('userSentence', userSay);
+                formData.append('originalSentence', current.text);
+                formData.append('userSentence', spokenText);
                 formData.append('phase', phase);
                 formData.append('languageCode', scriptData.language || 'ja');
+
                 const response = await fetch('/api/practice/check', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
 
+                if (!response.ok) throw new Error('Network error');
                 const result = await response.json();
-                const status = result.status || (result.isCorrect ? 'PASS' : ((result.similarity || 0) >= 0.6 ? 'NEAR' : 'FAIL'));
-                const percent = Math.round((result.similarity || (result.isCorrect ? 1.0 : 0.5)) * 100);
 
-                // 1. Cập nhật màu sắc của Script Bubble
-                if (currentBubble) {
-                    currentBubble.classList.remove('status-pass', 'status-near', 'status-fail');
-                    if (status === 'PASS') {
-                        currentBubble.classList.add('status-pass');
-                    } else if (status === 'NEAR') {
-                        currentBubble.classList.add('status-near');
+                if (result.isCorrect) {
+                    if (bubble) {
+                        bubble.className = 'bubble correct';
+                        bubble.innerText = current.text;
+                    }
+                    statusText.innerText = `🟢 Tuyệt vời! ${result.suggestion || 'Đã phát âm chuẩn xác.'}`;
+                    btnNextStep.disabled = false;
+                    btnRecord.disabled = true;
+
+                    setTimeout(() => nextStep(), 1000);
+                } else {
+                    const similarity = calculateSimilarityClient(current.text, spokenText);
+                    if (similarity >= 0.70) {
+                        if (bubble) bubble.className = 'bubble almost';
+                        statusText.innerText = `🟡 Gần đúng (${Math.round(similarity * 100)}%). Bạn có thể nói lại để chuẩn hơn hoặc nhấn Tiếp theo.`;
+                        btnNextStep.disabled = false;
                     } else {
-                        currentBubble.classList.add('status-fail');
+                        if (bubble) bubble.className = 'bubble incorrect';
+                        statusText.innerText = `🔴 Chưa chính xác. Vui lòng bấm Mic để đọc lại câu này nhé!`;
+                        btnNextStep.disabled = true;
+                    }
+
+                    if (feedbackBox) {
+                        feedbackBox.innerHTML = `
+                            <div class="ai-feedback-box">
+                                <div>💡 <strong>Gợi ý:</strong> ${escapeHtml(result.suggestion || 'Hãy đọc chậm và rõ ràng từng từ.')}</div>
+                            </div>`;
                     }
                 }
-
-                // 2. Cập nhật Feedback & Trạng thái điều khiển
-                if (feedbackContainer) {
-                    let pillHtml = '';
-                    let adviceHtml = '';
-
-                    if (status === 'PASS') {
-                        // Xanh lá cây: đã pass, chỉ cần đổi màu sắc và thông báo tinh tế
-                        pillHtml = `<div class="eval-pill pill-pass">✓ ĐÃ PASS (${percent}%)</div>`;
-                        feedbackContainer.innerHTML = `
-                            ${pillHtml}
-                            <div style="font-size: 0.8rem; color: #065f46; margin-top: 0.25rem; font-weight: 600;">
-                                ${escapeHtml(result.suggestion || 'Phát âm rất chuẩn!')}
-                            </div>
-                        `;
-                        statusText.innerText = `Xuất sắc! Bạn đã pass câu này (${percent}%). Nhấn 'Tiếp theo' để tiếp tục.`;
-                        btnNextStep.style.display = "inline-flex";
-
-                    } else if (status === 'NEAR') {
-                        // Màu vàng: gần đúng, có thể nói lại hoặc tiếp tục
-                        pillHtml = `<div class="eval-pill pill-near">⚠️ GẦN ĐÚNG (${percent}%)</div>`;
-                        feedbackContainer.innerHTML = `
-                            ${pillHtml}
-                            <div class="feedback-bubble" style="background: #fffbeb; border: 1px solid #fde68a; color: #92400e;">
-                                <div>Bạn đã nói: <em>"${escapeHtml(result.userSentence || userSay)}"</em></div>
-                                ${result.suggestion ? `<div style="margin-top: 0.2rem;">${escapeHtml(result.suggestion)}</div>` : ''}
-                            </div>
-                        `;
-                        statusText.innerText = `Khá tốt (${percent}%)! Bạn có thể nhấn mic nói lại để đạt điểm xanh hoặc nhấn 'Tiếp theo'.`;
-                        btnNextStep.style.display = "inline-flex";
-
-                    } else {
-                        // Màu đỏ: sai quá, yêu cầu lặp lại
-                        pillHtml = `<div class="eval-pill pill-fail">✕ CẦN LẶP LẠI (${percent}%)</div>`;
-                        let errorsHtml = '';
-                        if (result.errors && result.errors.length > 0) {
-                            errorsHtml = `<ul class="feedback-errors">${result.errors.map(err => `<li>${escapeHtml(err)}</li>`).join('')}</ul>`;
-                        }
-
-                        feedbackContainer.innerHTML = `
-                            ${pillHtml}
-                            <div class="feedback-bubble error">
-                                <strong>⚠️ Phát âm chưa đạt (dưới 60%):</strong>
-                                <div>Bạn đã nói: <em>"${escapeHtml(result.userSentence || userSay)}"</em></div>
-                                <div style="margin-top: 0.2rem; font-weight: 600;">👉 Hãy bấm "Nghe mẫu" rồi nhấn mic nói lại câu này!</div>
-                                ${errorsHtml}
-                            </div>
-                        `;
-                        statusText.innerText = `Chưa đạt (${percent}%). Bạn hãy bấm mic và đọc lại câu này nhé!`;
-                    }
-                }
-
-                chatStream.scrollTop = chatStream.scrollHeight;
-                btnRecord.disabled = false;
-
             } catch (err) {
-                console.error("Lỗi check speech:", err);
-                btnRecord.disabled = false;
-                statusText.innerText = "Kiểm tra hoàn tất (Offline mock).";
+                console.error(err);
+                if (bubble) bubble.className = 'bubble correct';
+                statusText.innerText = 'Đã hoàn thành lượt đọc.';
+                btnNextStep.disabled = false;
+                setTimeout(() => nextStep(), 900);
             }
         }
 
-        async function finishSession() {
-            clearInterval(timerInterval);
-            let isPassed = false;
-
-            if (practiceHistoryId) {
-                try {
-                    const formData = new URLSearchParams();
-                    formData.append('historyId', practiceHistoryId);
-                    const res = await fetch('/api/practice/finish', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: formData
-                    });
-                    isPassed = await res.json();
-                } catch (e) {
-                    console.error("Lỗi finish session:", e);
-                }
+        function calculateSimilarityClient(s1, s2) {
+            if (!s1 || !s2) return 0;
+            const clean1 = s1.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
+            const clean2 = s2.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
+            if (clean1 === clean2) return 1.0;
+            let matches = 0;
+            for (let char of clean1) {
+                if (clean2.includes(char)) matches++;
             }
+            return matches / Math.max(clean1.length, clean2.length);
+        }
 
-            isPassedSession = isPassed;
-            const finishIcon = document.getElementById('finish-icon');
-            const finishTitle = document.getElementById('finish-title');
-            const finishDesc = document.getElementById('finish-desc');
-            const finishTime = document.getElementById('finish-time');
-            const btnNextPhase = document.getElementById('btn-next-phase-action');
+        function nextStep() {
+            currentIndex++;
+            renderChatStep();
+        }
 
-            finishTime.innerText = timerDisplay.innerText;
+        btnNextStep.addEventListener('click', nextStep);
 
-            if (isPassed) {
-                finishIcon.innerHTML = '🏆';
-                finishIcon.style.background = '#ecfdf5';
-                finishIcon.style.color = '#10b981';
-                finishTitle.innerText = "Xuất sắc! Bạn đã ĐẠT";
-                finishDesc.innerText = "Bạn đã hoàn thành bài luyện tập đúng thời gian mục tiêu và đủ điều kiện để chuyển sang giai đoạn tiếp theo!";
-                btnNextPhase.style.display = 'block';
-            } else {
-                finishIcon.innerHTML = '⏱️';
-                finishIcon.style.background = '#fef2f2';
-                finishIcon.style.color = '#ef4444';
-                finishTitle.innerText = "Chưa đạt thời gian mục tiêu";
-                finishDesc.innerText = "Bạn đã hoàn thành kịch bản nhưng thời gian phản xạ còn chậm hơn mốc mục tiêu. Hãy luyện tập lại để tăng phản xạ nhé!";
-                btnNextPhase.innerText = "Luyện tập lại Giai đoạn này";
-                btnNextPhase.onclick = () => window.location.reload();
-            }
+        btnListenSample.addEventListener('click', () => {
+            speakCurrentSentence();
+        });
 
-            finishModal.style.display = 'flex';
+        btnShowPhoneticFooter.addEventListener('click', () => {
+            isShowPhonetic = !isShowPhonetic;
+            document.querySelectorAll('.phonetic-card').forEach(card => {
+                if (isShowPhonetic) card.classList.remove('hidden-phonetic');
+                else card.classList.add('hidden-phonetic');
+            });
+            btnPhoneticFooterText.innerText = isShowPhonetic ? '🎴 Ẩn cách đọc' : '🎴 Xem cách đọc';
+        });
+
+        // Finish Session
+        function finishSession() {
+            if (timerInterval) clearInterval(timerInterval);
+            const now = new Date();
+            const elapsed = Math.floor((now - startTime) / 1000);
+            const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+            const secs = String(elapsed % 60).padStart(2, '0');
+            const formattedTime = `${mins}:${secs}`;
+
+            document.getElementById('finish-time').innerText = formattedTime;
+            document.getElementById('r-stat-time').innerText = formattedTime;
+
+            const isPassed = !scriptData.targetDuration || elapsed <= scriptData.targetDuration;
+            if (finishModal) finishModal.style.display = 'flex';
+        }
+
+        function restartPractice() {
+            currentIndex = 0;
+            startTime = null;
+            if (timerInterval) clearInterval(timerInterval);
+            timerDisplay.innerText = '00:00';
+            chatStream.innerHTML = '';
+            switchTab('practice');
+            startPractice();
         }
 
         function goToNextPhase() {
@@ -1684,17 +1901,13 @@
             window.location.href = `/practice/scripts/${scriptData.id}?phase=${nextPhase}`;
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
-        function escapeJs(str) {
-            if (!str) return '';
-            return str.replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, ' ');
-        }
-
-        window.onload = initApp;
+        // Bootstrap on load
+        window.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
 </html>
