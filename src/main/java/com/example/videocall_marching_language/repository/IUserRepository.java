@@ -1,6 +1,9 @@
 package com.example.videocall_marching_language.repository;
 
 import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.enums.UserRole;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Lock;
@@ -17,6 +20,32 @@ public interface IUserRepository extends JpaRepository<User, Long>, JpaSpecifica
     List<User> findAllByIdForUpdate(@Param("userIds") List<Long> userIds);
 
     Optional<User> findByEmail(String email);
+
     boolean existsByEmail(String email);
+
     boolean existsByUsername(String username);
+
+    List<User> findByRole(UserRole role);
+
+    long countByRole(UserRole role);
+
+    Optional<User> findByIdAndRole(Long id, UserRole role);
+
+    // Dùng cho UserServiceImpl (lọc theo username VÀ email)
+    @Query("SELECT u FROM User u WHERE u.role = :role AND " +
+            "(:username = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :username, '%'))) AND " +
+            "(:email = '' OR LOWER(u.email) LIKE LOWER(CONCAT('%', :email, '%')))")
+    Page<User> searchUsersByRole(@Param("role") UserRole role,
+                                 @Param("username") String username,
+                                 @Param("email") String email,
+                                 Pageable pageable);
+
+    // Dùng cho AdminUserServiceImpl (tìm kiếm chung trong từ khóa search)
+    @Query("SELECT u FROM User u WHERE u.role = :role AND " +
+            "(:search = '' OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<User> searchByRole(@Param("role") UserRole role,
+                            @Param("search") String search,
+                            Pageable pageable);
+
 }

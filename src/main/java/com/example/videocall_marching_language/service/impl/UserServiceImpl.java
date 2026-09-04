@@ -59,6 +59,7 @@ public class UserServiceImpl implements IUserService {
     public List<User> findAll() {
         return userRepository.findByRole(UserRole.USER);
     }
+
     @Override
     @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
@@ -94,14 +95,14 @@ public class UserServiceImpl implements IUserService {
         String cleanUsername = (username != null) ? username.trim() : "";
         String cleanEmail = (email != null) ? email.trim() : "";
 
-        // Tối ưu thành 1 câu query duy nhất, không cần nhiều nhánh if-else
         return userRepository.searchUsersByRole(UserRole.USER, cleanUsername, cleanEmail, pageable);
     }
+
     // ==================== PRIVATE HELPER METHODS ====================
 
     @Override
     @Transactional(readOnly = true)
-    public java.util.Optional<User> findByEmail(String email) {
+    public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 

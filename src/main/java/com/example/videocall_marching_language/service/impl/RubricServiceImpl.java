@@ -23,7 +23,7 @@ public class RubricServiceImpl implements IRubricService {
 
     @Override
     public List<Rubric> findAllActive() {
-        return rubricRepository.findByIsActiveTrueOrderByIdAsc();
+        return rubricRepository.findByActiveTrueOrderByIdAsc();
     }
 
     @Override

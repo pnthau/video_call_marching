@@ -57,6 +57,37 @@ class SecurityIntegrationTests {
     }
 
     @Test
+    void guestIsRedirectedFromAdminAndAdminCanAccess() throws Exception {
+        mockMvc.perform(get("/admin"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+        mockMvc.perform(get("/admin").with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void adminPostRequiresCsrfAndWorksWithCsrf() throws Exception {
+        mockMvc.perform(post("/admin/rubrics/toggle/1").with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(post("/admin/rubrics/toggle/999999")
+                        .with(user("admin@example.com").roles("ADMIN")).with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void legacyRubricOperationsAreNotExposed() throws Exception {
+        mockMvc.perform(get("/admin/rubrics/1/edit")
+                        .with(user("admin@example.com").roles("ADMIN")))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/admin/rubrics/1/edit")
+                        .with(user("admin@example.com").roles("ADMIN")).with(csrf()))
+                .andExpect(status().isNotFound());
+        mockMvc.perform(post("/admin/rubrics/1/toggle")
+                        .with(user("admin@example.com").roles("ADMIN")).with(csrf()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void logoutRequiresCsrfAndRedirectsToLogin() throws Exception {
         mockMvc.perform(post("/logout")
                         .with(user("learner@example.com").roles("USER"))

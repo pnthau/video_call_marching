@@ -6,7 +6,7 @@ import com.example.videocall_marching_language.entity.Tag;
 import com.example.videocall_marching_language.entity.TagCategory;
 import com.example.videocall_marching_language.enums.TagCategoryType;
 import com.example.videocall_marching_language.repository.ITagRepository;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.Model;
@@ -24,7 +24,7 @@ class WebControllerTests {
 
     @Test
     void videoCallPageLoadsCategoryTypesAndTheirTags() {
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         ITagRepository tagRepository = mock(ITagRepository.class);
         MatchingProperties matchingProperties = new MatchingProperties();
         Model model = mock(Model.class);

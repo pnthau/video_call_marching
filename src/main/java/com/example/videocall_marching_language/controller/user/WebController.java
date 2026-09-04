@@ -4,7 +4,7 @@ import com.example.videocall_marching_language.config.MatchingProperties;
 import com.example.videocall_marching_language.dto.TagOptionDTO;
 import com.example.videocall_marching_language.enums.TagCategoryType;
 import com.example.videocall_marching_language.repository.ITagRepository;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -21,7 +21,7 @@ public class WebController {
     @Value("${agora.app-id}")
     private String agoraAppId;
 
-    private final UserService userService;
+    private final IUserService userService;
     private final ITagRepository tagRepository;
     private final MatchingProperties matchingProperties;
 

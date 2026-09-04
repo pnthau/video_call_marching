@@ -76,13 +76,17 @@
         </a>
 
         <div class="nav-section">Quản lý (Team)</div>
-        <a th:href="@{/users}" class="nav-link"
-           th:classappend="${currentUri != null && #strings.startsWith(currentUri, '/users')} ? 'active'">
+        <a th:href="@{/admin/users}" class="nav-link"
+           th:classappend="${currentUri != null && #strings.startsWith(currentUri, '/admin/users')} ? 'active'">
             👥 Users
         </a>
     </nav>
     <div class="p-3" style="border-top: 1px solid #334155;">
-        <a th:href="@{/logout}" class="nav-link text-danger">🚪 Đăng xuất</a>
+        <form th:action="@{/logout}" method="post" class="d-inline">
+            <button type="submit" class="btn btn-link text-danger text-decoration-none p-0 border-0">
+                🚪 Đăng xuất
+            </button>
+        </form>
     </div>
 </div>
 

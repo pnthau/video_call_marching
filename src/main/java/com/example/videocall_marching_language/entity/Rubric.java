@@ -23,16 +23,16 @@ public class Rubric {
 
     /**
      * Mã tiêu chí ổn định — không bao giờ thay đổi để không làm sai lịch sử rating.
-     * Admin chỉ được sửa displayName / description / isActive.
+     * Admin chỉ được sửa displayName / description / active.
      */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, unique = true, length = 40)
+    @Column(nullable = false, unique = true, length = 40, updatable = false)
     private RubricCriteria criteria;
 
     /**
      * Tên hiển thị — admin có thể sửa tự do.
      */
-    @Column(name = "display_name", nullable = false)
+    @Column(name = "display_name", nullable = false, length = 100)
     private String displayName;
 
     @Column(columnDefinition = "TEXT")
@@ -40,7 +40,7 @@ public class Rubric {
 
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

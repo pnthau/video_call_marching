@@ -5,10 +5,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+
+import java.util.Collection;
 
 @Configuration
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final GoogleOidcUserService googleOidcUserService;
@@ -29,7 +35,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .oidcUserService(googleOidcUserService)
                         )
-                        .defaultSuccessUrl("/profile", true)
+                        .successHandler(customSuccessHandler())
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
@@ -40,5 +46,23 @@ public class SecurityConfig {
                 );
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler customSuccessHandler() {
+        return (request, response, authentication) -> {
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+            String targetUrl = "/profile";
+
+            for (GrantedAuthority authority : authorities) {
+                if (authority.getAuthority().equals("ROLE_ADMIN")) {
+                    targetUrl = "/admin";
+                    break;
+                }
+            }
+
+            response.sendRedirect(targetUrl);
+        };
     }
 }

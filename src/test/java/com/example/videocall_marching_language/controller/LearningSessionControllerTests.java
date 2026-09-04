@@ -8,7 +8,7 @@ import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
 import com.example.videocall_marching_language.enums.SessionStatus;
 import com.example.videocall_marching_language.service.ILearningSessionService;
-import com.example.videocall_marching_language.service.UserService;
+import com.example.videocall_marching_language.service.IUserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -30,7 +30,7 @@ class LearningSessionControllerTests {
     @Test
     void activeSessionIsResolvedFromAuthenticatedUser() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -53,7 +53,7 @@ class LearningSessionControllerTests {
     @Test
     void noActiveSessionReturns204() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user = user(1L, "user1");
@@ -67,7 +67,7 @@ class LearningSessionControllerTests {
     @Test
     void historyReturnsTheOtherParticipantWhenCurrentUserIsUser2() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "first");
@@ -99,7 +99,7 @@ class LearningSessionControllerTests {
     @Test
     void getTokenReturnsSessionTokenResponseForParticipantA() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -138,7 +138,7 @@ class LearningSessionControllerTests {
     @Test
     void getTokenReturnsSessionTokenResponseForParticipantB() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -177,7 +177,7 @@ class LearningSessionControllerTests {
     @Test
     void getSessionReturnsDtoForParticipant() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -211,7 +211,7 @@ class LearningSessionControllerTests {
     @Test
     void getSessionReturns403ForNonParticipant() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -241,7 +241,7 @@ class LearningSessionControllerTests {
     @Test
     void getSessionReturns404ForNonExistentSession() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -259,7 +259,7 @@ class LearningSessionControllerTests {
     @Test
     void getTokenReturns409ForTerminalSession() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user1 = user(1L, "user1");
@@ -280,7 +280,7 @@ class LearningSessionControllerTests {
     @Test
     void getTokenReturns403ForAuthenticatedNonParticipant() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user = user(3L, "outsider");
@@ -295,7 +295,7 @@ class LearningSessionControllerTests {
     @Test
     void getTokenReturns404ForMissingSession() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user = user(1L, "user1");
@@ -310,7 +310,7 @@ class LearningSessionControllerTests {
     @Test
     void activeParticipantCanRefreshTokenWithoutClientOverrides() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user = user(1L, "user1");
@@ -328,7 +328,7 @@ class LearningSessionControllerTests {
     @Test
     void reportJoinReturns409ForTerminalOrExpiredSession() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
-        UserService userService = mock(UserService.class);
+        IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
         LearningSessionController controller = new LearningSessionController(sessionService, userService);
         User user = user(1L, "user1");
