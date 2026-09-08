@@ -495,3 +495,26 @@ Không dùng `git add .`. Push non-force và mở Draft PR từ `feature/securit
 ## 18. Quyết định Slice 3 đã chốt
 
 Slice 3 đã được authorize. Quota, `429` JSON/MVC response, internal no-dependency implementation, controllable clock, maximum `10_000` buckets và expire-after-access cleanup tại mục 9 là contract cố định; không còn open decision nào chặn implementation. Slice 1 `APPROVED — PASS` và Slice 2 `APPROVED FOR IMPLEMENTATION` giữ nguyên.
+
+## 19. Slice 4 — Multipart and friendly error boundary
+
+- Default-profile multipart limits are `spring.servlet.multipart.max-file-size=5MB` and
+  `spring.servlet.multipart.max-request-size=6MB`. The request allowance exists only for
+  multipart overhead and form fields; it does not increase the avatar allowance.
+- `AvatarValidator` remains authoritative at `5 * 1024 * 1024` bytes. A parser rejection
+  must return HTTP 413 before controller, storage, Cloudinary, or profile mutation runs.
+- MVC parser errors return friendly HTML 413 with: `Ảnh tải lên vượt quá dung lượng cho phép.
+  Vui lòng chọn ảnh nhỏ hơn hoặc bằng 5 MB.` API parser errors return JSON
+  `ApiErrorResponse` with code `PAYLOAD_TOO_LARGE`.
+- MVC 403/404/405/413/500 return sanitized HTML and API `/api/**` errors return sanitized
+  JSON. Responses must not expose raw URI/query, principal, filename, multipart content,
+  exception details, or stack traces.
+- Authentication entry-point behavior remains unchanged. Authorization denial is 403 only
+  after authentication; unauthenticated requests must not become 403 or 429.
+- Tests must verify bound multipart configuration, parser rejection boundary behavior,
+  MVC/API response separation, and that rejected uploads do not invoke business/storage flow.
+- Embedded Tomcat uses the finite `server.tomcat.max-swallow-size=8MB`; unlimited swallow
+  (`-1`) is explicitly prohibited. The finite swallow size does not raise the 5 MiB avatar
+  or 6 MiB request limits. Friendly 413 is guaranteed for the tested rejected-request
+  boundary within this finite capacity; requests beyond 8 MiB may be connector-closed to
+  protect resources and must not invoke business/storage/Cloudinary or expose data.
