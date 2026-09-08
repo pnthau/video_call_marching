@@ -1,7 +1,7 @@
 package com.example.videocall_marching_language.controller.user;
 
-import com.example.videocall_marching_language.config.MatchingProperties;
-import com.example.videocall_marching_language.dto.TagOptionDTO;
+import com.example.videocall_marching_language.config.properties.MatchingProperties;
+import com.example.videocall_marching_language.dto.matching.TagOptionDTO;
 import com.example.videocall_marching_language.enums.TagCategoryType;
 import com.example.videocall_marching_language.repository.ITagRepository;
 import com.example.videocall_marching_language.service.IUserService;

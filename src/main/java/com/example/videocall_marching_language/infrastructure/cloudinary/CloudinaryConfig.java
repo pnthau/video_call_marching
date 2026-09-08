@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.utils;
+package com.example.videocall_marching_language.infrastructure.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import org.springframework.beans.factory.annotation.Value;

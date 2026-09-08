@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.config;
+package com.example.videocall_marching_language.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;

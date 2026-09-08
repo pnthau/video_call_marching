@@ -5,16 +5,13 @@ import com.example.videocall_marching_language.dto.session.LearningSessionRespon
 import com.example.videocall_marching_language.dto.session.SessionTokenDTO;
 import com.example.videocall_marching_language.entity.LearningSession;
 import com.example.videocall_marching_language.entity.User;
-import com.example.videocall_marching_language.exception.SessionAccessDeniedException;
-import com.example.videocall_marching_language.exception.SessionConflictException;
-import com.example.videocall_marching_language.exception.SessionNotFoundException;
+import com.example.videocall_marching_language.exception.UserNotFoundException;
 import com.example.videocall_marching_language.service.ILearningSessionService;
 import com.example.videocall_marching_language.service.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +27,7 @@ public class LearningSessionController {
     @GetMapping("/active")
     public ResponseEntity<LearningSessionResponse> getActiveSession(Authentication authentication) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
         return learningSessionService.findActiveSessionByUserId(currentUser.getId())
                 .map(session -> ResponseEntity.ok(toResponse(session, currentUser.getId())))
@@ -42,17 +39,15 @@ public class LearningSessionController {
             @PathVariable Long sessionId,
             Authentication authentication) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
         LearningSession session = learningSessionService.findById(sessionId)
-                .orElse(null);
-        if (session == null) {
-            return ResponseEntity.notFound().build();
-        }
+                .orElseThrow(() -> new com.example.videocall_marching_language.exception.SessionNotFoundException("Session not found: " + sessionId));
+
         boolean isParticipant = session.getUser1().getId().equals(currentUser.getId())
                 || session.getUser2().getId().equals(currentUser.getId());
         if (!isParticipant) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            throw new com.example.videocall_marching_language.exception.SessionAccessDeniedException("User is not a participant of this session");
         }
         return ResponseEntity.ok(toResponse(session, currentUser.getId()));
     }
@@ -62,18 +57,10 @@ public class LearningSessionController {
             @PathVariable Long sessionId,
             Authentication authentication) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
-        try {
-            SessionTokenDTO tokenDTO = learningSessionService.generateTokenForSession(sessionId, currentUser.getId());
-            return ResponseEntity.ok(tokenDTO);
-        } catch (SessionNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (SessionConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (SessionAccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        SessionTokenDTO tokenDTO = learningSessionService.generateTokenForSession(sessionId, currentUser.getId());
+        return ResponseEntity.ok(tokenDTO);
     }
 
     @PostMapping("/{sessionId}/join-agora")
@@ -81,18 +68,10 @@ public class LearningSessionController {
             @PathVariable Long sessionId,
             Authentication authentication) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
-        try {
-            learningSessionService.reportJoinAgora(sessionId, currentUser.getId());
-            return ResponseEntity.ok().build();
-        } catch (SessionNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (SessionConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (SessionAccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        learningSessionService.reportJoinAgora(sessionId, currentUser.getId());
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{sessionId}/leave-agora")
@@ -100,18 +79,10 @@ public class LearningSessionController {
             @PathVariable Long sessionId,
             Authentication authentication) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
-        try {
-            learningSessionService.reportLeaveAgora(sessionId, currentUser.getId());
-            return ResponseEntity.ok().build();
-        } catch (SessionNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (SessionConflictException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (SessionAccessDeniedException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        learningSessionService.reportLeaveAgora(sessionId, currentUser.getId());
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/history")
@@ -119,7 +90,7 @@ public class LearningSessionController {
             Authentication authentication,
             @PageableDefault(size = 10) Pageable pageable) {
         User currentUser = userService.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found: " + authentication.getName()));
 
         Page<LearningSessionHistoryResponse> history = learningSessionService.getHistory(currentUser.getId(), pageable)
                 .map(session -> toHistoryResponse(session, currentUser.getId()));

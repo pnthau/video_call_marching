@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.config;
+package com.example.videocall_marching_language.config.bootstrap;
 
 import com.example.videocall_marching_language.entity.Rubric;
 import com.example.videocall_marching_language.entity.Tag;

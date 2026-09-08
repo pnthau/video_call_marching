@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.controller;
+package com.example.videocall_marching_language.controller.admin;
 
 import com.example.videocall_marching_language.dto.admin.UserRequestDTO;
 import com.example.videocall_marching_language.entity.User;

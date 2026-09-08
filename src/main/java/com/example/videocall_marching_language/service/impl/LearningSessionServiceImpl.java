@@ -1,7 +1,7 @@
 package com.example.videocall_marching_language.service.impl;
 
-import com.example.videocall_marching_language.config.LearningSessionProperties;
-import com.example.videocall_marching_language.config.MatchingProperties;
+import com.example.videocall_marching_language.config.properties.LearningSessionProperties;
+import com.example.videocall_marching_language.config.properties.MatchingProperties;
 import com.example.videocall_marching_language.dto.session.SessionTokenDTO;
 import com.example.videocall_marching_language.entity.LearningSession;
 import com.example.videocall_marching_language.entity.SessionPresence;

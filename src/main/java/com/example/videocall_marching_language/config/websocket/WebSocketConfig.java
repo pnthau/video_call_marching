@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.config;
+package com.example.videocall_marching_language.config.websocket;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;

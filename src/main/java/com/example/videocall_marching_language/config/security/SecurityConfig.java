@@ -1,6 +1,9 @@
-package com.example.videocall_marching_language.config;
+package com.example.videocall_marching_language.config.security;
 
 import com.example.videocall_marching_language.service.impl.GoogleOidcUserService;
+import com.example.videocall_marching_language.ratelimit.InMemoryRateLimiter;
+import com.example.videocall_marching_language.ratelimit.RateLimitFilter;
+import com.example.videocall_marching_language.ratelimit.RateLimitRequestResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.util.Collection;
@@ -20,7 +24,8 @@ public class SecurityConfig {
     private final GoogleOidcUserService googleOidcUserService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   RateLimitFilter rateLimitFilter) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/oauth2/**", "/login/oauth2/**", "/css/**", "/js/**", "/images/**", "/error")
@@ -43,9 +48,21 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                );
+                )
+                .addFilterBefore(rateLimitFilter, AuthorizationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public RateLimitRequestResolver rateLimitRequestResolver() {
+        return new RateLimitRequestResolver();
+    }
+
+    @Bean
+    public RateLimitFilter rateLimitFilter(InMemoryRateLimiter inMemoryRateLimiter,
+                                           RateLimitRequestResolver rateLimitRequestResolver) {
+        return new RateLimitFilter(inMemoryRateLimiter, rateLimitRequestResolver);
     }
 
     @Bean

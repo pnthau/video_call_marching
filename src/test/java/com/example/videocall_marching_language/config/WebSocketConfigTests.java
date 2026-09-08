@@ -1,5 +1,8 @@
 package com.example.videocall_marching_language.config;
 
+import com.example.videocall_marching_language.config.websocket.StompPrincipalInterceptor;
+import com.example.videocall_marching_language.config.websocket.WebSocketConfig;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.StompWebSocketEndpointRegistration;

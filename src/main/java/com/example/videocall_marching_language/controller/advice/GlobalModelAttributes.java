@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.config;
+package com.example.videocall_marching_language.controller.advice;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
