@@ -13,8 +13,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.http.MediaType;
 
 import java.util.Collection;
+import java.time.Instant;
 
 @Configuration
 @RequiredArgsConstructor
@@ -49,6 +52,9 @@ public class SecurityConfig {
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 .addFilterBefore(rateLimitFilter, AuthorizationFilter.class);
 
         return http.build();
@@ -80,6 +86,21 @@ public class SecurityConfig {
             }
 
             response.sendRedirect(targetUrl);
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, exception) -> {
+            if (request.getRequestURI().startsWith("/api/")) {
+                response.setStatus(403);
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding("UTF-8");
+                response.getWriter().write("{\"code\":\"ACCESS_DENIED\",\"message\":\"Bạn không có quyền truy cập tài nguyên này.\",\"timestamp\":\""
+                        + Instant.now() + "\",\"path\":\"/api/**\"}");
+                return;
+            }
+            response.sendError(403);
         };
     }
 }

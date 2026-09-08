@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -35,7 +36,8 @@ public final class RateLimitFilter extends OncePerRequestFilter {
             return;
         }
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken
+                || !authentication.isAuthenticated()
                 || authentication.getName() == null || authentication.getName().isBlank()) {
             filterChain.doFilter(request, response);
             return;

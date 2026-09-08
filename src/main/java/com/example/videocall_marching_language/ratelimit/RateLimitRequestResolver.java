@@ -18,10 +18,10 @@ public final class RateLimitRequestResolver {
         if ("GET".equals(verb) && path.matches("/api/sessions/[^/]+/token")) {
             return Optional.of(RateLimitPolicy.SESSION_TOKEN);
         }
-        if ("POST".equals(verb) && path.matches("/api/sessions/[^/]+/join")) {
+        if ("POST".equals(verb) && path.matches("/api/sessions/[^/]+/(?:join|join-agora)")) {
             return Optional.of(RateLimitPolicy.SESSION_JOIN);
         }
-        if ("POST".equals(verb) && path.matches("/api/sessions/[^/]+/leave")) {
+        if ("POST".equals(verb) && path.matches("/api/sessions/[^/]+/(?:leave|leave-agora)")) {
             return Optional.of(RateLimitPolicy.SESSION_LEAVE);
         }
         if ("POST".equals(verb) && "/profile/edit".equals(path) && avatarMultipart) {
