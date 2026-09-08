@@ -17,6 +17,8 @@ class RateLimitRequestResolverTests {
         assertPolicy("GET", "/api/sessions/42/token", false, RateLimitPolicy.SESSION_TOKEN);
         assertPolicy("POST", "/api/sessions/42/join", false, RateLimitPolicy.SESSION_JOIN);
         assertPolicy("POST", "/api/sessions/42/leave", false, RateLimitPolicy.SESSION_LEAVE);
+        assertPolicy("POST", "/api/sessions/42/join-agora", false, RateLimitPolicy.SESSION_JOIN);
+        assertPolicy("POST", "/api/sessions/42/leave-agora", false, RateLimitPolicy.SESSION_LEAVE);
     }
 
     @Test

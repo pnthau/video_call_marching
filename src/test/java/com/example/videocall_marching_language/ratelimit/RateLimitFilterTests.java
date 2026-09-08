@@ -118,6 +118,38 @@ class RateLimitFilterTests {
     }
 
     @Test
+    void joinAgoraEleventhRequestReturns429WithoutDownstreamInvocation() throws Exception {
+        authenticate("join-agora@example.test");
+        FilterChain chain = mock(FilterChain.class);
+        for (int i = 0; i < RateLimitPolicy.SESSION_JOIN.capacity(); i++) {
+            filter.doFilterInternal(request("POST", "/api/sessions/42/join-agora"),
+                    new MockHttpServletResponse(), chain);
+        }
+        MockHttpServletRequest request = request("POST", "/api/sessions/42/join-agora");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilterInternal(request, response, chain);
+
+        assertEquals(429, response.getStatus());
+        verify(chain, never()).doFilter(request, response);
+    }
+
+    @Test
+    void leaveAgoraEleventhRequestReturns429WithoutDownstreamInvocation() throws Exception {
+        authenticate("leave-agora@example.test");
+        FilterChain chain = mock(FilterChain.class);
+        for (int i = 0; i < RateLimitPolicy.SESSION_LEAVE.capacity(); i++) {
+            filter.doFilterInternal(request("POST", "/api/sessions/42/leave-agora"),
+                    new MockHttpServletResponse(), chain);
+        }
+        MockHttpServletRequest request = request("POST", "/api/sessions/42/leave-agora");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        filter.doFilterInternal(request, response, chain);
+
+        assertEquals(429, response.getStatus());
+        verify(chain, never()).doFilter(request, response);
+    }
+
+    @Test
     void filterRetryAfterUsesBucketRemainingTimeAfterPartialRefill() throws Exception {
         java.util.concurrent.atomic.AtomicReference<Instant> now =
                 new java.util.concurrent.atomic.AtomicReference<>(Instant.parse("2026-01-01T00:00:00Z"));
