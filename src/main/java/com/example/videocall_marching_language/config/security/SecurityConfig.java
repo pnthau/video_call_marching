@@ -7,6 +7,7 @@ import com.example.videocall_marching_language.ratelimit.RateLimitRequestResolve
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +16,9 @@ import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.http.MediaType;
+import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import org.springframework.boot.health.autoconfigure.actuate.endpoint.HealthEndpointProperties;
+import org.springframework.boot.actuate.endpoint.Show;
 
 import java.util.Collection;
 import java.time.Instant;
@@ -32,6 +36,8 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/login", "/oauth2/**", "/login/oauth2/**", "/css/**", "/js/**", "/images/**", "/error")
+                        .permitAll()
+                        .requestMatchers("/actuator/health/**", "/actuator/info")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/profile/**", "/video-call", "/video-call/**", "/api/agora/**", "/api/sessions/**")
@@ -63,6 +69,33 @@ public class SecurityConfig {
     @Bean
     public RateLimitRequestResolver rateLimitRequestResolver() {
         return new RateLimitRequestResolver();
+    }
+
+    @Bean
+    @Primary
+    public WebEndpointProperties actuatorWebEndpointProperties() {
+        WebEndpointProperties properties = new WebEndpointProperties();
+        properties.getExposure().setInclude(java.util.Set.of("health", "info"));
+        return properties;
+    }
+
+    @Bean
+    @Primary
+    public HealthEndpointProperties actuatorHealthEndpointProperties() {
+        HealthEndpointProperties properties = new HealthEndpointProperties();
+        properties.setShowDetails(Show.WHEN_AUTHORIZED);
+        properties.setRoles(java.util.Set.of("ADMIN"));
+
+        HealthEndpointProperties.Group liveness = new HealthEndpointProperties.Group();
+        liveness.setInclude(java.util.Set.of("livenessState"));
+        liveness.setShowDetails(Show.NEVER);
+        properties.getGroup().put("liveness", liveness);
+
+        HealthEndpointProperties.Group readiness = new HealthEndpointProperties.Group();
+        readiness.setInclude(java.util.Set.of("readinessState", "db", "flyway"));
+        readiness.setShowDetails(Show.NEVER);
+        properties.getGroup().put("readiness", readiness);
+        return properties;
     }
 
     @Bean
