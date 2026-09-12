@@ -74,6 +74,10 @@
            th:classappend="${currentUri != null && #strings.startsWith(currentUri, '/admin/rubrics')} ? 'active'">
             📋 Rubric
         </a>
+        <a th:href="@{/admin/tags}" class="nav-link"
+           th:classappend="${currentUri != null && #strings.startsWith(currentUri, '/admin/tags')} ? 'active'">
+            🏷️ Tag
+        </a>
 
         <div class="nav-section">Quản lý (Team)</div>
         <a th:href="@{/admin/users}" class="nav-link"

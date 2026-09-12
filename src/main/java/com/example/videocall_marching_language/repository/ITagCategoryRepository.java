@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ITagCategoryRepository  extends JpaRepository<TagCategory, Long> {
     List<TagCategory> findByActiveTrueOrderByDisplayOrderAsc();
+    List<TagCategory> findAllByOrderByDisplayOrderAscNameAsc();
 }
