@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+
+<head>
+    <title>Chi tiết người dùng</title>
+</head>
+
+<body>
+
+<section>
+
+    <!-- HEADER -->
+    <div class="user-page-header">
+
+        <div>
+            <span class="admin-kicker">USER MANAGEMENT</span>
+
+            <h1>Chi tiết người dùng</h1>
+
+            <p>
+                Xem thông tin tài khoản người dùng trong hệ thống.
+            </p>
+        </div>
+
+        <a th:href="@{/admin/users}"
+           class="user-back-btn">
+            ← Danh sách User
+        </a>
+
+    </div>
+
+
+    <!-- SUCCESS -->
+    <div th:if="${param.updated != null}"
+         class="user-success-message">
+
+        <span>✓</span>
+
+        <div>
+            <strong>Đã cập nhật người dùng!</strong>
+            <small>Thông tin tài khoản đã được lưu thành công.</small>
+        </div>
+
+    </div>
+
+
+    <!-- USER DETAIL -->
+    <div class="user-detail-card">
+
+        <!-- PROFILE -->
+        <div class="user-detail-profile">
+
+            <div class="user-detail-avatar"
+                 th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">
+                U
+            </div>
+
+            <div>
+                <span class="user-detail-label">
+                    USER ACCOUNT
+                </span>
+
+                <h2 th:text="${user.username}">
+                    Username
+                </h2>
+
+                <p th:text="${user.email}">
+                    email@example.com
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="admin-form-divider"></div>
+
+
+        <!-- INFORMATION -->
+        <div class="user-detail-grid">
+
+            <div class="user-detail-item">
+
+                <span class="detail-icon">
+                    🆔
+                </span>
+
+                <div>
+                    <small>ID</small>
+
+                    <strong th:text="${user.id}">
+                        1
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="user-detail-item">
+
+                <span class="detail-icon">
+                    👤
+                </span>
+
+                <div>
+                    <small>USERNAME</small>
+
+                    <strong th:text="${user.username}">
+                        user
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="user-detail-item">
+
+                <span class="detail-icon">
+                    ✉
+                </span>
+
+                <div>
+                    <small>EMAIL</small>
+
+                    <strong th:text="${user.email}">
+                        email@example.com
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="user-detail-item">
+
+                <span class="detail-icon">
+                    🎯
+                </span>
+
+                <div>
+                    <small>TRÌNH ĐỘ</small>
+
+                    <strong class="detail-level"
+                            th:text="${user.currentLevel}">
+                        N5
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ACTIONS -->
+        <div class="user-detail-actions">
+
+            <a th:href="@{/admin/users}"
+               class="admin-new-back-btn">
+                ← Quay lại danh sách
+            </a>
+
+            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+               class="admin-new-save-btn">
+                ✎ Chỉnh sửa User
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- INFO -->
+    <div class="admin-new-info">
+
+        <span>ℹ️</span>
+
+        <div>
+            <strong>Thông tin người dùng</strong>
+
+            <p>
+                Bạn có thể chỉnh sửa username và trình độ
+                bằng nút "Chỉnh sửa User".
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

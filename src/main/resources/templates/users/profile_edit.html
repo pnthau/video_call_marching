@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Chỉnh sửa hồ sơ - CAStudy</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="profile-page">
+
+<div class="profile-shell">
+
+    <!-- HEADER -->
+    <header class="profile-topbar">
+
+        <div class="profile-brand">
+            <a th:href="@{/profile}" class="profile-logo">
+                C
+            </a>
+
+            <div class="profile-brand-text">
+                <a th:href="@{/profile}">
+                    CAStudy
+                </a>
+                <span>Language Learning</span>
+            </div>
+        </div>
+
+        <div class="profile-header-right">
+
+            <div class="profile-online">
+                <span></span>
+                Đang hoạt động
+            </div>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="profile-logout">
+                    Đăng xuất
+                </button>
+            </form>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+    <main class="profile-main">
+
+        <section class="profile-card edit-profile-card">
+
+            <!-- TITLE -->
+            <div class="edit-heading">
+
+                <div class="edit-heading-icon">
+                    ✎
+                </div>
+
+                <div>
+                    <span class="profile-label">
+                        ACCOUNT SETTINGS
+                    </span>
+
+                    <h1>
+                        Chỉnh sửa hồ sơ
+                    </h1>
+
+                    <p>
+                        Cập nhật thông tin cá nhân và trình độ tiếng Nhật của bạn.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="profile-divider"></div>
+
+
+            <!-- FORM -->
+            <form
+                    th:action="@{/profile/edit}"
+                    th:object="${updateProfileRequest}"
+                    method="post"
+                    enctype="multipart/form-data"
+                    novalidate>
+
+                <!-- USERNAME -->
+                <div class="edit-form-group">
+
+                    <label for="username">
+                        <span>👤</span>
+                        Tên hiển thị
+                    </label>
+
+                    <input
+                            id="username"
+                            type="text"
+                            th:field="*{username}"
+                            class="edit-input"
+                            th:classappend="${#fields.hasErrors('username')} ? ' edit-input-error'"
+                            placeholder="Nhập tên hiển thị">
+
+                    <div
+                            class="edit-error"
+                            th:if="${#fields.hasErrors('username')}"
+                            th:errors="*{username}">
+                    </div>
+
+                </div>
+
+
+                <!-- LEVEL -->
+                <div class="edit-form-group">
+
+                    <label for="currentLevel">
+                        <span>🎯</span>
+                        Trình độ tiếng Nhật
+                    </label>
+
+                    <div class="edit-select-wrapper">
+
+                        <select
+                                id="currentLevel"
+                                th:field="*{currentLevel}"
+                                class="edit-input edit-select"
+                                th:classappend="${#fields.hasErrors('currentLevel')} ? ' edit-input-error'">
+
+                            <option
+                                    th:each="level : ${levels}"
+                                    th:value="${level}"
+                                    th:text="${level}">
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <div
+                            class="edit-error"
+                            th:if="${#fields.hasErrors('currentLevel')}"
+                            th:errors="*{currentLevel}">
+                    </div>
+
+                    <small class="edit-help">
+                        Chọn trình độ hiện tại để hệ thống tìm đối tác luyện tập phù hợp.
+                    </small>
+
+                </div>
+
+
+                <!-- AVATAR -->
+                <div class="edit-form-group">
+
+                    <label for="avatar">
+                        <span>🖼</span>
+                        Ảnh đại diện
+                    </label>
+
+
+                    <div class="current-avatar-box">
+
+                        <div>
+
+                            <img
+                                    th:if="${profile.avatarUrl() != null}"
+                                    th:src="${profile.avatarUrl()}"
+                                    class="edit-avatar"
+                                    alt="Avatar hiện tại">
+
+                            <div
+                                    th:unless="${profile.avatarUrl() != null}"
+                                    class="edit-avatar edit-avatar-default"
+                                    th:text="${#strings.substring(profile.username(), 0, 1).toUpperCase()}">
+                                U
+                            </div>
+
+                        </div>
+
+                        <div class="current-avatar-info">
+
+                            <strong>
+                                Ảnh hiện tại
+                            </strong>
+
+                            <span>
+                                Chọn ảnh mới nếu muốn thay đổi.
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <label class="file-upload">
+
+                        <span class="file-upload-icon">
+                            ↑
+                        </span>
+
+                        <span class="file-upload-text">
+                            Chọn ảnh mới
+                        </span>
+
+                        <input
+                                id="avatar"
+                                type="file"
+                                th:field="*{avatar}"
+                                accept="image/jpeg,image/png,image/webp"
+                                th:classappend="${#fields.hasErrors('avatar')} ? ' edit-input-error'">
+
+                    </label>
+
+
+                    <small class="edit-help">
+                        JPEG, PNG hoặc WebP · Tối đa 5 MB · Bỏ trống để giữ ảnh hiện tại.
+                    </small>
+
+                    <div
+                            class="edit-error"
+                            th:if="${#fields.hasErrors('avatar')}"
+                            th:errors="*{avatar}">
+                    </div>
+
+                </div>
+
+
+                <!-- ACTIONS -->
+                <div class="edit-actions">
+
+                    <a
+                            class="profile-btn profile-btn-outline"
+                            th:href="@{/profile}">
+
+                        ← Quay lại hồ sơ
+
+                    </a>
+
+                    <button
+                            class="profile-btn profile-btn-primary edit-save-btn"
+                            type="submit">
+
+                        ✓ Lưu thay đổi
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- INFO CARD -->
+        <section class="edit-info-card">
+
+            <div class="edit-info-icon">
+                🔒
+            </div>
+
+            <div>
+                <strong>
+                    Thông tin của bạn được bảo vệ
+                </strong>
+
+                <p>
+                    Chỉ những thông tin cần thiết cho việc ghép đôi
+                    luyện tập mới được sử dụng trên CAStudy.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="profile-footer">
+
+        <strong>CAStudy</strong>
+        <span>•</span>
+        Language Learning Platform
+        <span>•</span>
+        Luyện nói cùng nhau, tiến bộ cùng nhau.
+
+    </footer>
+
+</div>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${isView} ? 'Chi tiết User' : (${user.id} != null ? 'Sửa User' : 'Thêm User')">
+        Form User
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="admin-form-page">
+
+<div class="admin-form-wrapper">
+
+    <!-- HEADER -->
+    <div class="admin-form-page-header">
+
+        <div>
+            <span class="admin-kicker">USER MANAGEMENT</span>
+
+            <h1 th:text="${isView} ? 'Chi tiết User' :
+                         (${user.id != null} ? 'Chỉnh sửa User' : 'Thêm User mới')">
+                Quản lý User
+            </h1>
+
+            <p>
+                Quản lý thông tin tài khoản người dùng trên CAStudy.
+            </p>
+        </div>
+
+        <a th:href="@{/admin/users}"
+           class="admin-form-back">
+            ← Danh sách User
+        </a>
+
+    </div>
+
+
+    <!-- FORM CARD -->
+    <div class="admin-user-form-card">
+
+        <div class="admin-user-form-heading">
+
+            <div class="admin-user-form-icon"
+                 th:text="${isView} ? '👁' : (${user.id != null} ? '✎' : '+')">
+                ✎
+            </div>
+
+            <div>
+
+                <h2 th:text="${isView} ? 'Thông tin người dùng' :
+                             (${user.id != null} ? 'Chỉnh sửa thông tin' : 'Tạo người dùng mới')">
+                    Thông tin người dùng
+                </h2>
+
+                <p>
+                    Các thông tin tài khoản và trình độ tiếng Nhật.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="admin-form-divider"></div>
+
+
+        <form
+                th:action="@{${user.id != null ? '/admin/users/edit/' + user.id : '/admin/users/add'}}"
+                th:object="${user}"
+                method="post">
+
+            <!-- CSRF -->
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+
+            <!-- ID -->
+            <div class="admin-new-form-group"
+                 th:if="${user.id != null}">
+
+                <label>
+                    🆔 ID
+                </label>
+
+                <input
+                        type="text"
+                        th:field="*{id}"
+                        class="admin-new-input admin-readonly-input"
+                        readonly>
+
+            </div>
+
+
+            <!-- USERNAME -->
+            <div class="admin-new-form-group">
+
+                <label for="username">
+                    👤 Username
+
+                    <span
+                            class="required-mark"
+                            th:if="${!isView}">
+                        *
+                    </span>
+                </label>
+
+                <input
+                        id="username"
+                        type="text"
+                        th:field="*{username}"
+                        class="admin-new-input"
+                        th:classappend="${#fields.hasErrors('username')} ? ' admin-input-error'"
+                        placeholder="Nhập username..."
+                        th:disabled="${isView}">
+
+                <div
+                        class="admin-new-error"
+                        th:if="${#fields.hasErrors('username')}"
+                        th:errors="*{username}">
+                </div>
+
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="admin-new-form-group">
+
+                <label for="email">
+                    ✉ Email
+
+                    <span
+                            class="required-mark"
+                            th:if="${!isView}">
+                        *
+                    </span>
+                </label>
+
+                <input
+                        id="email"
+                        type="email"
+                        th:field="*{email}"
+                        class="admin-new-input"
+                        th:classappend="${#fields.hasErrors('email')} ? ' admin-input-error'"
+                        placeholder="Nhập email..."
+                        th:disabled="${isView}">
+
+                <div
+                        class="admin-new-error"
+                        th:if="${#fields.hasErrors('email')}"
+                        th:errors="*{email}">
+                </div>
+
+            </div>
+
+
+            <!-- LEVEL -->
+            <div class="admin-new-form-group">
+
+                <label for="currentLevel">
+                    🎯 Trình độ tiếng Nhật
+
+                    <span
+                            class="required-mark"
+                            th:if="${!isView}">
+                        *
+                    </span>
+                </label>
+
+                <div class="admin-new-select-wrapper">
+
+                    <select
+                            id="currentLevel"
+                            th:field="*{currentLevel}"
+                            class="admin-new-input admin-new-select"
+                            th:classappend="${#fields.hasErrors('currentLevel')} ? ' admin-input-error'"
+                            th:disabled="${isView}">
+
+                        <option value="">
+                            -- Chọn Level --
+                        </option>
+
+                        <option
+                                th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div
+                        class="admin-new-error"
+                        th:if="${#fields.hasErrors('currentLevel')}"
+                        th:errors="*{currentLevel}">
+                </div>
+
+                <small class="admin-new-help">
+                    Chọn trình độ tiếng Nhật hiện tại của người dùng.
+                </small>
+
+            </div>
+
+
+            <!-- TRUST SCORE -->
+            <div class="admin-new-form-group">
+
+                <label for="trustScore">
+                    ⭐ Trust Score
+                </label>
+
+                <div class="trust-score-row">
+
+                    <input
+                            id="trustScore"
+                            type="number"
+                            th:field="*{trustScore}"
+                            class="admin-new-input"
+                            th:classappend="${#fields.hasErrors('trustScore')} ? ' admin-input-error'"
+                            step="0.1"
+                            min="0"
+                            max="10"
+                            th:disabled="${isView}">
+
+                    <span class="trust-score-max">
+                        / 10
+                    </span>
+
+                </div>
+
+                <div
+                        class="admin-new-error"
+                        th:if="${#fields.hasErrors('trustScore')}"
+                        th:errors="*{trustScore}">
+                </div>
+
+                <small class="admin-new-help">
+                    Điểm tin cậy của người dùng, từ 0 đến 10.
+                </small>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+            <div class="admin-new-form-actions">
+
+                <a
+                        th:href="@{/admin/users}"
+                        class="admin-new-back-btn">
+
+                    ← Quay lại
+
+                </a>
+
+
+                <button
+                        th:if="${!isView}"
+                        type="submit"
+                        class="admin-new-save-btn"
+                        th:text="${user.id != null} ? '✓ Lưu thay đổi' : '+ Thêm người dùng'">
+
+                    Lưu thay đổi
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- INFO -->
+    <div class="admin-new-info">
+
+        <span>🔒</span>
+
+        <div>
+
+            <strong>
+                Thông tin tài khoản
+            </strong>
+
+            <p>
+                Hãy kiểm tra thông tin trước khi lưu thay đổi.
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>

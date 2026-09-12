@@ -1,0 +1,327 @@
+﻿<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+
+<head>
+    <title>Quản lý Users</title>
+</head>
+
+<body>
+
+<section>
+
+    <!-- HEADER -->
+    <div class="user-list-header">
+
+        <div>
+            <span class="admin-kicker">USER MANAGEMENT</span>
+
+            <h1>
+                Quản lý người dùng
+            </h1>
+
+            <p>
+                Xem và quản lý các tài khoản USER trong hệ thống.
+            </p>
+        </div>
+
+        <div class="user-list-header-actions">
+
+            <span class="user-count-badge">
+                👥 Chỉ quản lý tài khoản USER
+            </span>
+
+            <a th:href="@{/admin}"
+               class="user-dashboard-btn">
+                ← Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- FLASH MESSAGE -->
+    <div th:if="${param.updated != null}"
+         class="user-success-message">
+
+        <span>✓</span>
+
+        <div>
+            <strong>Cập nhật thành công!</strong>
+            <small>Thông tin người dùng đã được lưu.</small>
+        </div>
+
+    </div>
+
+
+    <!-- SEARCH -->
+    <div class="user-search-card">
+
+        <div class="search-title">
+            <div class="search-icon">
+                🔎
+            </div>
+
+            <div>
+                <strong>Tìm kiếm người dùng</strong>
+                <span>Tìm theo username hoặc email</span>
+            </div>
+        </div>
+
+
+        <form th:action="@{/admin/users}"
+              method="get"
+              class="user-search-form">
+
+            <input
+                    type="text"
+                    name="search"
+                    class="user-search-input"
+                    placeholder="Nhập username hoặc email..."
+                    th:value="${search}">
+
+            <button type="submit"
+                    class="user-search-btn">
+                🔎 Tìm kiếm
+            </button>
+
+            <a th:href="@{/admin/users}"
+               class="user-clear-btn">
+                Xóa lọc
+            </a>
+
+        </form>
+
+    </div>
+
+
+    <!-- USER TABLE -->
+    <div class="user-table-card">
+
+        <div class="user-table-header">
+
+            <div>
+                <strong>Danh sách người dùng</strong>
+                <span>Thông tin tài khoản</span>
+            </div>
+
+            <span class="table-total"
+                  th:text="${users.totalElements + ' người dùng'}">
+                0 người dùng
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="user-table">
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Người dùng</th>
+                    <th>Email</th>
+                    <th>Trình độ</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                <tr th:each="user : ${users.content}">
+
+                    <!-- ID -->
+                    <td>
+                        <span class="user-id"
+                              th:text="${user.id}">
+                            1
+                        </span>
+                    </td>
+
+
+                    <!-- USERNAME -->
+                    <td>
+
+                        <div class="table-user">
+
+                            <div class="table-avatar">
+                                <span
+                                        th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">
+                                    U
+                                </span>
+                            </div>
+
+                            <strong th:text="${user.username}">
+                                Username
+                            </strong>
+
+                        </div>
+
+                    </td>
+
+
+                    <!-- EMAIL -->
+                    <td>
+                        <span class="user-email"
+                              th:text="${user.email}">
+                            email@example.com
+                        </span>
+                    </td>
+
+
+                    <!-- LEVEL -->
+                    <td>
+
+                        <span class="user-level"
+                              th:text="${user.currentLevel}">
+                            N5
+                        </span>
+
+                    </td>
+
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="user-actions">
+
+                            <a
+                                    th:href="@{/admin/users/{id}(id=${user.id})}"
+                                    class="user-view-btn">
+                                Xem
+                            </a>
+
+                            <a
+                                    th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+                                    class="user-edit-btn">
+                                Sửa
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+
+                <!-- EMPTY -->
+                <tr th:if="${users.content.isEmpty()}">
+
+                    <td colspan="5">
+
+                        <div class="user-empty">
+
+                            <div class="empty-icon">
+                                👥
+                            </div>
+
+                            <strong>
+                                Không tìm thấy người dùng
+                            </strong>
+
+                            <p>
+                                Không có tài khoản nào phù hợp với điều kiện tìm kiếm.
+                            </p>
+
+                            <a th:href="@{/admin/users}"
+                               class="user-clear-btn">
+                                Xóa bộ lọc
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- PAGINATION -->
+    <div class="user-pagination"
+         th:if="${users.totalPages > 1}">
+
+        <div class="pagination-info">
+
+            Trang
+            <strong th:text="${users.number + 1}">
+                1
+            </strong>
+
+            /
+            <strong th:text="${users.totalPages}">
+                1
+            </strong>
+
+            <span>
+                · Tổng
+                <strong th:text="${users.totalElements}">
+                    0
+                </strong>
+                bản ghi
+            </span>
+
+        </div>
+
+
+        <nav>
+
+            <ul class="user-pagination-list">
+
+                <!-- PREVIOUS -->
+                <li th:classappend="${users.first} ? 'disabled'">
+
+                    <a
+                            th:href="@{/admin/users(page=${users.number - 1}, search=${search})}">
+                        ←
+                    </a>
+
+                </li>
+
+
+                <!-- PAGES -->
+                <li
+                        th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
+                        th:classappend="${i == users.number} ? 'active'">
+
+                    <a
+                            th:href="@{/admin/users(page=${i}, search=${search})}"
+                            th:text="${i + 1}">
+                        1
+                    </a>
+
+                </li>
+
+
+                <!-- NEXT -->
+                <li th:classappend="${users.last} ? 'disabled'">
+
+                    <a
+                            th:href="@{/admin/users(page=${users.number + 1}, search=${search})}">
+                        →
+                    </a>
+
+                </li>
+
+            </ul>
+
+        </nav>
+
+    </div>
+
+</section>
+
+</body>
+</html>

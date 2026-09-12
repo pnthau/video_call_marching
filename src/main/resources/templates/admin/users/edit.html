@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+
+<head>
+    <title>Sửa người dùng</title>
+</head>
+
+<body>
+
+<section>
+
+    <div class="user-page-header">
+
+        <div>
+            <span class="admin-kicker">USER MANAGEMENT</span>
+            <h1>Sửa người dùng</h1>
+            <p>Cập nhật thông tin tài khoản người dùng.</p>
+        </div>
+
+        <a th:href="@{/admin/users}"
+           class="user-back-btn">
+            ← Quay lại danh sách
+        </a>
+
+    </div>
+
+
+    <div class="user-edit-card">
+
+        <div class="user-edit-title">
+            <div class="user-edit-icon">
+                ✎
+            </div>
+
+            <div>
+                <h2>Thông tin tài khoản</h2>
+                <p>Chỉnh sửa thông tin có thể cập nhật của người dùng.</p>
+            </div>
+        </div>
+
+
+        <div class="admin-form-divider"></div>
+
+
+        <form method="post"
+              th:action="@{/admin/users/{id}/edit(id=${user.id})}"
+              th:object="${form}">
+
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}">
+
+
+            <!-- USERNAME -->
+            <div class="admin-form-group">
+
+                <label for="username">
+                    👤 Username
+                </label>
+
+                <input
+                        id="username"
+                        type="text"
+                        class="admin-form-input"
+                        th:field="*{username}"
+                        maxlength="50"
+                        placeholder="Nhập username">
+
+                <div class="admin-form-error"
+                     th:if="${#fields.hasErrors('username')}"
+                     th:errors="*{username}">
+                </div>
+
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="admin-form-group">
+
+                <label>
+                    ✉ Email
+                </label>
+
+                <div class="admin-readonly-field"
+                     th:text="${user.email}">
+                    email@example.com
+                </div>
+
+                <div class="admin-form-help">
+                    Email được quản lý bởi tài khoản OAuth liên kết
+                    và không thể thay đổi tại đây.
+                </div>
+
+            </div>
+
+
+            <!-- LEVEL -->
+            <div class="admin-form-group">
+
+                <label for="currentLevel">
+                    🎯 Trình độ
+                </label>
+
+                <div class="admin-select-wrapper">
+
+                    <select
+                            id="currentLevel"
+                            class="admin-form-input admin-select"
+                            th:field="*{currentLevel}">
+
+                        <option
+                                th:each="level : ${levels}"
+                                th:value="${level}"
+                                th:text="${level}">
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <div class="admin-form-error"
+                     th:if="${#fields.hasErrors('currentLevel')}"
+                     th:errors="*{currentLevel}">
+                </div>
+
+            </div>
+
+
+            <!-- ACTIONS -->
+            <div class="admin-form-actions">
+
+                <a th:href="@{/admin/users}"
+                   class="admin-back-button">
+                    ← Quay lại
+                </a>
+
+                <a th:href="@{/admin/users/{id}(id=${user.id})}"
+                   class="admin-cancel-button">
+                    Hủy
+                </a>
+
+                <button
+                        class="admin-save-button"
+                        type="submit">
+                    ✓ Lưu thay đổi
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <!-- INFO -->
+    <div class="admin-info-box">
+
+        <span>🔒</span>
+
+        <div>
+            <strong>Bảo mật tài khoản</strong>
+            <p>
+                Email của người dùng được liên kết với OAuth
+                và chỉ có thể thay đổi thông qua nhà cung cấp xác thực.
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

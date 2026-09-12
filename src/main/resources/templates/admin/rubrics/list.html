@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+
+<head>
+    <title>Quản lý Rubric – Admin</title>
+</head>
+
+<body>
+
+<section>
+
+    <!-- HEADER -->
+    <div class="rubric-list-header">
+
+        <div>
+            <span class="admin-kicker">RUBRIC MANAGEMENT</span>
+
+            <h1>Quản lý Rubric</h1>
+
+            <p>
+                Quản lý các tiêu chí đánh giá được sử dụng trong hệ thống.
+            </p>
+        </div>
+
+        <div class="rubric-header-actions">
+
+            <span class="rubric-count-badge">
+                📋 7 tiêu chí cố định
+            </span>
+
+            <a th:href="@{/admin}"
+               class="rubric-dashboard-btn">
+                ← Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUCCESS MESSAGE -->
+    <div th:if="${param.success != null || param.updated != null || param.toggled != null}"
+         class="rubric-success">
+
+        <span class="rubric-success-icon">
+            ✓
+        </span>
+
+        <div>
+
+            <strong th:if="${param.updated != null}">
+                Cập nhật Rubric thành công!
+            </strong>
+
+            <strong th:if="${param.toggled != null}">
+                Đã thay đổi trạng thái Rubric!
+            </strong>
+
+            <strong th:if="${param.success != null && param.success[0] == 'edit'}">
+                Cập nhật Rubric thành công!
+            </strong>
+
+            <strong th:if="${param.success != null && param.success[0] == 'toggle'}">
+                Đã thay đổi trạng thái Rubric!
+            </strong>
+
+            <small>
+                Thao tác đã được thực hiện thành công.
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- TABLE CARD -->
+    <div class="rubric-table-card">
+
+        <div class="rubric-table-header">
+
+            <div>
+
+                <strong>
+                    Danh sách Rubric
+                </strong>
+
+                <span>
+                    Các tiêu chí đánh giá của CAStudy
+                </span>
+
+            </div>
+
+            <span class="rubric-total">
+                7 criteria
+            </span>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="rubric-table">
+
+                <thead>
+
+                <tr>
+                    <th>ID</th>
+                    <th>Criteria</th>
+                    <th>Tên hiển thị</th>
+                    <th>Mô tả</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                <tr th:each="rubric : ${rubrics}">
+
+                    <!-- ID -->
+                    <td>
+                        <span class="rubric-id"
+                              th:text="${rubric.id}">
+                            1
+                        </span>
+                    </td>
+
+
+                    <!-- CRITERIA -->
+                    <td>
+
+                        <span class="rubric-code"
+                              th:text="${rubric.criteria}">
+                            ACCURACY
+                        </span>
+
+                    </td>
+
+
+                    <!-- DISPLAY NAME -->
+                    <td>
+
+                        <strong class="rubric-display-name"
+                                th:text="${rubric.displayName}">
+                            Độ chính xác
+                        </strong>
+
+                    </td>
+
+
+                    <!-- DESCRIPTION -->
+                    <td>
+
+                        <span class="rubric-description"
+                              th:text="${rubric.description}">
+                            Mô tả chi tiết
+                        </span>
+
+                    </td>
+
+
+                    <!-- STATUS -->
+                    <td class="text-center">
+
+                        <span
+                                th:if="${rubric.active}"
+                                class="rubric-status active">
+                            ● Active
+                        </span>
+
+                        <span
+                                th:unless="${rubric.active}"
+                                class="rubric-status inactive">
+                            ● Inactive
+                        </span>
+
+                    </td>
+
+
+                    <!-- ACTIONS -->
+                    <td>
+
+                        <div class="rubric-actions">
+
+                            <!-- EDIT -->
+                            <a
+                                    th:href="@{/admin/rubrics/edit/{id}(id=${rubric.id})}"
+                                    class="rubric-edit-action">
+                                ✎ Sửa
+                            </a>
+
+
+                            <!-- TOGGLE -->
+                            <form
+                                    th:action="@{/admin/rubrics/toggle/{id}(id=${rubric.id})}"
+                                    method="post">
+
+                                <input
+                                        type="hidden"
+                                        th:name="${_csrf.parameterName}"
+                                        th:value="${_csrf.token}"
+                                        th:if="${_csrf != null}">
+
+                                <button
+                                        type="submit"
+                                        class="rubric-toggle-action"
+                                        th:classappend="${rubric.active} ? ' toggle-off' : ' toggle-on'"
+                                        th:text="${rubric.active} ? '🔕 Tắt' : '🔔 Bật'"
+                                        th:title="${rubric.active} ? 'Tắt Rubric' : 'Bật Rubric'">
+
+                                    🔕 Tắt
+
+                                </button>
+
+                            </form>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+
+                <!-- EMPTY -->
+                <tr th:if="${rubrics == null || rubrics.isEmpty()}">
+
+                    <td colspan="6">
+
+                        <div class="rubric-empty">
+
+                            <div>
+                                📋
+                            </div>
+
+                            <strong>
+                                Chưa có dữ liệu Rubric
+                            </strong>
+
+                            <p>
+                                Hệ thống hiện chưa có tiêu chí đánh giá nào.
+                            </p>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- NOTE -->
+    <div class="rubric-note">
+
+        <span>💡</span>
+
+        <div>
+
+            <strong>
+                Lưu ý về Rubric
+            </strong>
+
+            <p>
+                Rubric không thể bị xóa để bảo toàn lịch sử đánh giá.
+                Sử dụng nút <b>Bật/Tắt</b> để thay đổi trạng thái.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+</body>
+</html>

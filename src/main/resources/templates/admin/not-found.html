@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::section})}">
+
+<head>
+    <title>Không tìm thấy</title>
+</head>
+
+<body>
+<section>
+
+    <div class="not-found-page">
+
+        <div class="not-found-card">
+
+            <div class="not-found-icon">
+                !
+            </div>
+
+            <div class="not-found-code">
+                404
+            </div>
+
+            <h1 class="not-found-title">
+                Không tìm thấy dữ liệu
+            </h1>
+
+            <p class="not-found-text">
+                Dữ liệu bạn yêu cầu không tồn tại hoặc đã được thay đổi.
+            </p>
+
+            <div class="not-found-actions">
+                <a class="not-found-btn not-found-btn-primary"
+                   th:href="@{/admin}">
+                    ← Về Dashboard
+                </a>
+
+                <a class="not-found-btn not-found-btn-secondary"
+                   th:href="@{/admin/users}">
+                    Quản lý Users
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+</body>
+</html>

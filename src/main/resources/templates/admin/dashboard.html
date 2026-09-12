@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{admin/layout :: layout(~{::title}, ~{::content})}">
+
+<head>
+    <title>Dashboard – CAStudy Admin</title>
+</head>
+
+<body>
+
+<th:block th:fragment="content">
+
+    <!-- ================= PAGE HEADER ================= -->
+
+    <div class="dashboard-header">
+
+        <div>
+            <div class="dashboard-kicker">
+                CAStudy ADMIN
+            </div>
+
+            <h1>
+                Tổng quan hệ thống
+            </h1>
+
+            <p>
+                Theo dõi nhanh tình trạng người dùng và nội dung của hệ thống.
+            </p>
+        </div>
+
+        <div class="dashboard-date">
+            📊 Dashboard
+        </div>
+
+    </div>
+
+
+    <!-- ================= STAT CARDS ================= -->
+
+    <div class="dashboard-stats">
+
+
+        <!-- USERS -->
+
+        <div class="dashboard-stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon stat-icon-blue">
+                    👥
+                </div>
+
+                <span class="stat-label">
+                    NGƯỜI DÙNG
+                </span>
+
+            </div>
+
+            <div class="stat-number"
+                 th:text="${totalUsers}">
+                0
+            </div>
+
+            <div class="stat-description">
+                Tổng số User trong hệ thống
+            </div>
+
+        </div>
+
+
+        <!-- TAGS -->
+
+        <div class="dashboard-stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon stat-icon-green">
+                    🏷️
+                </div>
+
+                <span class="stat-label">
+                    TAG
+                </span>
+
+            </div>
+
+            <div class="stat-number"
+                 th:text="${totalTags}">
+                0
+            </div>
+
+            <div class="stat-description">
+                Tổng số Tag đang được sử dụng
+            </div>
+
+        </div>
+
+
+        <!-- RUBRICS -->
+
+        <div class="dashboard-stat-card">
+
+            <div class="stat-card-top">
+
+                <div class="stat-icon stat-icon-orange">
+                    📋
+                </div>
+
+                <span class="stat-label">
+                    RUBRIC
+                </span>
+
+            </div>
+
+            <div class="stat-number"
+                 th:text="${activeRubrics}">
+                0
+            </div>
+
+            <div class="stat-description">
+                Rubric đang hoạt động
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= QUICK ACCESS ================= -->
+
+    <section class="quick-section">
+
+        <div class="quick-heading">
+
+            <div>
+                <span class="dashboard-kicker">
+                    MANAGEMENT
+                </span>
+
+                <h2>
+                    Truy cập nhanh
+                </h2>
+
+                <p>
+                    Chọn chức năng quản lý bạn muốn thực hiện.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="quick-grid">
+
+
+            <!-- USER MANAGEMENT -->
+
+            <a th:href="@{/admin/users}"
+               class="quick-card">
+
+                <div class="quick-card-icon blue">
+                    👥
+                </div>
+
+                <div class="quick-card-content">
+
+                    <h3>
+                        Quản lý User
+                    </h3>
+
+                    <p>
+                        Xem, thêm, chỉnh sửa và quản lý tài khoản người dùng.
+                    </p>
+
+                    <span class="quick-link">
+                        Mở quản lý User →
+                    </span>
+
+                </div>
+
+            </a>
+
+
+            <!-- RUBRIC MANAGEMENT -->
+
+            <a th:href="@{/admin/rubrics}"
+               class="quick-card">
+
+                <div class="quick-card-icon purple">
+                    📋
+                </div>
+
+                <div class="quick-card-content">
+
+                    <h3>
+                        Quản lý Rubric
+                    </h3>
+
+                    <p>
+                        Quản lý các tiêu chí đánh giá và nội dung luyện tập.
+                    </p>
+
+                    <span class="quick-link">
+                        Mở quản lý Rubric →
+                    </span>
+
+                </div>
+
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= SYSTEM STATUS ================= -->
+
+    <section class="system-status">
+
+        <div class="system-status-icon">
+            ✓
+        </div>
+
+        <div>
+
+            <strong>
+                Hệ thống đang hoạt động
+            </strong>
+
+            <p>
+                CAStudy Language Learning Platform
+            </p>
+
+        </div>
+
+    </section>
+
+</th:block>
+
+</body>
+</html>

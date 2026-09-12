@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Hồ sơ - CAStudy</title>
+
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="profile-page">
+
+<div class="profile-shell">
+
+    <!-- ================= HEADER ================= -->
+    <header class="profile-topbar"
+            style="background: linear-gradient(90deg, #1e3a8a, #4338ca, #4f46e5) !important; border: none;">
+        <div class="profile-brand">
+            <a th:href="@{/profile}" class="profile-logo"
+               style="background: white !important; color: #4338ca !important;">
+                C
+            </a>
+
+            <div class="profile-brand-text">
+                <a th:href="@{/profile}">
+                    CAStudy
+                </a>
+                <span>Language Learning</span>
+            </div>
+        </div>
+
+        <div class="profile-header-right">
+
+            <div class="profile-online">
+                <span></span>
+                Đang hoạt động
+            </div>
+
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="profile-logout"
+                        style="background: white !important; color: #4338ca !important; border: none;">
+                    Đăng xuất
+                </button>
+            </form>
+
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+    <main class="profile-main">
+
+        <!-- SUCCESS MESSAGE -->
+        <div th:if="${param.updated}" class="profile-success">
+            <span class="success-icon">✓</span>
+            <div>
+                <strong>Hồ sơ đã được cập nhật</strong>
+                <small>Thông tin của bạn đã được lưu thành công.</small>
+            </div>
+        </div>
+
+
+        <!-- ================= PROFILE HERO ================= -->
+        <section class="profile-card">
+
+            <div class="profile-card-top">
+
+                <!-- AVATAR -->
+                <div class="profile-avatar-area">
+
+                    <img
+                            th:if="${profile.avatarUrl() != null}"
+                            th:src="${profile.avatarUrl()}"
+                            class="profile-avatar-image"
+                            alt="Avatar">
+
+                    <div
+                            th:unless="${profile.avatarUrl() != null}"
+                            class="profile-avatar-default"
+                            th:text="${#strings.substring(profile.username(), 0, 1).toUpperCase()}">
+                        U
+                    </div>
+
+                    <div class="profile-online-badge"></div>
+
+                </div>
+
+
+                <!-- USER INFO -->
+                <div class="profile-user-info">
+
+                    <div class="profile-label">
+                        MY PROFILE
+                    </div>
+
+                    <h1 th:text="${profile.username()}">
+                        Tên người dùng
+                    </h1>
+
+                    <p class="profile-email">
+                        <span>✉</span>
+                        <span th:text="${profile.email()}">
+                            user@example.com
+                        </span>
+                    </p>
+
+                    <div class="profile-badges">
+
+                        <span class="profile-level-badge"
+                              th:text="${profile.currentLevel()}">
+                            N5
+                        </span>
+
+                        <span class="profile-role-badge"
+                              th:text="${profile.role()}">
+                            USER
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= STATS ================= -->
+            <div class="profile-divider"></div>
+
+            <div class="profile-stats">
+
+                <div class="profile-stat">
+                    <span class="stat-icon">★</span>
+
+                    <div>
+                        <small>Điểm tin cậy</small>
+
+                        <strong th:text="${#numbers.formatDecimal(profile.trustScore(), 1, 1)}">
+                            0.0
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div class="profile-stat">
+                    <span class="stat-icon">◎</span>
+
+                    <div>
+                        <small>Trình độ hiện tại</small>
+
+                        <strong th:text="${profile.currentLevel()}">
+                            N5
+                        </strong>
+                    </div>
+                </div>
+
+
+                <div class="profile-stat">
+                    <span class="stat-icon">●</span>
+
+                    <div>
+                        <small>Trạng thái</small>
+
+                        <strong class="stat-active">
+                            Sẵn sàng luyện tập
+                        </strong>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <!-- ================= ACTIONS ================= -->
+            <div class="profile-divider"></div>
+
+            <div class="profile-actions">
+
+                <a class="profile-btn profile-btn-primary"
+                   th:href="@{/profile/edit}">
+
+                    <span>✎</span>
+                    Chỉnh sửa hồ sơ
+
+                </a>
+
+
+                <a class="profile-btn profile-btn-outline"
+                   th:href="@{/video-call}">
+
+                    <span>▣</span>
+                    Vào phòng luyện nói
+                    <span class="btn-arrow">→</span>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= PRACTICE CARD ================= -->
+        <section class="practice-card">
+
+            <div class="practice-icon">
+                🎧
+            </div>
+
+            <div class="practice-content">
+
+                <span class="practice-label">
+                    LUYỆN TẬP
+                </span>
+
+                <h2>
+                    Sẵn sàng tìm đối tác?
+                </h2>
+
+                <p>
+                    Kết nối với người học phù hợp để luyện nói
+                    và cải thiện khả năng giao tiếp.
+                </p>
+
+            </div>
+
+            <a th:href="@{/video-call}"
+               class="practice-btn">
+
+                Bắt đầu luyện tập
+                <span>→</span>
+
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="profile-footer">
+
+        <strong>CAStudy</strong>
+        <span>•</span>
+        Language Learning Platform
+        <span>•</span>
+        Luyện nói cùng nhau, tiến bộ cùng nhau.
+
+    </footer>
+
+</div>
+
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+</body>
+</html>
