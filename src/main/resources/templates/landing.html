@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marching Language - Nền Tảng Luyện Nói Ngoại Ngữ Thực Chiến Chuẩn Quốc Tế</title>
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <!-- Global Custom Styles -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="position-relative overflow-x-hidden">
+
+    <!-- Decorative Glow Blobs -->
+    <div class="hero-glow-blob-1"></div>
+    <div class="hero-glow-blob-2"></div>
+
+    <!-- Universal Sticky Glassmorphism Header -->
+    <div th:replace="~{fragments/navbar :: navbar('home')}"></div>
+
+    <!-- =========================================================================
+         1. HERO SECTION
+         ========================================================================= -->
+    <section class="py-5 py-lg-6 position-relative">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <!-- Hero Left: Content -->
+                <div class="col-lg-6 text-center text-lg-start">
+                    <!-- Badge -->
+                    <div class="badge-hero-pill mb-4 shadow-sm">
+                        <span>✨ Nền tảng luyện nói ngoại ngữ thực chiến số 1</span>
+                    </div>
+
+                    <!-- Headline -->
+                    <h1 class="display-4 fw-extrabold tracking-tight text-slate-900 mb-3" style="font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;">
+                        Tự Tin Giao Tiếp <br>
+                        <span class="brand-gradient">Tiếng Nhật &amp; Tiếng Anh</span> <br>
+                        Sau 15 Phút Mỗi Ngày
+                    </h1>
+
+                    <!-- Subtitle -->
+                    <p class="lead text-muted mb-4 fs-5" style="line-height: 1.65;">
+                        Phá bỏ rào cản sợ nói với chu trình học 3 bước khép kín: 
+                        <strong>Luyện nghe Whisper AI</strong> ➔ 
+                        <strong>Phản xạ đối đáp AI Sensei</strong> ➔ 
+                        <strong>Video call P2P 1-1 cùng người thật</strong> theo thời gian thực.
+                    </p>
+
+                    <!-- Dual CTA Buttons -->
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start mb-4">
+                        <a th:href="${isAuthenticated == true} ? @{/profile} : @{/login}" 
+                           class="btn btn-primary px-4 py-3 fs-6 rounded-pill shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
+                            <span>🚀 Bắt Đầu Miễn Phí</span>
+                        </a>
+                        <a th:href="@{/practice/audio-lessons}" 
+                           class="btn btn-outline-secondary px-4 py-3 fs-6 rounded-pill bg-white shadow-sm d-inline-flex align-items-center justify-content-center gap-2">
+                            <span>🎧 Khám Phá Bài Nghe Audio</span>
+                        </a>
+                    </div>
+
+                    <!-- Social Proof Micro-Badge -->
+                    <div class="d-flex align-items-center justify-content-center justify-content-lg-start gap-3 pt-2">
+                        <div class="d-flex align-items-center">
+                            <span class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.75rem;">A</span>
+                            <span class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold shadow-sm ms-n2" style="width: 32px; height: 32px; font-size: 0.75rem; margin-left: -8px;">B</span>
+                            <span class="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center fw-bold shadow-sm ms-n2" style="width: 32px; height: 32px; font-size: 0.75rem; margin-left: -8px;">C</span>
+                            <span class="rounded-circle bg-info text-white d-flex align-items-center justify-content-center fw-bold shadow-sm ms-n2" style="width: 32px; height: 32px; font-size: 0.75rem; margin-left: -8px;">D</span>
+                        </div>
+                        <div class="small text-muted">
+                            <strong class="text-dark">1,200+ người học</strong> đang trực tuyến hôm nay
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Right: Live Interactive Mockup Window -->
+                <div class="col-lg-6">
+                    <div class="mockup-window p-1">
+                        <!-- Mockup Top Bar -->
+                        <div class="mockup-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="mockup-dot bg-danger"></div>
+                                <div class="mockup-dot bg-warning"></div>
+                                <div class="mockup-dot bg-success"></div>
+                                <span class="small text-muted ms-2" style="font-size: 0.8rem;">marching://session/p2p-live-call</span>
+                            </div>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                                🟢 LIVE 04:32
+                            </span>
+                        </div>
+
+                        <!-- Mockup Screen Content -->
+                        <div class="p-3 p-md-4" style="background: #090d16;">
+                            <div class="row g-3">
+                                <!-- Remote / AI Partner View -->
+                                <div class="col-12 col-md-6">
+                                    <div class="rounded-4 p-3 position-relative overflow-hidden" style="background: #1e293b; aspect-ratio: 4/3; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,0.08);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                                🤖 Sensei AI Partner
+                                            </span>
+                                            <span class="badge bg-dark-subtle text-light rounded-2" style="font-size: 0.7rem;">🇯🇵 JLPT N3</span>
+                                        </div>
+
+                                        <div class="text-center my-auto">
+                                            <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center fw-bold display-6 mb-2" style="width: 68px; height: 68px;">
+                                                🇯🇵
+                                            </div>
+                                            <div class="text-white fw-bold small">Sensei Aoi</div>
+                                            <div class="text-white-50" style="font-size: 0.75rem;">Speaking Japanese...</div>
+                                        </div>
+
+                                        <!-- Live Speech Balloon -->
+                                        <div class="bg-dark p-2 rounded-3 border border-secondary" style="font-size: 0.8rem; color: #a5b4fc;">
+                                            💬 "週末は何をしましたか？"
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Local User View -->
+                                <div class="col-12 col-md-6">
+                                    <div class="rounded-4 p-3 position-relative overflow-hidden" style="background: #131d2f; aspect-ratio: 4/3; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid rgba(255,255,255,0.08);">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-emerald text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                                👤 Bạn (Học viên)
+                                            </span>
+                                            <span class="badge bg-warning text-dark rounded-2" style="font-size: 0.7rem;">Level N3</span>
+                                        </div>
+
+                                        <div class="text-center my-auto">
+                                            <div class="rounded-circle bg-success-subtle text-success d-inline-flex align-items-center justify-content-center fw-bold display-6 mb-2" style="width: 68px; height: 68px;">
+                                                😊
+                                            </div>
+                                            <div class="text-white fw-bold small">Đang nói: Khớp 98%</div>
+                                        </div>
+
+                                        <!-- Realtime Metrics Pills -->
+                                        <div class="d-flex justify-content-between gap-1">
+                                            <span class="badge bg-success-subtle text-success p-1 text-truncate" style="font-size: 0.7rem;">⚡ Phản xạ: 1.1s</span>
+                                            <span class="badge bg-info-subtle text-info p-1 text-truncate" style="font-size: 0.7rem;">🎯 Phát âm: 9.5/10</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mockup Bottom Control Bar -->
+                            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top border-secondary flex-wrap gap-2">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary text-white p-2 rounded-3">🎤 Mic On</span>
+                                    <span class="badge bg-secondary text-white p-2 rounded-3">📷 Cam On</span>
+                                    <span class="badge bg-warning text-dark p-2 rounded-3">📖 Phao Cứu Sinh</span>
+                                </div>
+                                <span class="badge bg-danger text-white p-2 rounded-pill px-3">🔴 Kết thúc</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         2. METRICS & SOCIAL PROOF BAR
+         ========================================================================= -->
+    <section class="py-5 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="row g-4 text-center">
+                <div class="col-6 col-md-3">
+                    <div class="metric-stat-card border-0">
+                        <div class="metric-number">10,000+</div>
+                        <div class="text-muted fw-semibold mt-1">Phút hội thoại thực tế</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-stat-card border-0">
+                        <div class="metric-number">98%</div>
+                        <div class="text-muted fw-semibold mt-1">Học viên tự tin hơn</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-stat-card border-0">
+                        <div class="metric-number">3 Bước</div>
+                        <div class="text-muted fw-semibold mt-1">Chu trình học độc quyền</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="metric-stat-card border-0">
+                        <div class="metric-number">2+</div>
+                        <div class="text-muted fw-semibold mt-1">Ngôn ngữ (Nhật &amp; Anh)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         3. BỘ 3 TRỤ CỘT HỌC TẬP (3 CORE PILLARS)
+         ========================================================================= -->
+    <section class="py-5 py-lg-6">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-bold text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 0.05em;">
+                    Hệ sinh thái toàn diện
+                </span>
+                <h2 class="display-6 fw-bold text-slate-900 mb-3" style="font-weight: 800;">
+                    3 Trụ Cột Đột Phá Giúp Bạn Nói Trôi Chảy
+                </h2>
+                <p class="text-muted fs-5">
+                    Không chỉ học thuộc ngữ pháp khô cứng, Marching Language dẫn dắt bạn qua lộ trình thực chiến từ nghe ngấm đến đàm thoại thời gian thực.
+                </p>
+            </div>
+
+            <!-- Pillars Grid -->
+            <div class="row g-4">
+                <!-- Pillar 1: Audio Whisper AI -->
+                <div class="col-lg-4">
+                    <div class="pillar-card">
+                        <div>
+                            <div class="pillar-icon-box bg-primary-subtle text-primary">
+                                🎧
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 mb-3 fw-bold" style="font-size: 0.78rem;">
+                                TRỤ CỘT 1 • INPUT
+                            </span>
+                            <h3 class="h4 fw-bold text-slate-900 mb-2">Bài Học Audio &amp; Whisper AI</h3>
+                            <p class="text-muted mb-4" style="line-height: 1.6;">
+                                Bóc tách hội thoại từng câu bằng AI Whisper STT chuẩn xác. Phân tích ngữ pháp tự động, dịch nghĩa song ngữ và luyện nghe chép chính tả (Dictation) tương tác.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="d-flex flex-wrap gap-1 mb-3">
+                                <span class="badge bg-light text-secondary border">Whisper STT</span>
+                                <span class="badge bg-light text-secondary border">Ngữ pháp AI</span>
+                                <span class="badge bg-light text-secondary border">Shadowing Loop</span>
+                            </div>
+                            <a th:href="@{/practice/audio-lessons}" class="btn btn-outline-primary w-100 rounded-pill fw-semibold">
+                                Khám phá bài nghe ➔
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pillar 2: AI Roleplay Scripts -->
+                <div class="col-lg-4">
+                    <div class="pillar-card" style="border-color: #fbcfe8;">
+                        <div>
+                            <div class="pillar-icon-box text-white" style="background: var(--accent-gradient);">
+                                🗣️
+                            </div>
+                            <span class="badge text-white rounded-pill px-3 py-1 mb-3 fw-bold" style="background: #ec4899; font-size: 0.78rem;">
+                                TRỤ CỘT 2 • BRIDGE AI
+                            </span>
+                            <h3 class="h4 fw-bold text-slate-900 mb-2">Kịch Bản Phản Xạ AI Sensei</h3>
+                            <p class="text-muted mb-4" style="line-height: 1.6;">
+                                Đóng vai theo tình huống đời sống &amp; công sở với 3 giai đoạn tăng dần độ khó: Lặp lại, Điền khuyết từ, và Ẩn kịch bản. AI Sensei phản hồi chỉ sau 0.5 giây.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="d-flex flex-wrap gap-1 mb-3">
+                                <span class="badge bg-light text-secondary border">3 Giai đoạn</span>
+                                <span class="badge bg-light text-secondary border">Phản hồi tức thì</span>
+                                <span class="badge bg-light text-secondary border">Sửa lỗi phát âm</span>
+                            </div>
+                            <a th:href="@{/practice/scripts}" class="btn btn-ai w-100 rounded-pill fw-semibold">
+                                Luyện kịch bản ngay ➔
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pillar 3: Video Call P2P 1-1 -->
+                <div class="col-lg-4">
+                    <div class="pillar-card">
+                        <div>
+                            <div class="pillar-icon-box bg-success-subtle text-success">
+                                👥
+                            </div>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1 mb-3 fw-bold" style="font-size: 0.78rem;">
+                                TRỤ CỘT 3 • REAL OUTPUT
+                            </span>
+                            <h3 class="h4 fw-bold text-slate-900 mb-2">Ghép Đôi P2P Video Call 1-1</h3>
+                            <p class="text-muted mb-4" style="line-height: 1.6;">
+                                Thuật toán ghép bạn học cùng ngôn ngữ, trình độ (JLPT / CEFR) và chủ đề. Tích hợp Sổ tay Phao cứu sinh in-call giúp bạn không bao giờ bị bí từ khi đàm thoại.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="d-flex flex-wrap gap-1 mb-3">
+                                <span class="badge bg-light text-secondary border">Matching đa chiều</span>
+                                <span class="badge bg-light text-secondary border">Phao cứu sinh</span>
+                                <span class="badge bg-light text-secondary border">WebRTC siêu tốc</span>
+                            </div>
+                            <a th:href="@{/video-call}" class="btn btn-emerald w-100 rounded-pill fw-semibold">
+                                Vào phòng ghép đôi ➔
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         4. THE 3-PHASE FLYWHEEL (CHU TRÌNH HẤP THỤ NGÔN NGỮ)
+         ========================================================================= -->
+    <section class="py-5 py-lg-6 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-3 py-2 fw-bold text-uppercase mb-2" style="font-size: 0.8rem;">
+                    Phương pháp khoa học
+                </span>
+                <h2 class="display-6 fw-bold text-slate-900 mb-3" style="font-weight: 800;">
+                    Chu Trình Hấp Thụ Ngôn Ngữ 3 Bước (The Flywheel)
+                </h2>
+                <p class="text-muted fs-5">
+                    Mô hình học khép kín được nghiên cứu để giải quyết triệt để vấn đề "học nhiều năm nhưng không mở miệng nói được".
+                </p>
+            </div>
+
+            <div class="row g-4 position-relative">
+                <!-- Step 1 -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light border h-100 position-relative">
+                        <div class="display-4 fw-extrabold text-primary mb-3" style="font-weight: 800; opacity: 0.85;">01</div>
+                        <h4 class="fw-bold text-slate-900 mb-2">Input: Nghe Ngấm Tự Nhiên</h4>
+                        <p class="text-muted" style="line-height: 1.6;">
+                            Tiếp cận audio giọng bản xứ qua các bài nghe ngắn. Công nghệ Whisper AI phiên âm từng từ, giúp tai làm quen với ngữ điệu và phát âm chuẩn xác.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light border h-100 position-relative" style="border-color: #fbcfe8 !important;">
+                        <div class="display-4 fw-extrabold mb-3" style="font-weight: 800; color: #ec4899; opacity: 0.85;">02</div>
+                        <h4 class="fw-bold text-slate-900 mb-2">Bridge: Phản Xạ AI Sensei</h4>
+                        <p class="text-muted" style="line-height: 1.6;">
+                            Luyện tập đối thoại 1-1 cùng trợ lý AI không áp lực sợ sai. Từng bước giấu kịch bản để kích hoạt khả năng tư duy ngôn ngữ trực tiếp trong não bộ.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light border h-100 position-relative">
+                        <div class="display-4 fw-extrabold text-success mb-3" style="font-weight: 800; opacity: 0.85;">03</div>
+                        <h4 class="fw-bold text-slate-900 mb-2">Output: Giao Tiếp Thực Chiến</h4>
+                        <p class="text-muted" style="line-height: 1.6;">
+                            Bước vào phòng gọi P2P kết nối người thật. Ứng dụng ngay mẫu câu đã luyện, vượt qua e ngại và nhận điểm đánh giá tín nhiệm sau mỗi buổi học.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         5. SO SÁNH VƯỢT TRỘI (WHY MARCHING LANGUAGE)
+         ========================================================================= -->
+    <section class="py-5 py-lg-6">
+        <div class="container">
+            <div class="text-center max-w-700 mx-auto mb-5">
+                <span class="badge bg-info-subtle text-info rounded-pill px-3 py-2 fw-bold text-uppercase mb-2" style="font-size: 0.8rem;">
+                    So sánh khác biệt
+                </span>
+                <h2 class="display-6 fw-bold text-slate-900 mb-3" style="font-weight: 800;">
+                    Tại Sao Chọn Marching Language?
+                </h2>
+                <p class="text-muted fs-5">
+                    Xem cách chúng tôi giải quyết các nỗi đau lớn nhất của người học ngoại ngữ tại Việt Nam.
+                </p>
+            </div>
+
+            <div class="table-responsive shadow-sm rounded-4 border bg-white">
+                <table class="table table-hover align-middle mb-0" style="font-size: 0.98rem;">
+                    <thead class="bg-light">
+                        <tr>
+                            <th scope="col" class="py-3 px-4 text-slate-700" style="width: 30%;">Tiêu chí</th>
+                            <th scope="col" class="py-3 px-4 text-muted" style="width: 35%;">Cách học truyền thống</th>
+                            <th scope="col" class="py-3 px-4 text-primary fw-bold" style="width: 35%; background: var(--primary-light);">Marching Language 🚀</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-slate-800">Môi trường luyện nói</td>
+                            <td class="py-3 px-4 text-muted">Hiếm khi có người luyện cùng, phải đến câu lạc bộ vào khung giờ cố định</td>
+                            <td class="py-3 px-4 text-primary fw-semibold" style="background: rgba(238, 242, 255, 0.4);">Ghép đôi người thật 24/7 &amp; AI Sensei luôn sẵn sàng 24/7</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-slate-800">Tâm lý sợ sai &amp; ngại ngùng</td>
+                            <td class="py-3 px-4 text-muted">Sợ phát âm sai, ngại bị chê cười nên thường im lặng</td>
+                            <td class="py-3 px-4 text-primary fw-semibold" style="background: rgba(238, 242, 255, 0.4);">Luyện nhuần nhuyễn với AI Sensei không phán xét trước khi gặp người thật</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-slate-800">Hỗ trợ khi bí từ</td>
+                            <td class="py-3 px-4 text-muted">Bế tắc, im lặng ngượng ngùng, ngắt quãng cuộc trò chuyện</td>
+                            <td class="py-3 px-4 text-primary fw-semibold" style="background: rgba(238, 242, 255, 0.4);">Sổ tay Phao Cứu Sinh in-call gợi ý mẫu câu cứu cánh tức thì</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-slate-800">Đo lường sự tiến bộ</td>
+                            <td class="py-3 px-4 text-muted">Chỉ biết qua điểm thi ngữ pháp trên giấy, không phản ánh khả năng nói</td>
+                            <td class="py-3 px-4 text-primary fw-semibold" style="background: rgba(238, 242, 255, 0.4);">Rubric đánh giá chi tiết 4 tiêu chuẩn &amp; Điểm tín cậy Trust Score</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 fw-bold text-slate-800">Chi phí đầu tư</td>
+                            <td class="py-3 px-4 text-muted">Hàng triệu đồng mỗi tháng cho các khóa giao tiếp với giáo viên</td>
+                            <td class="py-3 px-4 text-primary fw-semibold" style="background: rgba(238, 242, 255, 0.4);">Bắt đầu hoàn toàn miễn phí với công nghệ AI tiên tiến nhất</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         6. FINAL CALL TO ACTION BANNER
+         ========================================================================= -->
+    <section class="py-5 py-lg-6">
+        <div class="container">
+            <div class="rounded-4 p-4 p-md-5 text-center text-white position-relative overflow-hidden shadow-lg" 
+                 style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);">
+                <div class="py-3 py-md-4 max-w-700 mx-auto position-relative" style="z-index: 2;">
+                    <h2 class="display-5 fw-extrabold mb-3" style="font-weight: 800; letter-spacing: -0.02em;">
+                        Sẵn Sàng Làm Chủ Khả Năng Nói Ngoại Ngữ?
+                    </h2>
+                    <p class="lead text-white-50 mb-4 fs-5" style="max-width: 620px; margin-left: auto; margin-right: auto;">
+                        Bắt đầu ngay hôm nay để trải nghiệm chu trình luyện nói phản xạ đỉnh cao cùng hàng ngàn học viên khác.
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center">
+                        <a th:href="${isAuthenticated == true} ? @{/profile} : @{/login}" 
+                           class="btn btn-light text-primary px-4 py-3 rounded-pill fw-bold fs-6 shadow-sm">
+                            🚀 Bắt Đầu Miễn Phí Ngay
+                        </a>
+                        <a th:href="@{/video-call}" 
+                           class="btn btn-outline-light px-4 py-3 rounded-pill fw-semibold fs-6">
+                            👥 Ghép Đôi Phòng Gọi P2P
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         7. MODERN FOOTER
+         ========================================================================= -->
+    <footer class="bg-white border-top py-5">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <!-- Brand Info -->
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-logo-badge">🗣️</div>
+                        <span class="brand-gradient fs-4">Marching Language</span>
+                    </div>
+                    <p class="text-muted small mb-3" style="line-height: 1.6;">
+                        Nền tảng luyện nói ngoại ngữ thực chiến số 1, kết hợp trí tuệ nhân tạo Whisper STT, AI Roleplay và phòng gọi P2P 1-1 người thật.
+                    </p>
+                    <div class="small text-muted">
+                        © 2026 Marching Language. All rights reserved.
+                    </div>
+                </div>
+
+                <!-- Learning Pillars Links -->
+                <div class="col-6 col-lg-2 offset-lg-1">
+                    <h6 class="fw-bold text-slate-900 mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.05em;">Học tập</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a th:href="@{/practice/scripts}" class="text-muted text-decoration-none hover-primary">🗣️ Luyện Scripts</a></li>
+                        <li><a th:href="@{/practice/audio-lessons}" class="text-muted text-decoration-none hover-primary">🎧 Luyện Audio</a></li>
+                        <li><a th:href="@{/video-call}" class="text-muted text-decoration-none hover-primary">👥 Ghép đôi P2P</a></li>
+                        <li><a th:href="@{/profile}" class="text-muted text-decoration-none hover-primary">👤 Trang cá nhân</a></li>
+                    </ul>
+                </div>
+
+                <!-- Languages Supported -->
+                <div class="col-6 col-lg-2">
+                    <h6 class="fw-bold text-slate-900 mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.05em;">Ngôn ngữ</h6>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small">
+                        <li><a th:href="@{/practice/scripts(language='ja')}" class="text-muted text-decoration-none">🇯🇵 Tiếng Nhật (JLPT N5-N1)</a></li>
+                        <li><a th:href="@{/practice/scripts(language='en')}" class="text-muted text-decoration-none">🇬🇧 Tiếng Anh (CEFR A1-C1)</a></li>
+                    </ul>
+                </div>
+
+                <!-- Security & Tech -->
+                <div class="col-lg-3">
+                    <h6 class="fw-bold text-slate-900 mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.05em;">Bảo mật &amp; Công nghệ</h6>
+                    <p class="text-muted small mb-2">
+                        🔒 Xác thực chuẩn Google OIDC &amp; mã hóa AES cho toàn bộ API key cá nhân.
+                    </p>
+                    <span class="badge bg-light text-secondary border">Bootstrap 5.3</span>
+                    <span class="badge bg-light text-secondary border">WebRTC Agora</span>
+                    <span class="badge bg-light text-secondary border">Whisper AI</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

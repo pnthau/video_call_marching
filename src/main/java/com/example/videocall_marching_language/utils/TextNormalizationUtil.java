@@ -50,36 +50,69 @@
         /**                                                                                                                                                                      
          * Tính tỷ lệ tương đồng giữa 2 chuỗi (từ 0.0 đến 1.0)                                                                                                                   
          */                                                                                                                                                                      
-        public static double calculateSimilarity(String s1, String s2) {                                                                                                         
-            if (s1.equals(s2)) return 1.0;                                                                                                                                       
-            if (s1.isEmpty() || s2.isEmpty()) return 0.0;                                                                                                                        
-                                                                                                                                                                                 
-            int distance = calculateLevenshteinDistance(s1, s2);                                                                                                                 
-            int maxLength = Math.max(s1.length(), s2.length());                                                                                                                  
-            return 1.0 - ((double) distance / maxLength);                                                                                                                        
+        public static double calculateSimilarity(String s1, String s2, String languageCode) {
+            if (s1.equals(s2)) return 1.0;
+            if (s1.isEmpty() || s2.isEmpty()) return 0.0;
+
+            if ("ja".equalsIgnoreCase(languageCode) || "zh".equalsIgnoreCase(languageCode)) {
+                int distance = calculateLevenshteinDistanceChar(s1, s2);
+                int maxLength = Math.max(s1.length(), s2.length());
+                return 1.0 - ((double) distance / maxLength);
+            } else {
+                String[] words1 = s1.split("\\s+");
+                String[] words2 = s2.split("\\s+");
+                int distance = calculateLevenshteinDistanceWord(words1, words2);
+                int maxLength = Math.max(words1.length, words2.length);
+                return 1.0 - ((double) distance / maxLength);
+            }
+        }
+        
+        // Giữ lại hàm cũ gọi mặc định sang Tiếng Anh (để tránh lỗi nếu có nơi khác đang gọi)
+        public static double calculateSimilarity(String s1, String s2) {
+            return calculateSimilarity(s1, s2, "en");
         }                                                                                                                                                                        
                                                                                                                                                                                  
         /**                                                                                                                                                                      
          * Thuật toán Levenshtein Distance đo khoảng cách sai khác                                                                                                               
          */                                                                                                                                                                      
-        private static int calculateLevenshteinDistance(String a, String b) {                                                                                                    
-            int[] costs = new int[b.length() + 1];                                                                                                                               
-            for (int j = 0; j < costs.length; j++) {                                                                                                                             
-                costs[j] = j;                                                                                                                                                    
-            }                                                                                                                                                                    
-            for (int i = 1; i <= a.length(); i++) {                                                                                                                              
-                costs[0] = i;                                                                                                                                                    
-                int nw = i - 1;                                                                                                                                                  
-                for (int j = 1; j <= b.length(); j++) {                                                                                                                          
-                    int cj = Math.min(                                                                                                                                           
-                            1 + Math.min(costs[j], costs[j - 1]),                                                                                                                
-                            a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1                                                                                                     
-                    );                                                                                                                                                           
-                    nw = costs[j];                                                                                                                                               
-                    costs[j] = cj;                                                                                                                                               
-                }                                                                                                                                                                
-            }                                                                                                                                                                    
-            return costs[b.length()];                                                                                                                                            
+        private static int calculateLevenshteinDistanceChar(String a, String b) {
+            int[] costs = new int[b.length() + 1];
+            for (int j = 0; j < costs.length; j++) {
+                costs[j] = j;
+            }
+            for (int i = 1; i <= a.length(); i++) {
+                costs[0] = i;
+                int nw = i - 1;
+                for (int j = 1; j <= b.length(); j++) {
+                    int cj = Math.min(
+                            1 + Math.min(costs[j], costs[j - 1]),
+                            a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1
+                    );
+                    nw = costs[j];
+                    costs[j] = cj;
+                }
+            }
+            return costs[b.length()];
+        }
+        
+        private static int calculateLevenshteinDistanceWord(String[] a, String[] b) {
+            int[] costs = new int[b.length + 1];
+            for (int j = 0; j < costs.length; j++) {
+                costs[j] = j;
+            }
+            for (int i = 1; i <= a.length; i++) {
+                costs[0] = i;
+                int nw = i - 1;
+                for (int j = 1; j <= b.length; j++) {
+                    int cj = Math.min(
+                            1 + Math.min(costs[j], costs[j - 1]),
+                            a[i - 1].equals(b[j - 1]) ? nw : nw + 1
+                    );
+                    nw = costs[j];
+                    costs[j] = cj;
+                }
+            }
+            return costs[b.length];
         }                                                                                                                                                                        
                                                                                                                                                                                  
         private static String cleanUnicodeAndPunctuation(String text) {                                                                                                          

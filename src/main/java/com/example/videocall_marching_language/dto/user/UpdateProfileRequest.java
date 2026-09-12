@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.dto.user;
 
+import com.example.videocall_marching_language.enums.AIProvider;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -18,8 +19,9 @@ public class UpdateProfileRequest {
     @Size(min = 2, max = 50, message = "Tên hiển thị phải có từ 2 đến 50 ký tự")
     private String username;
 
-    @NotNull(message = "Vui lòng chọn trình độ tiếng Nhật")
-    private JapaneseLevel currentLevel;
+    private AIProvider provider;
+
+    private String apiKey;
 
     private MultipartFile avatar;
 }

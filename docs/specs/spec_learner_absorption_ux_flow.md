@@ -17,7 +17,7 @@
 ```mermaid
 graph TD
     A["Cấp độ 1: Nạp & Hiểu (Input & Vocabulary Deck)<br/>• Xem bối cảnh & Nghe toàn bài<br/>• Flashcards từ vựng then chốt<br/>• Mẫu câu 'ăn điểm' (Key Grammar)"] --> B["Cấp độ 2: Luyện Nhại & Chấm Điểm (Shadowing & Color Feedback)<br/>• Nghe AI đọc mẫu từng câu<br/>• Lật thẻ xem Hiragana/IPA khi quên từ<br/>• AI chấm màu sắc: Xanh / Vàng / Đỏ"]
-    B --> C["Cấp độ 3: Phản Xạ Chủ Động (Active Recall & Roleplay)<br/>• Điền từ khuyết (Cloze Test)<br/>• Đóng vai liên tục với AI Sensei (Ẩn script)"]
+    B --> C["Cấp độ 3: Phản Xạ Chủ Động (Active Recall & Roleplay)<br/>• Điền từ khuyết (Cloze Test)<br/>• Đóng vai liên tục (Ẩn script)"]
     C --> D["Cấp độ 4: Thực Chiến 1-1 (Live P2P Video Call)<br/>• Mở khóa nút Ghép Đôi Thực Chiến<br/>• Tích hợp 'Sổ tay mẫu câu (Cheat Sheet)' ngay trong phòng gọi"]
 ```
 

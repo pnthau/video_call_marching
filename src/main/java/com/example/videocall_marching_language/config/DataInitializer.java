@@ -51,12 +51,35 @@ public class DataInitializer {
                         Tag.builder().name("N5").tagCategory(level).build(),
                         Tag.builder().name("N4").tagCategory(level).build(),
                         Tag.builder().name("N3").tagCategory(level).build(),
+                        Tag.builder().name("N2").tagCategory(level).build(),
+                        Tag.builder().name("N1").tagCategory(level).build(),
+                        Tag.builder().name("A1").tagCategory(level).build(),
+                        Tag.builder().name("A2").tagCategory(level).build(),
+                        Tag.builder().name("B1").tagCategory(level).build(),
+                        Tag.builder().name("B2").tagCategory(level).build(),
+                        Tag.builder().name("C1").tagCategory(level).build(),
                         Tag.builder().name("Từ vựng (Vocabulary)").tagCategory(activity).build(),
                         Tag.builder().name("Đóng vai (Roleplay)").tagCategory(activity).build(),
+                        Tag.builder().name("Hội thoại tự do (Free Talk)").tagCategory(activity).build(),
                         Tag.builder().name("Giới thiệu bản thân").tagCategory(topic).build(),
                         Tag.builder().name("Mua sắm (Shopping)").tagCategory(topic).build(),
                         Tag.builder().name("Du lịch & Hỏi đường").tagCategory(topic).build(),
                         Tag.builder().name("Tiếng Anh giao tiếp").tagCategory(topic).build()));
+            } else {
+                List<TagCategory> cats = categoryRepository.findByActiveTrueOrderByDisplayOrderAsc();
+                TagCategory levelCat = cats.stream().filter(c -> c.getType() == TagCategoryType.LEVEL).findFirst().orElse(null);
+                if (levelCat != null) {
+                    List<String> levelsToSeed = List.of("N5", "N4", "N3", "N2", "N1", "A1", "A2", "B1", "B2", "C1");
+                    for (String lvl : levelsToSeed) {
+                        if (tagRepository.findByName(lvl).isEmpty()) {
+                            tagRepository.save(Tag.builder().name(lvl).tagCategory(levelCat).build());
+                        }
+                    }
+                }
+                TagCategory actCat = cats.stream().filter(c -> c.getType() == TagCategoryType.ACTIVITY).findFirst().orElse(null);
+                if (actCat != null && tagRepository.findByName("Hội thoại tự do (Free Talk)").isEmpty()) {
+                    tagRepository.save(Tag.builder().name("Hội thoại tự do (Free Talk)").tagCategory(actCat).build());
+                }
             }
 
             validateRubricCriteria(rubricRepository.findAllCriteriaCodes());
@@ -96,6 +119,7 @@ public class DataInitializer {
                                     .title("Giới thiệu bản thân cơ bản (Self-introduction)")
                                     .tag(tagIntro != null ? tagIntro : defaultTag)
                                     .language("ja")
+                                    .level("N5")
                                     .targetDuration(45)
                                     .content("A: 初めまして、私は田中です。ベトナムから来ました。\nB: 初めまして、田中さん。どうぞよろしくお願いします。\nA: こちらこそ、よろしくお願いいたします。")
                                     .phoneticContent("A: はじめまして、わたしはたなかです。べとなむからきました。\nB: はじめまして、たなかさん。どうぞよろしくおねがいします。\nA: こちらこそ、よろしくおねがいいたします。")
@@ -106,6 +130,7 @@ public class DataInitializer {
                                     .title("Mua sắm tại cửa hàng tiện lợi (Combini)")
                                     .tag(tagShopping != null ? tagShopping : defaultTag)
                                     .language("ja")
+                                    .level("N5")
                                     .targetDuration(60)
                                     .content("A: いらっしゃいませ！お弁当を温めますか？\nB: はい、お願いします。\nA: レジ袋はご利用になりますか？\nB: いいえ、大丈夫です。\nA: お会計は500円になります。\nB: PayPayで払います。")
                                     .phoneticContent("A: いらっしゃいませ！おべんとうをあたためますか？\nB: はい、おねがいします。\nA: レジぶくろはごりようになりますか？\nB: いいえ、だいじょうぶです。\nA: おかいけいはごひゃくえんになります。\nB: ペイペイではらいます。")
@@ -116,6 +141,7 @@ public class DataInitializer {
                                     .title("Gọi món tại quán ăn (Restaurant Ordering)")
                                     .tag(tagRoleplay != null ? tagRoleplay : defaultTag)
                                     .language("ja")
+                                    .level("N4")
                                     .targetDuration(60)
                                     .content("A: すみません、注文をお願いします。\nB: はい、何にいたしましょうか？\nA: ラーメン一つとギョーザをお願いします。\nB: かしこまりました。お飲み物はいかがですか？\nA: お水を一杯ください。")
                                     .phoneticContent("A: すみません、ちゅうもんをおねがいします。\nB: はい、なににいたしましょうか？\nA: らーめんひとつとぎょーざをおねがいします。\nB: かしこまりました。お飲み物はいかがですか？\nA: おみずをいっぱいください。")
@@ -126,6 +152,7 @@ public class DataInitializer {
                                     .title("Hỏi đường đến ga tàu (Asking for Directions)")
                                     .tag(tagTravel != null ? tagTravel : defaultTag)
                                     .language("ja")
+                                    .level("N4")
                                     .targetDuration(50)
                                     .content("A: すみません、東京駅はどこですか？\nB: この道をまっすぐ行って、信号を右に曲がってください。\nA: 歩いてどれくらいかかりますか？\nB: だいたい5分くらいですよ。\nA: ありがとうございます。助かりました。")
                                     .phoneticContent("A: すみません、とうきょうえきはどこですか？\nB: このみちをまっすぐいって、しんごうをみぎにまがってください。\nA: あるいてどれくらいかかりますか？\nB: だいたいごふんくらいですよ。\nA: ありがとうございます。たすかりました。")
@@ -136,6 +163,7 @@ public class DataInitializer {
                                     .title("Daily English Greeting & Coffee (Giao tiếp tiếng Anh)")
                                     .tag(tagEnglish != null ? tagEnglish : defaultTag)
                                     .language("en")
+                                    .level("A1")
                                     .targetDuration(45)
                                     .content("A: Hello! How are you doing today?\nB: Hi! I am doing well, thank you. How about you?\nA: I am pretty good. Are you free this afternoon?\nB: Yes, I am free. Let's grab a coffee together!\nA: That sounds wonderful!")
                                     .phoneticContent("A: /həˈloʊ! haʊ ɑːr juː ˈduːɪŋ təˈdeɪ?/\nB: /haɪ! aɪ æm ˈduːɪŋ wɛl, θæŋk juː. haʊ əˈbaʊt juː?/\nA: /aɪ æm ˈprɪti ɡʊd. ɑːr juː friː ðɪs ˌæftərˈnuːn?/\nB: /jɛs, aɪ æm friː. lɛts ɡræb ə ˈkɔːfi təˈɡɛðər!/\nA: /ðæt saʊndz ˈwʌndərfəl!/")

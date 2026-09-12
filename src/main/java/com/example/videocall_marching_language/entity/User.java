@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.entity;
 
+import com.example.videocall_marching_language.enums.AIProvider;
 import jakarta.persistence.*;
 import lombok.*;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
@@ -61,4 +62,8 @@ public class User {
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "active_ai_provider", length = 20)
+    private AIProvider activeAiProvider;
 }

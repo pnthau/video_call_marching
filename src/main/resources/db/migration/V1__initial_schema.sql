@@ -63,10 +63,14 @@ CREATE TABLE IF NOT EXISTS `peer_ratings` (
     `rater_id` BIGINT NOT NULL,
     `ratee_id` BIGINT NOT NULL,
     `total_score` INT NOT NULL,
+    `session_id` BIGINT,
+    `detail_scores` TEXT,
+    `comment` VARCHAR(500),
     `created_at` DATETIME,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`rater_id`) REFERENCES `users`(`id`),
-    FOREIGN KEY (`ratee_id`) REFERENCES `users`(`id`)
+    FOREIGN KEY (`ratee_id`) REFERENCES `users`(`id`),
+    FOREIGN KEY (`session_id`) REFERENCES `learning_sessions`(`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `social_accounts` (

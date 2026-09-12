@@ -1,6 +1,6 @@
 package com.example.videocall_marching_language.utils;
 
-import com.example.videocall_marching_language.dto.SentenceRoleDTO;
+import com.example.videocall_marching_language.dto.script.SentenceRoleResponse;
 
 import java.text.BreakIterator;
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class SentenceSplitterUtil {
         return sentences;
     }
 
-    public static List<SentenceRoleDTO> assignRoles(List<String> sentences) {
-        List<SentenceRoleDTO> result = new ArrayList<>();
+    public static List<SentenceRoleResponse> assignRoles(List<String> sentences) {
+        List<SentenceRoleResponse> result = new ArrayList<>();
         String currentRole = "Người nói"; // Vai mặc định
 
         // Regex tìm các dạng "A: ", "Khách hàng： " ở ngay đầu câu
@@ -49,7 +49,7 @@ public class SentenceSplitterUtil {
             }
 
             if (!sentence.isEmpty()) {
-                result.add(SentenceRoleDTO.builder()
+                result.add(SentenceRoleResponse.builder()
                         .role(currentRole)
                         .text(sentence)
                         .build());
@@ -58,12 +58,12 @@ public class SentenceSplitterUtil {
         return result;
     }
 
-    public static List<SentenceRoleDTO> parseScriptLines(String content, String phoneticContent) {
+    public static List<SentenceRoleResponse> parseScriptLines(String content, String phoneticContent) {
         return parseScriptLines(content, phoneticContent, null);
     }
 
-    public static List<SentenceRoleDTO> parseScriptLines(String content, String phoneticContent, String meaningContent) {
-        List<SentenceRoleDTO> result = new ArrayList<>();
+    public static List<SentenceRoleResponse> parseScriptLines(String content, String phoneticContent, String meaningContent) {
+        List<SentenceRoleResponse> result = new ArrayList<>();
         if (content == null || content.trim().isEmpty()) {
             return result;
         }
@@ -167,7 +167,7 @@ public class SentenceSplitterUtil {
                     meaning = rawMeaning;
                 }
 
-                result.add(SentenceRoleDTO.builder()
+                result.add(SentenceRoleResponse.builder()
                         .role(currentRole)
                         .text(line)
                         .phonetic(phonetic)

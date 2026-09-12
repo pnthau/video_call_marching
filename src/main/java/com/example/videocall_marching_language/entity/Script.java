@@ -28,6 +28,10 @@ public class Script {
     @Column(nullable = false)
     private String language;
 
+    @Column(nullable = false, length = 20)
+    @Builder.Default
+    private String level = "N5";
+
     @Column(name = "phonetic")
     private String phoneticContent;
 

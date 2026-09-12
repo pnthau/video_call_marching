@@ -30,6 +30,16 @@ public class PeerRating {
     @Column(name = "total_score", nullable = false)
     private int totalScore;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id")
+    private LearningSession session;
+
+    @Column(name = "detail_scores", columnDefinition = "TEXT")
+    private String detailScores;
+
+    @Column(length = 500)
+    private String comment;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

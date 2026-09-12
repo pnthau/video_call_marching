@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -19,6 +20,34 @@ class SecurityIntegrationTests {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Test
+    void guestCanAccessLandingPageAtRoot() throws Exception {
+        mockMvc.perform(get("/"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("landing"));
+    }
+
+    @Test
+    void guestCanAccessLandingPageAtLanding() throws Exception {
+        mockMvc.perform(get("/landing"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("landing"));
+    }
+
+    @Test
+    void authenticatedUserCanAccessLandingPageAtRoot() throws Exception {
+        mockMvc.perform(get("/").with(user("learner@example.com").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("landing"));
+    }
+
+    @Test
+    void authenticatedUserCanAccessLandingPageAtLanding() throws Exception {
+        mockMvc.perform(get("/landing").with(user("learner@example.com").roles("USER")))
+                .andExpect(status().isOk())
+                .andExpect(view().name("landing"));
+    }
 
     @Test
     void guestIsRedirectedFromProfileToLogin() throws Exception {

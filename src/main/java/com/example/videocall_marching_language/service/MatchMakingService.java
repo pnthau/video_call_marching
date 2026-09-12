@@ -3,7 +3,6 @@ package com.example.videocall_marching_language.service;
 import com.example.videocall_marching_language.config.MatchingProperties;
 import com.example.videocall_marching_language.dto.MatchRequestDTO;
 import com.example.videocall_marching_language.dto.MatchResultDTO;
-import com.example.videocall_marching_language.dto.WaitingUserDTO;
 import com.example.videocall_marching_language.entity.LearningSession;
 import com.example.videocall_marching_language.entity.Tag;
 import com.example.videocall_marching_language.entity.User;
@@ -13,7 +12,6 @@ import com.example.videocall_marching_language.enums.TagCategoryType;
 import com.example.videocall_marching_language.exception.SessionConflictException;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.repository.ITagRepository;
-import com.example.videocall_marching_language.service.ILearningSessionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -124,7 +122,8 @@ public class MatchMakingService {
             }
 
             Instant now = timeProvider.instant();
-            boolean canExpandLevel = !now.isBefore(anchor.getEnqueuedAt().plusSeconds(matchingProperties.getAdjacentLevelAfterSeconds()));
+            boolean canExpandLevel = !now
+                    .isBefore(anchor.getEnqueuedAt().plusSeconds(matchingProperties.getAdjacentLevelAfterSeconds()));
 
             List<MatchingQueueEntry> sameLevelCandidates = candidates.stream()
                     .filter(e -> e.getLevel() == anchor.getLevel())
@@ -205,7 +204,8 @@ public class MatchMakingService {
             sendNotificationAfterCommit(user2.getUserId(), resultForUser2);
 
         } catch (SessionConflictException e) {
-            // Persist failed due to conflict - entries remain in queue with original enqueuedAt
+            // Persist failed due to conflict - entries remain in queue with original
+            // enqueuedAt
             log.warn("Session conflict for users {} and {}: {}", user1.getUserId(), user2.getUserId(), e.getMessage());
             String status = switch (e.getConflictType()) {
                 case USER_HAS_ACTIVE_SESSION -> "USER_ACTIVE_SESSION";
@@ -217,14 +217,18 @@ public class MatchMakingService {
             sendMatchResult(user2.getUserId(), MatchResultDTO.builder().status(status).build());
         } catch (Exception e) {
             // Persist failed - entries remain in queue with original enqueuedAt
-            log.error("Failed to create session for users {} and {}: {}", user1.getUserId(), user2.getUserId(), e.getMessage(), e);
+            log.error("Failed to create session for users {} and {}: {}", user1.getUserId(), user2.getUserId(),
+                    e.getMessage(), e);
             throw new RuntimeException("Failed to create session", e);
         }
     }
 
     public void cancelSearch(Long userId) {
         matchResults.remove(userId);
-        userQueueMap.remove(userId.toString());
+        MatchingQueueEntry entry = userQueueMap.remove(userId.toString());
+        if (entry != null && entry.getSessionId() != null) {
+            sessionUserMap.remove(entry.getSessionId());
+        }
     }
 
     public void recoverSession(Long userId, String webSocketSessionId) {
@@ -244,7 +248,8 @@ public class MatchMakingService {
 
             LearningSession session = activeSession.get();
             Long peerId = session.getUser1().getId().equals(userId)
-                    ? session.getUser2().getId() : session.getUser1().getId();
+                    ? session.getUser2().getId()
+                    : session.getUser1().getId();
             User peer = userRepository.findById(peerId)
                     .orElseThrow(() -> new IllegalStateException("Session peer no longer exists"));
             registerConnection(userId, webSocketSessionId);
@@ -285,7 +290,8 @@ public class MatchMakingService {
     public void notifyRecoveryComplete(Long userId) {
         learningSessionService.findActiveSessionByUserId(userId).ifPresent(session -> {
             Long peerId = session.getUser1().getId().equals(userId)
-                    ? session.getUser2().getId() : session.getUser1().getId();
+                    ? session.getUser2().getId()
+                    : session.getUser1().getId();
             simpMessagingTemplate.convertAndSend("/topic/match/" + peerId,
                     MatchResultDTO.builder().status("PEER_RECOVERED").sessionId(session.getId()).build());
         });
@@ -302,7 +308,8 @@ public class MatchMakingService {
     public void endCall(Long userId) {
         MatchResultDTO currentUserLeaved = matchResults.get(userId);
 
-        if (currentUserLeaved != null && "MATCHED".equals(currentUserLeaved.getStatus()) && currentUserLeaved.getSessionId() != null) {
+        if (currentUserLeaved != null && "MATCHED".equals(currentUserLeaved.getStatus())
+                && currentUserLeaved.getSessionId() != null) {
             try {
                 learningSessionService.reportLeaveAgora(currentUserLeaved.getSessionId(), userId);
             } catch (Exception e) {
@@ -334,7 +341,8 @@ public class MatchMakingService {
                 try {
                     learningSessionService.reportLeaveAgora(session.getId(), authenticatedUserId);
                     Long peerId = session.getUser1().getId().equals(authenticatedUserId)
-                            ? session.getUser2().getId() : session.getUser1().getId();
+                            ? session.getUser2().getId()
+                            : session.getUser1().getId();
                     simpMessagingTemplate.convertAndSend("/topic/match/" + peerId,
                             MatchResultDTO.builder().status("PEER_RECONNECTING").sessionId(session.getId()).build());
                 } catch (RuntimeException e) {
@@ -361,16 +369,20 @@ public class MatchMakingService {
             Long peerId = currentStatus.getPeerId();
             Long sessionIdFromResult = currentStatus.getSessionId();
 
-            // WebSocket disconnect is just a presence signal - report leave to set reconnect deadline
+            // WebSocket disconnect is just a presence signal - report leave to set
+            // reconnect deadline
             // Session will be finalized by scheduler after grace period expires
             if (sessionIdFromResult != null) {
                 try {
                     learningSessionService.reportLeaveAgora(sessionIdFromResult, disconnectedUser.getUserId());
                 } catch (Exception e) {
-                    log.error("Error reporting leave for session {} user {}: {}", sessionIdFromResult, disconnectedUser.getUserId(), e.getMessage(), e);
-                    // Do not swallow: callers/monitoring must observe that presence persistence failed.
+                    log.error("Error reporting leave for session {} user {}: {}", sessionIdFromResult,
+                            disconnectedUser.getUserId(), e.getMessage(), e);
+                    // Do not swallow: callers/monitoring must observe that presence persistence
+                    // failed.
                     // Disconnect should NOT finalize session - reconnect deadline handles it
-                    throw new IllegalStateException("Failed to report leave on disconnect for session " + sessionIdFromResult, e);
+                    throw new IllegalStateException(
+                            "Failed to report leave on disconnect for session " + sessionIdFromResult, e);
                 }
             }
 

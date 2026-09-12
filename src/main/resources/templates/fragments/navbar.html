@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- Universal Glassmorphism Top Navigation Bar -->
+<nav th:fragment="navbar(activePage)" class="navbar navbar-expand-lg sticky-top glass-nav py-2" style="z-index: 1020;">
+    <div class="container">
+        <!-- Logo Marching Language -->
+        <a class="navbar-brand d-flex align-items-center gap-2 text-decoration-none me-3" th:href="@{/}">
+            <div class="brand-logo-badge">🗣️</div>
+            <span class="brand-gradient fs-4">Marching Language</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler border-0 shadow-none p-2" type="button" data-bs-toggle="collapse" data-bs-target="#universalNavbarContent" aria-controls="universalNavbarContent" aria-expanded="false" aria-label="Bật/tắt thanh điều hướng">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Links & User Actions -->
+        <div class="collapse navbar-collapse" id="universalNavbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1 align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom text-lg-nowrap" th:classappend="${activePage == 'home'} ? 'active' : ''" th:href="@{/}">
+                        <span>🏠</span>
+                        <span>Trang chủ</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom text-lg-nowrap" th:classappend="${activePage == 'scripts'} ? 'active' : ''" th:href="@{/practice/scripts}">
+                        <span>🗣️</span>
+                        <span>Luyện Scripts</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom text-lg-nowrap" th:classappend="${activePage == 'audio'} ? 'active' : ''" th:href="@{/practice/audio-lessons}">
+                        <span>🎧</span>
+                        <span>Luyện Audio</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-link-custom text-lg-nowrap" th:classappend="${activePage == 'p2p'} ? 'active' : ''" th:href="@{/video-call}">
+                        <span>👥</span>
+                        <span>Ghép đôi P2P</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Auth Controls -->
+            <div class="d-flex align-items-center pt-3 pt-lg-0 border-top border-lg-0 mt-3 mt-lg-0">
+                <!-- If Authenticated -->
+                <div th:if="${isAuthenticated == true}" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap">
+                    <a th:href="@{/profile}" class="btn btn-light btn-sm border rounded-pill d-flex align-items-center gap-2 px-3 py-2 text-decoration-none text-dark shadow-sm">
+                        <img th:if="${currentUserAvatar != null}" th:src="${currentUserAvatar}" class="rounded-circle object-fit-cover" width="26" height="26" alt="Avatar">
+                        <span th:unless="${currentUserAvatar != null}" class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem;"
+                              th:text="${currentUsername != null and !currentUsername.isEmpty() ? #strings.substring(currentUsername, 0, 1).toUpperCase() : 'U'}">U</span>
+                        <span class="fw-semibold text-truncate text-nowrap" style="max-width: 120px;" th:text="${currentUsername != null ? currentUsername : 'Tài khoản'}">Tài khoản</span>
+                    </a>
+                    <a th:href="@{/profile}" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap" th:classappend="${activePage == 'profile'} ? 'active' : ''">
+                        Vào Hồ Sơ
+                    </a>
+                    <form th:action="@{/logout}" method="post" class="d-inline m-0">
+                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap">
+                            Đăng xuất
+                        </button>
+                    </form>
+                </div>
+
+                <!-- If Not Authenticated -->
+                <div th:unless="${isAuthenticated == true}" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap">
+                    <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap">
+                        Đăng nhập
+                    </a>
+                    <a th:href="@{/login}" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap">
+                        🚀 Bắt đầu miễn phí
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

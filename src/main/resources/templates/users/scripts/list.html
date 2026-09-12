@@ -3,65 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách Kịch bản Luyện nói</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #1a1a1a;
-            --secondary: #666666;
-            --surface: #ffffff;
-            --background: #f7f7f9;
-            --border: #eaeaea;
-            --hover: #f1f1f1;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--background); color: var(--primary); -webkit-font-smoothing: antialiased; padding: 2rem; }
-        .container { max-width: 800px; margin: 0 auto; }
-        .header { margin-bottom: 3rem; text-align: center; }
-        .header h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
-        .header p { color: var(--secondary); font-size: 1.1rem; }
-        .script-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-        .script-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-decoration: none;
-            color: inherit;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        .script-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.06); border-color: transparent; }
-        .card-title { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-        .card-meta { display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--secondary); }
-        .badge { background: var(--background); padding: 0.25rem 0.75rem; border-radius: 999px; font-weight: 500; }
-        .empty-state { text-align: center; color: var(--secondary); padding: 4rem; background: var(--surface); border-radius: 12px; border: 1px dashed var(--border); }
-    </style>
+    <title>Danh Sách Kịch Bản Luyện Nói AI - Video Marching</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    
 </head>
 <body>
-    <div class="container">
+    <!-- Universal Top Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar('scripts')}"></div>
+
+    <div class="container-custom">
+        <!-- Top Navigation Sub-bar -->
+        <div class="top-nav">
+            <a href="/profile" class="btn-back-nav">← Quay lại Trang cá nhân</a>
+            <a href="/practice/audio-lessons" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary-light); color: var(--primary); text-decoration: none; padding: 0.45rem 1rem; border-radius: 999px; font-weight: 700; font-size: 0.88rem;">
+                🎧 Học Ngôn Ngữ Qua Audio &amp; Whisper AI ➔
+            </a>
+        </div>
+
+        <!-- Header -->
         <header class="header">
-            <h1>Luyện nói AI</h1>
-            <p>Chọn một chủ đề để bắt đầu luyện tập (Giai đoạn <span th:text="${phase != null ? phase : 1}">1</span>)</p>
+            <h1>🗣️ Luyện Nói &amp; Kịch Bản AI</h1>
+            <p>Chọn tiêu chí chủ đề phù hợp để rèn luyện phản xạ đối đáp cùng trợ lý AI</p>
         </header>
-        
+
+        <!-- Active Filter Bar -->
+        <div class="filter-bar">
+            <div class="d-flex align-items-center flex-wrap gap-2 w-100 flex-lg-nowrap">
+                <span class="fw-bold small text-muted text-uppercase me-1 text-nowrap">Đang lọc:</span>
+                <div class="filter-scroll-wrapper flex-grow-1">
+                    <div class="filter-pills-row">
+                        <!-- Pill Chủ đề -->
+                        <span th:if="${selectedTopicName != null}" class="filter-pill">
+                            📚 <span th:text="${selectedTopicName}">Giới thiệu bản thân</span>
+                            <a th:href="@{/practice/scripts(language=${criteria.language}, level=${criteria.level}, phase=${phase})}" class="filter-pill-remove" title="Xóa lọc chủ đề">×</a>
+                        </span>
+                        <span th:unless="${selectedTopicName != null}" class="filter-pill" style="background: #f1f5f9; color: #475569;">
+                            📚 Tất cả chủ đề
+                        </span>
+
+                        <!-- Pill Ngôn ngữ -->
+                        <span th:if="${criteria.language != null and criteria.language != '' and criteria.language != 'all'}" class="filter-pill">
+                            🌐 <span th:text="${criteria.language == 'ja' ? 'Tiếng Nhật (JA)' : (criteria.language == 'en' ? 'Tiếng Anh (EN)' : #strings.toUpperCase(criteria.language))}">JA</span>
+                            <a th:href="@{/practice/scripts(tagId=${criteria.tagId}, level=${criteria.level}, phase=${phase})}" class="filter-pill-remove" title="Xóa lọc ngôn ngữ">×</a>
+                        </span>
+                        <span th:unless="${criteria.language != null and criteria.language != '' and criteria.language != 'all'}" class="filter-pill" style="background: #f1f5f9; color: #475569;">
+                            🌐 Tất cả ngôn ngữ
+                        </span>
+
+                        <!-- Pill Trình độ (Level) -->
+                        <span th:if="${selectedLevel != null and selectedLevel != 'ALL'}" class="filter-pill" style="background: #fef3c7; color: #b45309;">
+                            📊 Trình độ: <span th:text="${selectedLevel}">N5</span>
+                            <a th:href="@{/practice/scripts(tagId=${criteria.tagId}, language=${criteria.language}, phase=${phase})}" class="filter-pill-remove" title="Xóa lọc trình độ">×</a>
+                        </span>
+                        <span th:unless="${selectedLevel != null and selectedLevel != 'ALL'}" class="filter-pill" style="background: #f1f5f9; color: #475569;">
+                            📊 Tất cả trình độ
+                        </span>
+
+                        <!-- Pill Giai đoạn -->
+                        <span class="filter-pill" style="background: #fdf2f8; color: #db2777;">
+                            ⚡ Giai đoạn <span th:text="${phase != null ? phase : 1}">1</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút Mở Modal Tiêu chí -->
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                    ⚙️ Thay đổi tiêu chí lọc
+                </button>
+                <a th:if="${criteria.hasFilterCriteria()}" th:href="@{/practice/scripts(phase=${phase})}" class="btn btn-sm btn-light rounded-pill px-3 py-2 text-muted" title="Bỏ lọc toàn bộ">
+                    Xóa bộ lọc
+                </a>
+            </div>
+        </div>
+
+        <!-- Script Grid -->
         <div th:if="${scripts != null and !scripts.isEmpty()}" class="script-grid">
             <a th:each="script : ${scripts}" 
                th:href="@{/practice/scripts/{id}(id=${script.id}, phase=${phase != null ? phase : 1})}" 
                class="script-card">
-                <div class="card-title" th:text="${script.title}">Tiêu đề kịch bản</div>
+                <div>
+                    <span class="card-topic-tag" th:text="${script.tagName != null ? '📌 ' + script.tagName : '💬 Kịch bản'}">
+                        📌 Chủ đề
+                    </span>
+                    <div class="card-title" th:text="${script.title}">Tiêu đề kịch bản</div>
+                </div>
                 <div class="card-meta">
-                    <span class="badge" th:if="${script.targetDuration != null}" th:text="${script.targetDuration + ' giây'}">60 giây</span>
-                    <span class="badge" th:if="${script.language != null}" th:text="${script.language}">JA</span>
+                    <span class="meta-badge" th:if="${script.language != null}" th:text="${#strings.toUpperCase(script.language) == 'JA' ? '🇯🇵 JA' : (#strings.toUpperCase(script.language) == 'EN' ? '🇬🇧 EN' : #strings.toUpperCase(script.language))}">
+                        🇯🇵 JA
+                    </span>
+                    <span class="meta-badge" th:if="${script.level != null}" style="background: #fef3c7; color: #b45309;" th:text="'📊 ' + ${#strings.toUpperCase(script.level)}">
+                        📊 N5
+                    </span>
+                    <span class="meta-badge" th:if="${script.targetDuration != null}" th:text="'⏱️ ' + ${script.targetDuration} + ' giây'">
+                        ⏱️ 60 giây
+                    </span>
+                    <span class="meta-badge" style="background: #ecfdf5; color: #059669;">
+                        ⚡ Phase <span th:text="${phase != null ? phase : 1}">1</span>
+                    </span>
                 </div>
             </a>
         </div>
 
+        <!-- Empty State -->
         <div th:if="${scripts == null or scripts.isEmpty()}" class="empty-state">
-            <p>Chưa có kịch bản nào cho chủ đề này.</p>
+            <div class="empty-icon">📭</div>
+            <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 0.5rem;">Không tìm thấy kịch bản phù hợp</h3>
+            <p style="margin-bottom: 1.5rem;">Hiện chưa có bài kịch bản nào thỏa mãn các tiêu chí lọc đã chọn. Hãy thử chọn chủ đề khác.</p>
+            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#criteriaModal">
+                🎯 Thay đổi tiêu chí ngay
+            </button>
         </div>
     </div>
+
+    <!-- Bootstrap Modal: Lựa chọn tiêu chí luyện kịch bản -->
+    <div class="modal fade" id="criteriaModal" tabindex="-1" aria-labelledby="criteriaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header bg-primary text-white p-4">
+                    <div>
+                        <h5 class="modal-title fw-bold fs-4 mb-1" id="criteriaModalLabel">
+                            🎯 Lựa Chọn Tiêu Chí Luyện Kịch Bản
+                        </h5>
+                        <p class="mb-0 text-white-50 small">
+                            Hệ thống sẽ lọc kịch bản AI phù hợp nhất với mục tiêu giao tiếp thực tế của bạn
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <form th:action="@{/practice/scripts}" method="get" id="criteriaFilterForm">
+                    <div class="modal-body p-4">
+                        
+                        <!-- MỤC 1 (ƯU TIÊN SỐ 1): LỰA CHỌN NGÔN NGỮ GIAO TIẾP -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                                <span>🗣️ 1. Lựa chọn ngôn ngữ giao tiếp</span>
+                                <span class="badge bg-primary-subtle text-primary fw-medium">Bước 1: Chọn ngôn ngữ</span>
+                            </label>
+                            <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle" 
+                                    name="language" 
+                                    id="criteriaLanguageSelect">
+                                <option value="all" th:selected="${criteria == null or criteria.language == null or criteria.language == 'all'}">
+                                    🌐 Tất cả ngôn ngữ
+                                </option>
+                                <option value="ja" th:selected="${criteria != null and criteria.language == 'ja'}">
+                                    🇯🇵 Tiếng Nhật (Japanese)
+                                </option>
+                                <option value="en" th:selected="${criteria != null and criteria.language == 'en'}">
+                                    🇬🇧 Tiếng Anh (English)
+                                </option>
+                            </select>
+                            <div class="form-text text-muted small">
+                                Danh sách trình độ và chủ đề sẽ tự động thay đổi theo ngôn ngữ bạn chọn.
+                            </div>
+                        </div>
+
+                        <!-- MỤC 2 (MỚI): LỰA CHỌN TRÌNH ĐỘ (LEVEL) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                                <span>📊 2. Lựa chọn trình độ (Level)</span>
+                                <span class="badge bg-warning-subtle text-warning-emphasis fw-medium">Bước 2: Chọn trình độ</span>
+                            </label>
+                            <select class="form-select form-select-lg rounded-3 shadow-none border-warning-subtle" 
+                                    name="level" 
+                                    id="criteriaLevelSelect"
+                                    th:data-current-level="${criteria != null and criteria.level != null ? criteria.level : 'all'}">
+                                <option value="all">🌐 Tất cả trình độ</option>
+                            </select>
+                            <div class="form-text text-muted small">
+                                Trình độ JLPT (N5 - N1) hoặc CEFR (A1 - C1) tương ứng với ngôn ngữ đã chọn.
+                            </div>
+                        </div>
+
+                        <!-- MỤC 3 (CASCADING): CHỦ ĐỀ BÀI HỌC DẠNG DROPDOWN CÓ SCROLL -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                                <span>📚 3. Chủ đề bài học</span>
+                                <span class="badge bg-success-subtle text-success fw-medium">Bước 3: Chọn chủ đề</span>
+                            </label>
+                            <select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" 
+                                    name="tagId" 
+                                    id="criteriaTopicSelect"
+                                    th:data-current-tag-id="${criteria != null and criteria.tagId != null ? criteria.tagId : ''}">
+                                <option value="">Tất cả chủ đề</option>
+                            </select>
+                            <div class="form-text text-muted small" id="topicHelperText">
+                                Chỉ hiển thị các chủ đề có bài học thuộc ngôn ngữ và trình độ đã chọn.
+                            </div>
+                        </div>
+
+                        <!-- MỤC 4: HÌNH THỨC & GIAI ĐOẠN LUYỆN TẬP -->
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                                <span>⚡ 4. Hình thức &amp; Giai đoạn</span>
+                                <span class="badge bg-info-subtle text-info fw-medium">Bước 4: Chọn độ khó</span>
+                            </label>
+                            <select class="form-select form-select-lg rounded-3 shadow-none" name="phase" id="criteriaPhaseSelect">
+                                <option value="1" th:selected="${phase == 1 or criteria == null}">
+                                    Giai đoạn 1: Nghe &amp; Nhắc lại từng câu (Beginner)
+                                </option>
+                                <option value="2" th:selected="${phase == 2}">
+                                    Giai đoạn 2: Khuyết từ vựng quan trọng (Intermediate)
+                                </option>
+                                <option value="3" th:selected="${phase == 3}">
+                                    Giai đoạn 3: Đóng vai &amp; Ẩn kịch bản (Advanced)
+                                </option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer bg-light p-3 border-top-0 d-flex justify-content-between">
+                        <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                            Khám phá kịch bản phù hợp ➔
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dữ liệu ma trận Topic + Script Count được nạp dưới dạng application/json an toàn -->
+    <script type="application/json" id="topicsWithCountData" th:utext="${topicsWithCountJson}">[]</script>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const rawDataEl = document.getElementById('topicsWithCountData');
+            if (!rawDataEl) return;
+
+            let topicsData = [];
+            try {
+                topicsData = JSON.parse(rawDataEl.textContent || '[]');
+            } catch (err) {
+                console.error('Không thể đọc dữ liệu topicsWithCountData:', err);
+                return;
+            }
+
+            const langSelect = document.getElementById('criteriaLanguageSelect');
+            const levelSelect = document.getElementById('criteriaLevelSelect');
+            const topicSelect = document.getElementById('criteriaTopicSelect');
+            if (!langSelect || !levelSelect || !topicSelect) return;
+
+            const LEVEL_CONFIGS = {
+                ja: [
+                    { value: 'all', label: '🌐 Tất cả trình độ (Tiếng Nhật)' },
+                    { value: 'n5', label: '🟢 N5 - Nhập môn (Beginner)' },
+                    { value: 'n4', label: '🔵 N4 - Sơ cấp (Elementary)' },
+                    { value: 'n3', label: '🟡 N3 - Trung cấp (Intermediate)' },
+                    { value: 'n2', label: '🟠 N2 - Trung cao cấp (Upper-Intermediate)' },
+                    { value: 'n1', label: '🔴 N1 - Cao cấp (Advanced)' }
+                ],
+                en: [
+                    { value: 'all', label: '🌐 Tất cả trình độ (Tiếng Anh)' },
+                    { value: 'a1', label: '🟢 A1 - Cơ bản (Beginner)' },
+                    { value: 'a2', label: '🔵 A2 - Sơ cấp (Elementary)' },
+                    { value: 'b1', label: '🟡 B1 - Trung cấp (Intermediate)' },
+                    { value: 'b2', label: '🟠 B2 - Tự tin (Upper-Intermediate)' },
+                    { value: 'c1', label: '🔴 C1 - Nâng cao (Advanced)' }
+                ]
+            };
+
+            function updateLevelDropdown(selectedLang, targetLevel) {
+                const lang = (selectedLang || 'all').trim().toLowerCase();
+                const currentLevel = (targetLevel || 'all').trim().toLowerCase();
+
+                levelSelect.innerHTML = '';
+
+                let validLevels = [];
+                if (lang === 'ja') {
+                    validLevels = LEVEL_CONFIGS.ja;
+                } else if (lang === 'en') {
+                    validLevels = LEVEL_CONFIGS.en;
+                } else {
+                    validLevels = [
+                        { value: 'all', label: '🌐 Tất cả trình độ' },
+                        { optgroup: '🇯🇵 Tiếng Nhật (JLPT)', items: LEVEL_CONFIGS.ja.filter(x => x.value !== 'all') },
+                        { optgroup: '🇬🇧 Tiếng Anh (CEFR)', items: LEVEL_CONFIGS.en.filter(x => x.value !== 'all') }
+                    ];
+                }
+
+                let isLevelFound = false;
+
+                validLevels.forEach(item => {
+                    if (item.optgroup) {
+                        const group = document.createElement('optgroup');
+                        group.label = item.optgroup;
+                        item.items.forEach(sub => {
+                            const opt = document.createElement('option');
+                            opt.value = sub.value;
+                            opt.textContent = sub.label;
+                            if (sub.value === currentLevel) {
+                                opt.selected = true;
+                                isLevelFound = true;
+                            }
+                            group.appendChild(opt);
+                        });
+                        levelSelect.appendChild(group);
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = item.value;
+                        opt.textContent = item.label;
+                        if (item.value === currentLevel) {
+                            opt.selected = true;
+                            isLevelFound = true;
+                        }
+                        levelSelect.appendChild(opt);
+                    }
+                });
+
+                if (!isLevelFound) {
+                    levelSelect.value = 'all';
+                }
+            }
+
+            function updateTopicDropdown(selectedLang, selectedLevel, targetTagId) {
+                const lang = (selectedLang || 'all').trim().toLowerCase();
+                const lvl = (selectedLevel || 'all').trim().toLowerCase();
+
+                const tagMap = new Map();
+                let totalScriptsForCombo = 0;
+
+                topicsData.forEach(item => {
+                    const itemLang = (item.language || '').trim().toLowerCase();
+                    const itemLvl = (item.level || '').trim().toLowerCase();
+                    const count = parseInt(item.scriptCount, 10) || 0;
+
+                    const matchesLang = (lang === 'all' || itemLang === lang);
+                    const matchesLevel = (lvl === 'all' || itemLvl === lvl);
+
+                    if (matchesLang && matchesLevel) {
+                        totalScriptsForCombo += count;
+                        if (!tagMap.has(item.tagId)) {
+                            tagMap.set(item.tagId, {
+                                id: item.tagId,
+                                name: item.tagName,
+                                count: 0
+                            });
+                        }
+                        tagMap.get(item.tagId).count += count;
+                    }
+                });
+
+                topicSelect.innerHTML = '';
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = `Tất cả chủ đề (Tổng ${totalScriptsForCombo} bài học)`;
+                topicSelect.appendChild(defaultOption);
+
+                const sortedTopics = Array.from(tagMap.values())
+                    .filter(t => t.count > 0)
+                    .sort((a, b) => (a.name || '').localeCompare(b.name || '', 'vi'));
+
+                let isTargetFound = false;
+                sortedTopics.forEach(topic => {
+                    const opt = document.createElement('option');
+                    opt.value = topic.id;
+                    opt.textContent = `${topic.name} (${topic.count} bài học)`;
+
+                    if (targetTagId && String(topic.id) === String(targetTagId)) {
+                        opt.selected = true;
+                        isTargetFound = true;
+                    }
+                    topicSelect.appendChild(opt);
+                });
+
+                if (!isTargetFound) {
+                    defaultOption.selected = true;
+                }
+            }
+
+            const initialLang = langSelect.value || 'all';
+            const initialLevel = levelSelect.getAttribute('data-current-level') || 'all';
+            const initialTagId = topicSelect.getAttribute('data-current-tag-id') || topicSelect.value || '';
+
+            updateLevelDropdown(initialLang, initialLevel);
+            updateTopicDropdown(initialLang, levelSelect.value, initialTagId);
+
+            langSelect.addEventListener('change', function () {
+                const currentLevel = levelSelect.value;
+                const currentTagId = topicSelect.value;
+                updateLevelDropdown(this.value, currentLevel);
+                updateTopicDropdown(this.value, levelSelect.value, currentTagId);
+            });
+
+            levelSelect.addEventListener('change', function () {
+                const currentTagId = topicSelect.value;
+                updateTopicDropdown(langSelect.value, this.value, currentTagId);
+            });
+        });
+    </script>
+    <script th:if="${shouldOpenModal}">
+        window.addEventListener('DOMContentLoaded', function() {
+            var modalEl = document.getElementById('criteriaModal');
+            if (modalEl && typeof bootstrap !== 'undefined') {
+                var modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            }
+        });
+    </script>
 </body>
 </html>

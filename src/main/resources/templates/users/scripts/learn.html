@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${script.title} + ' - Luyện Nói Cùng AI'">Luyện Nói Cùng AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <style>
         :root {
             --primary: #4f46e5;
@@ -554,9 +556,21 @@
             border-top-right-radius: 4px;
         }
 
-        .bubble.correct { background: var(--success) !important; color: #ffffff !important; }
-        .bubble.almost { background: var(--warning) !important; color: #ffffff !important; }
-        .bubble.incorrect { background: var(--danger) !important; color: #ffffff !important; }
+        .bubble.correct { 
+            background: #10b981 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important; 
+        }
+        .bubble.almost { 
+            background: #f59e0b !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.3) !important; 
+        }
+        .bubble.incorrect { 
+            background: #ef4444 !important; 
+            color: #ffffff !important; 
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3) !important; 
+        }
 
         .text-blur {
             filter: blur(5px);
@@ -1118,27 +1132,17 @@
                         </div>
                         <div class="summary-box">
                             <span class="title">Độ sẵn sàng</span>
-                            <span class="val" style="color: #10b981;">100% Đạt</span>
+                            <span class="val" id="r-stat-readiness" style="color: #10b981;">100% Đạt</span>
                         </div>
                     </div>
 
                     <div class="action-call-cards">
-                        <!-- Nút ghép đôi người thật -->
-                        <a th:href="@{/video-call}" class="call-card-link primary">
+                        <a href="/video-call" class="call-card-link primary" style="background: #eef2ff; border-color: #c7d2fe;">
                             <div>
-                                <div class="call-card-title">👥 Ghép Đôi Gọi Video 1-1 Với Bạn Học Thật</div>
-                                <div class="call-card-sub">Hệ thống sẽ tự động ghép với đối tác có cùng trình độ và mục tiêu</div>
+                                <div class="call-card-title" style="color: #4338ca;">🚀 Tìm phòng giao tiếp P2P</div>
+                                <div class="call-card-sub">Bạn đã sẵn sàng! Hãy tìm phòng để luyện tập với người thật.</div>
                             </div>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                        </a>
-
-                        <!-- Nút gọi AI Sensei -->
-                        <a th:href="@{/video-call}" class="call-card-link">
-                            <div>
-                                <div class="call-card-title">🤖 Thử Thách Hội Thoại Với AI Sensei Tanaka (0 Đồng)</div>
-                                <div class="call-card-sub">Tập dượt mô phỏng 1-1 không giới hạn trước khi gặp bạn học</div>
-                            </div>
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4338ca" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
                         </a>
                     </div>
 
@@ -1197,7 +1201,12 @@
         /*]]>*/
     </script>
 
+    <script src="/js/tts-manager.js"></script>
     <script>
+        const csrfToken = document.querySelector('meta[name="_csrf"]').getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').getAttribute('content');
+
+        
         // --- Core State ---
         const sentences = scriptData.sentences || [];
         let currentIndex = 0;
@@ -1211,6 +1220,7 @@
         let isShowPhonetic = true;
         let isPlayingFullDialogue = false;
         let fullDialogueIndex = 0;
+        let passedIndices = new Set();
 
         // --- DOM Elements ---
         const chatStream = document.getElementById('chat-stream');
@@ -1236,11 +1246,14 @@
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         let recognition = null;
         let isRecording = false;
+        let latestSpokenTranscript = '';
+        let manualStopRequested = false;
+        let hasSubmitted = false;
 
         if (SpeechRecognition) {
             recognition = new SpeechRecognition();
             recognition.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
-            recognition.continuous = false;
+            recognition.continuous = true;
             recognition.interimResults = true;
             recognition.maxAlternatives = 1;
         }
@@ -1285,39 +1298,14 @@
             const container = document.getElementById('vocab-grid-container');
             if (!container) return;
 
-            // Extract useful patterns/vocab based on language and text
-            const isJa = (scriptData.language === 'ja');
-            let vocabList = [];
-
-            if (isJa) {
-                vocabList = [
-                    { word: '初めまして', reading: 'はじめまして', meaning: 'Rất vui được gặp bạn' },
-                    { word: 'よろしくお願いします', reading: 'よろしくおねがいします', meaning: 'Rất mong được giúp đỡ' },
-                    { word: '温めますか', reading: 'あたためますか', meaning: 'Có muốn hâm nóng không?' },
-                    { word: 'お会計', reading: 'おかいけい', meaning: 'Thanh toán tiền' },
-                    { word: '注文をお願いします', reading: 'ちゅうもんをおねがいします', meaning: 'Cho tôi gọi món' },
-                    { word: '東京駅', reading: 'とうきょうえき', meaning: 'Ga Tokyo' },
-                    { word: '曲がってください', reading: 'まがってください', meaning: 'Hãy rẽ / quẹo' },
-                    { word: '助かりました', reading: 'たすかりました', meaning: 'May quá / Cảm ơn đã giúp' }
-                ];
-            } else {
-                vocabList = [
-                    { word: 'How are you doing?', reading: '/haʊ ɑːr juː ˈduːɪŋ/', meaning: 'Hôm nay bạn thế nào?' },
-                    { word: 'Pretty good', reading: '/ˈprɪti ɡʊd/', meaning: 'Rất ổn / khá tốt' },
-                    { word: 'Free this afternoon', reading: '/friː ðɪs ˌæftərˈnuːn/', meaning: 'Chiều nay có rảnh không' },
-                    { word: 'Grab a coffee', reading: '/ɡræb ə ˈkɔːfi/', meaning: 'Cùng đi uống cà phê' },
-                    { word: 'Sounds wonderful', reading: '/saʊndz ˈwʌndərfəl/', meaning: 'Nghe tuyệt vời đấy!' }
-                ];
-            }
-
-            container.innerHTML = vocabList.map(item => `
+            container.innerHTML = sentences.map(s => `
                 <div class="vocab-card">
                     <div class="vocab-top">
-                        <div class="vocab-word">${escapeHtml(item.word)}</div>
-                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(item.word)}')">🔊</button>
+                        <div class="vocab-word">${escapeHtml(s.text)}</div>
+                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(s.text).replace(/'/g, "\\'")}')">🔊</button>
                     </div>
-                    <div class="vocab-reading">${escapeHtml(item.reading)}</div>
-                    <div class="vocab-meaning">${escapeHtml(item.meaning)}</div>
+                    ${s.phonetic ? `<div class="vocab-reading">${escapeHtml(s.phonetic)}</div>` : ''}
+                    ${s.meaning ? `<div class="vocab-meaning">${escapeHtml(s.meaning)}</div>` : ''}
                 </div>
             `).join('');
         }
@@ -1327,9 +1315,8 @@
             if (!container) return;
 
             container.innerHTML = sentences.map((s, idx) => {
-                const isJa = (scriptData.language === 'ja');
-                let reading = s.phonetic || (isJa ? convertKanjiToHiragana(s.text) : '');
-                let meaning = s.meaning || getSentenceMeaning(s.text);
+                let reading = s.phonetic || '';
+                let meaning = s.meaning || '';
                 const roleClass = (s.role === 'B' || idx % 2 === 1) ? 'role-b' : '';
 
                 return `
@@ -1340,7 +1327,7 @@
                             ${reading ? `<div class="dialogue-reading">🎴 ${escapeHtml(reading)}</div>` : ''}
                             ${meaning ? `<div class="dialogue-vi">🇻🇳 ${escapeHtml(meaning)}</div>` : ''}
                         </div>
-                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(s.text)}')">🔊</button>
+                        <button type="button" class="btn-mini-audio" onclick="playSingleTts('${escapeHtml(s.text).replace(/'/g, "\\'")}')">🔊</button>
                     </div>
                 `;
             }).join('');
@@ -1377,28 +1364,22 @@
             }
 
             const sentence = sentences[fullDialogueIndex];
-            const utterance = new SpeechSynthesisUtterance(sentence.text);
-            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
-            utterance.rate = 0.92;
+            const langCode = scriptData.language;
 
-            utterance.onend = function() {
+            TtsManager.playTts(sentence.text, langCode).then(() => {
                 if (isPlayingFullDialogue) {
                     fullDialogueIndex++;
                     setTimeout(playNextSentenceInDeck, 600);
                 }
-            };
-
-            utterance.onerror = function() {
+            }).catch(err => {
+                console.error(err);
                 stopFullDialogueAudio();
-            };
-
-            window.speechSynthesis.cancel();
-            window.speechSynthesis.speak(utterance);
+            });
         }
 
         function stopFullDialogueAudio() {
             isPlayingFullDialogue = false;
-            window.speechSynthesis.cancel();
+            TtsManager.stopAudio();
             updatePlayAllBtn(false);
             document.querySelectorAll('.dialogue-item').forEach(item => item.classList.remove('active-playing'));
         }
@@ -1417,11 +1398,8 @@
         }
 
         function playSingleTts(text) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
-            utterance.rate = 0.92;
-            window.speechSynthesis.speak(utterance);
+            const langCode = scriptData.language;
+            TtsManager.playTts(text, langCode);
         }
 
         // ==========================================
@@ -1528,86 +1506,6 @@
             }
         }
 
-        function convertKanjiToHiragana(text) {
-            if (!text) return '';
-            let s = text;
-            const dict = [
-                { k: '初めまして', h: 'はじめまして' },
-                { k: '私', h: 'わたし' },
-                { k: '田中', h: 'たなか' },
-                { k: '来ました', h: 'きました' },
-                { k: 'お願いします', h: 'おねがいします' },
-                { k: 'お願いいたします', h: 'おねがいいたします' },
-                { k: '弁当', h: 'べんとう' },
-                { k: 'お弁当', h: 'おべんとう' },
-                { k: '温めますか', h: 'あたためますか' },
-                { k: '袋', h: 'ふくろ' },
-                { k: 'レジ袋', h: 'レジぶくろ' },
-                { k: 'ご利用', h: 'ごりよう' },
-                { k: '大丈夫', h: 'だいじょうぶ' },
-                { k: '会計', h: 'かいけい' },
-                { k: 'お会計', h: 'おかいけい' },
-                { k: '500円', h: 'ごひゃくえん' },
-                { k: '円', h: 'えん' },
-                { k: '注文', h: 'ちゅうもん' },
-                { k: '何', h: 'なに' },
-                { k: '飲み物', h: 'のみもの' },
-                { k: 'お飲み物', h: 'おのみもの' },
-                { k: '水', h: 'みず' },
-                { k: 'お水', h: 'おみず' },
-                { k: '一杯', h: 'いっぱい' },
-                { k: '払います', h: 'はらいます' },
-                { k: '東京駅', h: 'とうきょうえき' },
-                { k: '道', h: 'みち' },
-                { k: '行って', h: 'いって' },
-                { k: '信号', h: 'しんごう' },
-                { k: '右', h: 'みぎ' },
-                { k: '曲がってください', h: 'まがってください' },
-                { k: '歩いて', h: 'あるいて' },
-                { k: '5分', h: 'ごふん' },
-                { k: '助かりました', h: 'たすかりました' }
-            ];
-            for (const item of dict) {
-                s = s.split(item.k).join(item.h);
-            }
-            return s;
-        }
-
-        function getSentenceMeaning(text) {
-            if (!text) return '';
-            const t = text.trim();
-            const dict = [
-                { pattern: /初めまして.*田中.*ベトナム/, meaning: 'Rất vui được gặp bạn, tôi là Tanaka. Tôi đến từ Việt Nam.' },
-                { pattern: /初めまして.*田中さん.*よろしくお願いします/, meaning: 'Rất vui được gặp bạn, anh Tanaka. Rất mong được giúp đỡ.' },
-                { pattern: /こちらこそ.*よろしく/, meaning: 'Chính tôi mới là người mong được giúp đỡ.' },
-                { pattern: /いらっしゃいませ.*お弁当.*温めますか/, meaning: 'Xin chào quý khách! Quý khách có muốn hâm nóng hộp cơm bento không?' },
-                { pattern: /はい.*お願いします/, meaning: 'Vâng, xin vui lòng hâm giúp tôi.' },
-                { pattern: /レジ袋.*ご利用/, meaning: 'Quý khách có dùng túi nilon không ạ?' },
-                { pattern: /いいえ.*大丈夫/, meaning: 'Không, tôi không cần túi đâu.' },
-                { pattern: /お会計.*500円/, meaning: 'Tổng tiền thanh toán là 500 yên.' },
-                { pattern: /PayPay.*払います/, meaning: 'Tôi sẽ thanh toán bằng PayPay.' },
-                { pattern: /すみません.*注文.*お願いします/, meaning: 'Xin lỗi, cho tôi gọi món với.' },
-                { pattern: /何にいたしましょうか/, meaning: 'Vâng, quý khách muốn dùng món gì ạ?' },
-                { pattern: /ラーメン.*ギョーザ/, meaning: 'Cho tôi một bát ramen và một đĩa gyoza.' },
-                { pattern: /かしこまりました.*お飲み物/, meaning: 'Tôi đã hiểu. Quý khách có muốn dùng đồ uống gì không?' },
-                { pattern: /お水.*一杯/, meaning: 'Cho tôi xin một ly nước lọc.' },
-                { pattern: /すみません.*東京駅.*どこ/, meaning: 'Xin lỗi, ga Tokyo ở đâu vậy ạ?' },
-                { pattern: /この道.*まっすぐ.*信号.*右/, meaning: 'Bạn đi thẳng con đường này, rồi rẽ phải ở cột đèn giao thông nhé.' },
-                { pattern: /歩いて.*どれくらい/, meaning: 'Đi bộ mất khoảng bao lâu vậy ạ?' },
-                { pattern: /だいたい.*5分/, meaning: 'Tầm khoảng 5 phút thôi bạn.' },
-                { pattern: /ありがとう.*助かりました/, meaning: 'Xin cảm ơn bạn rất nhiều. May quá.' },
-                { pattern: /How are you doing today/i, meaning: 'Xin chào! Hôm nay bạn thế nào?' },
-                { pattern: /doing well.*How about you/i, meaning: 'Chào bạn! Tôi khỏe, cảm ơn bạn. Còn bạn thì sao?' },
-                { pattern: /pretty good.*free this afternoon/i, meaning: 'Tôi cũng rất ổn. Chiều nay bạn có rảnh không?' },
-                { pattern: /grab a coffee together/i, meaning: 'Có, tôi rảnh. Cùng đi uống cà phê nhé!' },
-                { pattern: /sounds wonderful/i, meaning: 'Nghe tuyệt vời đấy!' }
-            ];
-            for (const item of dict) {
-                if (item.pattern.test(t)) return item.meaning;
-            }
-            return '';
-        }
-
         function renderChatStep() {
             if (currentIndex >= sentences.length) {
                 finishSession();
@@ -1644,21 +1542,15 @@
                 }
             }
 
-            const isJa = (scriptData.language === 'ja');
             let phoneticText = (current.phonetic && current.phonetic.trim() !== '') ? current.phonetic.trim() : '';
-            if (!phoneticText && isJa) {
-                phoneticText = convertKanjiToHiragana(current.text);
-            }
-
-            const phoneticHtml = `
+            
+            const phoneticHtml = phoneticText ? `
                 <div class="phonetic-card ${isShowPhonetic ? '' : 'hidden-phonetic'}" id="phonetic-${currentIndex}">
                     <div class="phonetic-content">${escapeHtml(phoneticText)}</div>
-                </div>`;
+                </div>` : '';
 
             let meaningText = (current.meaning && current.meaning.trim() !== '') ? current.meaning.trim() : '';
-            if (!meaningText) {
-                meaningText = getSentenceMeaning(current.text);
-            }
+
             const meaningHtml = meaningText ? `
                 <div class="script-meaning" id="meaning-${currentIndex}">
                     <span class="meaning-badge">Nghĩa</span>
@@ -1706,13 +1598,14 @@
         function speakCurrentSentence(callback) {
             if (currentIndex >= sentences.length) return;
             const text = sentences[currentIndex].text;
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = (scriptData.language === 'en') ? 'en-US' : 'ja-JP';
-            utterance.rate = 0.92;
-            utterance.onend = () => { if (callback) callback(); };
-            utterance.onerror = () => { if (callback) callback(); };
-            window.speechSynthesis.speak(utterance);
+            const langCode = scriptData.language;
+            
+            TtsManager.playTts(text, langCode).then(() => {
+                if (callback) callback();
+            }).catch(err => {
+                console.error(err);
+                if (callback) callback();
+            });
         }
 
         // Mic Button
@@ -1723,54 +1616,125 @@
                     return;
                 }
                 if (isRecording) {
-                    recognition.stop();
+                    // Người dùng bấm Dừng -> Tắt ghi âm và GỬI LUÔN
+                    stopRecordingAndSubmit();
                 } else {
-                    try {
-                        recognition.start();
-                    } catch (e) {
-                        console.error('Recognition error:', e);
-                    }
+                    // Người dùng bấm Bật ghi âm
+                    startRecording();
                 }
             });
+        }
+
+        function startRecording() {
+            TtsManager.stopAudio();
+            latestSpokenTranscript = '';
+            manualStopRequested = false;
+            hasSubmitted = false;
+            try {
+                recognition.start();
+            } catch (e) {
+                console.warn('Recognition start error, attempting restart:', e);
+                try {
+                    recognition.stop();
+                    setTimeout(() => recognition.start(), 120);
+                } catch (err) {}
+            }
+        }
+
+        function stopRecordingAndSubmit() {
+            manualStopRequested = true;
+            isRecording = false;
+            btnRecord.classList.remove('recording');
+            liveDot.classList.remove('recording');
+            btnRecord.disabled = true;
+            btnMicText.innerText = 'Đang kiểm tra...';
+
+            try {
+                recognition.stop();
+            } catch (e) {
+                console.warn('Recognition stop error:', e);
+            }
+
+            // Nếu đã có chữ nhận diện được từ micro, gửi luôn lập tức
+            if (latestSpokenTranscript && latestSpokenTranscript.trim()) {
+                submitCurrentSpeech();
+            } else {
+                // Đề phòng trường hợp vừa dứt tiếng bấm dừng ngay, đợi 50ms để buffer cuối cùng nạp vào
+                setTimeout(() => {
+                    submitCurrentSpeech();
+                }, 50);
+            }
+        }
+
+        function submitCurrentSpeech() {
+            if (hasSubmitted) return;
+            hasSubmitted = true;
+            resetRecordingState();
+
+            const textToSend = (latestSpokenTranscript || '').trim();
+            if (textToSend) {
+                statusText.innerText = `Bạn nói: "${textToSend}"`;
+                evaluateUserSpeech(textToSend);
+            } else {
+                statusText.innerText = '⚠️ Bạn chưa nói gì hoặc mic chưa bắt được tiếng. Vui lòng bấm mic để đọc lại!';
+                btnRecord.disabled = false;
+                btnMicText.innerText = 'Nhấn để nói';
+            }
         }
 
         if (recognition) {
             recognition.onstart = () => {
                 isRecording = true;
+                manualStopRequested = false;
+                hasSubmitted = false;
+                btnRecord.disabled = false;
                 btnRecord.classList.add('recording');
-                btnMicText.innerText = 'Đang nghe...';
+                btnMicText.innerText = '⏹️ Dừng';
                 liveDot.classList.add('recording');
-                statusText.innerText = 'Đang nhận diện giọng nói của bạn...';
+                statusText.innerText = '🎙️ Đang nghe... Đọc xong bấm "Dừng" để kiểm tra';
+
+                // Trả bubble về trạng thái trung tính khi user bắt đầu đọc lại
+                const curRow = document.getElementById(`msg-row-${currentIndex}`);
+                if (curRow) {
+                    const b = curRow.querySelector('.bubble');
+                    if (b) {
+                        b.classList.remove('correct', 'almost', 'incorrect');
+                    }
+                }
             };
 
             recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                let sessionTranscript = '';
+                for (let i = 0; i < event.results.length; ++i) {
+                    sessionTranscript += event.results[i][0].transcript;
                 }
-                const spokenText = finalTranscript || interimTranscript;
-                if (spokenText) statusText.innerText = `Bạn nói: "${spokenText}"`;
-                if (finalTranscript) evaluateUserSpeech(finalTranscript.trim());
+                latestSpokenTranscript = sessionTranscript.trim();
+                if (latestSpokenTranscript) {
+                    statusText.innerText = `Bạn đang nói: "${latestSpokenTranscript}"`;
+                }
             };
 
             recognition.onerror = (event) => {
                 console.warn('Speech Recognition error:', event.error);
-                statusText.innerText = `Lỗi nhận diện: ${event.error}. Vui lòng thử lại.`;
+                if (event.error === 'no-speech') {
+                    statusText.innerText = '⚠️ Chưa nghe thấy âm thanh. Vui lòng bấm mic để nói lại.';
+                } else {
+                    statusText.innerText = `Lỗi nhận diện: ${event.error}. Vui lòng thử lại.`;
+                }
                 resetRecordingState();
             };
 
             recognition.onend = () => {
                 resetRecordingState();
+                if (manualStopRequested && !hasSubmitted) {
+                    submitCurrentSpeech();
+                }
             };
         }
 
         function resetRecordingState() {
             isRecording = false;
+            manualStopRequested = false;
             btnRecord.classList.remove('recording');
             btnMicText.innerText = 'Nhấn để nói';
             liveDot.classList.remove('recording');
@@ -1783,6 +1747,8 @@
             const feedbackBox = document.getElementById(`feedback-box-${currentIndex}`);
 
             statusText.innerText = 'AI đang chấm điểm phát âm...';
+            btnRecord.disabled = true;
+            btnMicText.innerText = 'AI đang chấm...';
 
             try {
                 const formData = new URLSearchParams();
@@ -1793,64 +1759,182 @@
 
                 const response = await fetch('/api/practice/check', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken },
                     body: formData
                 });
-
+                // debugger;
                 if (!response.ok) throw new Error('Network error');
                 const result = await response.json();
 
-                if (result.isCorrect) {
+                // Log chi tiết toàn bộ dữ liệu từ Gemini AI ra DevTools Console để Developer/User kiểm tra
+                console.group('🤖 [Gemini Speech Evaluation Debug]');
+                console.log('📌 Câu gốc:', current.text);
+                console.log('🗣️ User nói:', spokenText);
+                console.log('🎯 Status:', result.status, '| isCorrect:', result.isCorrect, '| Similarity:', result.similarity);
+                console.log('💡 Suggestion:', result.suggestion);
+                console.log('⚠️ Errors:', result.errors);
+                console.log('🔊 TTS Segments:', result.ttsSegments);
+                console.log('📥 Dữ liệu RAW từ Gemini AI:\n', result.rawAiResponse);
+                console.log('📝 Prompt đã gửi tới AI:\n', result.aiPrompt);
+                console.log('⚙️ Debug Details:', result.debugDetails);
+                console.groupEnd();
+
+                const evalStatus = (result.status || (result.isCorrect ? 'PASS' : 'FAIL')).toUpperCase();
+                const cleanSuggestion = decodeHtml(result.suggestion || '');
+
+                if (evalStatus === 'PASS' || (result.isCorrect && evalStatus !== 'NEAR' && evalStatus !== 'FAIL')) {
+                    // 🟢 Đúng hoàn toàn -> Màu xanh
+                    passedIndices.add(currentIndex);
                     if (bubble) {
                         bubble.className = 'bubble correct';
                         bubble.innerText = current.text;
+                        bubble.classList.remove('text-blur');
                     }
-                    statusText.innerText = `🟢 Tuyệt vời! ${result.suggestion || 'Đã phát âm chuẩn xác.'}`;
+                    statusText.innerText = `🟢 Tuyệt vời! ${cleanSuggestion || 'Đã phát âm chuẩn xác.'}`;
                     btnNextStep.disabled = false;
                     btnRecord.disabled = true;
-
-                    setTimeout(() => nextStep(), 1000);
-                } else {
-                    const similarity = calculateSimilarityClient(current.text, spokenText);
-                    if (similarity >= 0.70) {
-                        if (bubble) bubble.className = 'bubble almost';
-                        statusText.innerText = `🟡 Gần đúng (${Math.round(similarity * 100)}%). Bạn có thể nói lại để chuẩn hơn hoặc nhấn Tiếp theo.`;
-                        btnNextStep.disabled = false;
-                    } else {
-                        if (bubble) bubble.className = 'bubble incorrect';
-                        statusText.innerText = `🔴 Chưa chính xác. Vui lòng bấm Mic để đọc lại câu này nhé!`;
-                        btnNextStep.disabled = true;
-                    }
+                    btnMicText.innerText = 'Đã đạt';
 
                     if (feedbackBox) {
                         feedbackBox.innerHTML = `
-                            <div class="ai-feedback-box">
-                                <div>💡 <strong>Gợi ý:</strong> ${escapeHtml(result.suggestion || 'Hãy đọc chậm và rõ ràng từng từ.')}</div>
+                            <div class="ai-feedback-box" style="border-left-color: #10b981; background: #ecfdf5;">
+                                <div style="color: #065f46; font-weight: 700; margin-bottom: 4px;">🟢 Tuyệt vời (Đúng 100%)</div>
+                                <div>${escapeHtml(cleanSuggestion || 'Bạn đã phát âm rất chuẩn xác!')}</div>
+                                ${buildDebugHtml(result)}
                             </div>`;
                     }
+
+                    setTimeout(() => nextStep(), 1500);
+                } else if (evalStatus === 'NEAR') {
+                    // 🟡 Gần đúng -> Màu vàng
+                    passedIndices.add(currentIndex);
+                    if (bubble) {
+                        bubble.className = 'bubble almost';
+                        if (phase === 2) bubble.innerText = current.text;
+                        bubble.classList.remove('text-blur');
+                    }
+                    statusText.innerText = `🟡 Gần đúng! ${cleanSuggestion || 'Bạn đọc gần đúng rồi, chỉ sai sót một chút.'}`;
+                    btnNextStep.disabled = false;
+                    btnRecord.disabled = false;
+                    btnMicText.innerText = 'Nhấn để nói lại';
+
+                    if (feedbackBox) {
+                        const nearErrorsHtml = (result.errors && result.errors.length > 0) ? `
+                            <div style="margin-top: 6px; padding: 6px 8px; background: rgba(245, 158, 11, 0.12); border-radius: 6px;">
+                                <div style="font-weight: 700; font-size: 0.8rem; color: #92400e;">🔍 Chi tiết lỗi cần chú ý:</div>
+                                <ul style="margin: 2px 0 0 16px; padding: 0; font-size: 0.82rem; color: #78350f;">
+                                    ${result.errors.map(err => `<li>${escapeHtml(decodeHtml(err))}</li>`).join('')}
+                                </ul>
+                            </div>` : '';
+
+                        feedbackBox.innerHTML = `
+                            <div class="ai-feedback-box" style="border-left-color: #f59e0b; background: #fffbeb;">
+                                <div style="color: #92400e; font-weight: 700; margin-bottom: 4px;">🟡 Gần đúng</div>
+                                <div>💡 <strong>Gợi ý AI:</strong> ${escapeHtml(cleanSuggestion || 'Bạn có thể bấm Mic nói lại cho chuẩn hơn, hoặc bấm Tiếp theo.')}</div>
+                                ${nearErrorsHtml}
+                                ${buildDebugHtml(result)}
+                            </div>`;
+                    }
+
+                    // Phát âm thanh phản hồi trực quan từ Gemini
+                    if (result.ttsSegments && result.ttsSegments.length > 0) {
+                        TtsManager.playTtsSegmentsSequential(result.ttsSegments);
+                    } else if (cleanSuggestion) {
+                        TtsManager.playTts(cleanSuggestion, 'vi-VN');
+                    }
+                } else {
+                    // 🔴 Sai nhiều -> Màu đỏ
+                    passedIndices.delete(currentIndex);
+                    if (bubble) {
+                        bubble.className = 'bubble incorrect';
+                    }
+                    statusText.innerText = `🔴 Chưa chính xác (Sai nhiều). ${cleanSuggestion || 'Vui lòng bấm Mic để đọc lại câu này nhé!'}`;
+                    btnNextStep.disabled = false;
+                    btnRecord.disabled = false;
+                    btnMicText.innerText = 'Nhấn để nói lại';
+
+                    if (feedbackBox) {
+                        const failErrorsHtml = (result.errors && result.errors.length > 0) ? `
+                            <div style="margin-top: 6px; padding: 6px 8px; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
+                                <div style="font-weight: 700; font-size: 0.8rem; color: #b91c1c;">🔍 Chi tiết lỗi phát âm:</div>
+                                <ul style="margin: 2px 0 0 16px; padding: 0; font-size: 0.82rem; color: #991b1b;">
+                                    ${result.errors.map(err => `<li>${escapeHtml(decodeHtml(err))}</li>`).join('')}
+                                </ul>
+                            </div>` : '';
+
+                        feedbackBox.innerHTML = `
+                            <div class="ai-feedback-box" style="border-left-color: #ef4444; background: #fef2f2;">
+                                <div style="color: #b91c1c; font-weight: 700; margin-bottom: 4px;">🔴 Chưa chính xác (Sai nhiều)</div>
+                                <div>⚠️ <strong>Chỉ lỗi:</strong> ${escapeHtml(cleanSuggestion || 'Hãy đọc chậm và rõ ràng từng từ theo mẫu.')}</div>
+                                ${failErrorsHtml}
+                                ${buildDebugHtml(result)}
+                            </div>`;
+                    }
+                    
+                    // Phát âm thanh phản hồi trực quan từ Gemini
+                    if (result.ttsSegments && result.ttsSegments.length > 0) {
+                        TtsManager.playTtsSegmentsSequential(result.ttsSegments);
+                    } else if (cleanSuggestion) {
+                        TtsManager.playTts(cleanSuggestion, 'vi-VN');
+                    }
                 }
+
             } catch (err) {
                 console.error(err);
-                if (bubble) bubble.className = 'bubble correct';
-                statusText.innerText = 'Đã hoàn thành lượt đọc.';
-                btnNextStep.disabled = false;
-                setTimeout(() => nextStep(), 900);
+                if (bubble) bubble.className = 'bubble incorrect';
+                statusText.innerText = '🔴 Lỗi kết nối đến máy chủ. Vui lòng kiểm tra lại mạng hoặc Backend và thử lại!';
+                btnNextStep.disabled = true;
+                btnRecord.disabled = false;
+                btnMicText.innerText = 'Nhấn để nói';
             }
         }
 
-        function calculateSimilarityClient(s1, s2) {
-            if (!s1 || !s2) return 0;
-            const clean1 = s1.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
-            const clean2 = s2.replace(/[^\p{L}\p{N}]/gu, '').toLowerCase();
-            if (clean1 === clean2) return 1.0;
-            let matches = 0;
-            for (let char of clean1) {
-                if (clean2.includes(char)) matches++;
-            }
-            return matches / Math.max(clean1.length, clean2.length);
+        function buildDebugHtml(result) {
+            if (!result) return '';
+            const segmentsHtml = (result.ttsSegments || []).map((seg, idx) => `
+                <div style="display: flex; align-items: baseline; gap: 6px; font-size: 0.8rem; margin-bottom: 3px;">
+                    <span style="background: #e2e8f0; color: #1e293b; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-size: 0.72rem; flex-shrink: 0;">#${idx + 1} [${escapeHtml(seg.lang)}]</span>
+                    <span style="color: #334155; word-break: break-word;">${escapeHtml(decodeHtml(seg.text))}</span>
+                </div>
+            `).join('');
+
+            return `
+                <details class="gemini-debug-details" style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 8px; font-size: 0.8rem; color: #475569;">
+                    <summary style="cursor: pointer; font-weight: 700; color: #4f46e5; outline: none; user-select: none;">
+                        🔍 Xem kết quả thô từ Gemini AI (Debug / Kiểm tra)
+                    </summary>
+                    <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">
+                        <div>
+                            <strong>Trạng thái:</strong> <span style="font-weight: 700; color: ${result.status === 'PASS' ? '#16a34a' : result.status === 'NEAR' ? '#d97706' : '#dc2626'}">${escapeHtml(result.status)}</span> | 
+                            <strong>Độ chính xác (Similarity):</strong> <code>${result.similarity != null ? (result.similarity * 100).toFixed(1) + '%' : 'N/A'}</code>
+                        </div>
+                        <div>
+                            <strong>Phân tách TTS (${(result.ttsSegments || []).length} segments):</strong>
+                            <div style="margin-top: 4px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
+                                ${segmentsHtml || '<span style="color:#94a3b8;">Không có segments</span>'}
+                            </div>
+                        </div>
+                        <div>
+                            <strong>Dữ liệu Raw Output từ Gemini AI:</strong>
+                            <pre style="margin-top: 4px; background: #0f172a; color: #38bdf8; padding: 8px; border-radius: 6px; font-size: 0.75rem; white-space: pre-wrap; word-break: break-all; max-height: 180px; overflow-y: auto;">${escapeHtml(result.rawAiResponse || 'Không có dữ liệu thô (rawAiResponse rỗng)')}</pre>
+                        </div>
+                        ${result.aiPrompt ? `
+                        <details style="font-size: 0.75rem; color: #64748b;">
+                            <summary style="cursor: pointer;">📝 Xem Prompt đã gửi tới Gemini</summary>
+                            <pre style="margin-top: 4px; background: #f1f5f9; color: #334155; padding: 6px; border-radius: 4px; white-space: pre-wrap; max-height: 140px; overflow-y: auto;">${escapeHtml(result.aiPrompt)}</pre>
+                        </details>
+                        ` : ''}
+                    </div>
+                </details>
+            `;
         }
+
+
 
         function nextStep() {
+            TtsManager.stopAudio();
             currentIndex++;
             renderChatStep();
         }
@@ -1872,6 +1956,7 @@
 
         // Finish Session
         function finishSession() {
+            TtsManager.stopAudio();
             if (timerInterval) clearInterval(timerInterval);
             const now = new Date();
             const elapsed = Math.floor((now - startTime) / 1000);
@@ -1882,13 +1967,23 @@
             document.getElementById('finish-time').innerText = formattedTime;
             document.getElementById('r-stat-time').innerText = formattedTime;
 
-            const isPassed = !scriptData.targetDuration || elapsed <= scriptData.targetDuration;
+            const userTotalTurns = sentences.filter(s => s.role === userRole).length;
+            const passedCount = passedIndices.size;
+            const readinessPercent = userTotalTurns > 0 ? Math.min(100, Math.round((passedCount / userTotalTurns) * 100)) : 100;
+            const rStatReadiness = document.getElementById('r-stat-readiness');
+            if (rStatReadiness) {
+                rStatReadiness.innerText = `${readinessPercent}% Đạt`;
+                rStatReadiness.style.color = readinessPercent >= 80 ? '#10b981' : (readinessPercent >= 50 ? '#f59e0b' : '#ef4444');
+            }
+
+            const isPassed = (!scriptData.targetDuration || elapsed <= scriptData.targetDuration) && readinessPercent >= 80;
             if (finishModal) finishModal.style.display = 'flex';
         }
 
         function restartPractice() {
             currentIndex = 0;
             startTime = null;
+            passedIndices.clear();
             if (timerInterval) clearInterval(timerInterval);
             timerDisplay.innerText = '00:00';
             chatStream.innerHTML = '';
@@ -1904,6 +1999,15 @@
         function escapeHtml(text) {
             if (!text) return '';
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function decodeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&quot;/g, '"')
+                       .replace(/&#039;/g, "'")
+                       .replace(/&amp;/g, '&')
+                       .replace(/&lt;/g, '<')
+                       .replace(/&gt;/g, '>');
         }
 
         // Bootstrap on load

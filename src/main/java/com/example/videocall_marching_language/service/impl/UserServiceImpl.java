@@ -3,8 +3,11 @@ package com.example.videocall_marching_language.service.impl;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
 import com.example.videocall_marching_language.entity.User;
+import com.example.videocall_marching_language.entity.UserAiSetting;
+import com.example.videocall_marching_language.enums.AIProvider;
 import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
+import com.example.videocall_marching_language.repository.IUserAiSettingRepository;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.AvatarStorageService;
 import com.example.videocall_marching_language.service.AvatarUploadResult;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +29,9 @@ import java.util.Optional;
 public class UserServiceImpl implements IUserService {
 
     private final IUserRepository userRepository;
+    private final IUserAiSettingRepository userAiSettingRepository;
     private final AvatarStorageService avatarStorageService;
 
-    // ==================== PROFILE MANAGEMENT ====================
 
     @Override
     @Transactional(readOnly = true)
@@ -40,7 +44,23 @@ public class UserServiceImpl implements IUserService {
     public UserProfileResponse updateCurrentProfile(String email, UpdateProfileRequest request) {
         User user = findByEmailOrThrow(email);
         user.setUsername(request.getUsername().trim());
-        user.setCurrentLevel(request.getCurrentLevel());
+        if (request.getProvider() != null) {
+            user.setActiveAiProvider(request.getProvider());
+        }
+
+        // Update or insert API key
+        if (request.getProvider() != null && request.getApiKey() != null && !request.getApiKey().isBlank()) {
+            UserAiSetting aiSetting =
+                userAiSettingRepository.findByUserIdAndAiProvider(user.getId(), request.getProvider())
+                .orElseGet(() -> {
+                    UserAiSetting newSetting = new UserAiSetting();
+                    newSetting.setUser(user);
+                    newSetting.setAiProvider(request.getProvider());
+                    return newSetting;
+                });
+            aiSetting.setAiApiKey(request.getApiKey().trim());
+            userAiSettingRepository.save(aiSetting);
+        }
 
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
             String previousAvatarPublicId = user.getAvatarPublicId();
@@ -112,14 +132,39 @@ public class UserServiceImpl implements IUserService {
     }
 
     private UserProfileResponse toResponse(User user) {
+        String apiKey = null;
+        List<AIProvider> configuredProviders = Collections.emptyList();
+
+        if (user.getId() != null) {
+            List<UserAiSetting> settings = userAiSettingRepository.findByUserId(user.getId());
+            if (settings != null) {
+                configuredProviders = settings.stream()
+                        .filter(s -> s.getAiApiKey() != null && !s.getAiApiKey().isBlank())
+                        .map(UserAiSetting::getAiProvider)
+                        .distinct()
+                        .toList();
+
+                AIProvider active = user.getActiveAiProvider();
+                if (active != null) {
+                    apiKey = settings.stream()
+                            .filter(s -> s.getAiProvider() == active)
+                            .map(UserAiSetting::getAiApiKey)
+                            .findFirst()
+                            .orElse(null);
+                }
+            }
+        }
+
         return new UserProfileResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getCurrentLevel(),
                 user.getTrustScore(),
                 user.getAvatarUrl(),
-                user.getRole()
+                user.getRole(),
+                user.getActiveAiProvider(),
+                apiKey,
+                configuredProviders
         );
     }
 
