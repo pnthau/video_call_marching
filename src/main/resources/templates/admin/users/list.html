@@ -20,12 +20,19 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3">
             <form th:action="@{/admin/users}" method="get" class="row g-2 align-items-center">
-                <div class="col-md-8">
+                <div class="col-md-4">
                     <input type="text"
-                           name="search"
+                           name="username"
                            class="form-control"
-                           placeholder="Tim theo username hoac email..."
-                           th:value="${search}" />
+                           placeholder="Username"
+                           th:value="${username}" />
+                </div>
+                <div class="col-md-4">
+                    <input type="text"
+                           name="email"
+                           class="form-control"
+                           placeholder="Email"
+                           th:value="${email}" />
                 </div>
                 <div class="col-md-4 d-flex gap-2">
                     <button type="submit" class="btn btn-primary flex-grow-1">Tim kiem</button>
@@ -60,7 +67,7 @@
                         <td class="text-center">
                             <a th:href="@{/admin/users/{id}(id=${user.id})}"
                                class="btn btn-outline-info btn-sm me-1" title="Xem chi tiet">Xem</a>
-                            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}"
+                            <a th:href="@{/admin/users/edit/{id}(id=${user.id})}"
                                class="btn btn-warning btn-sm" title="Chinh sua">Sua</a>
                         </td>
                     </tr>
@@ -87,18 +94,18 @@
             <ul class="pagination pagination-sm mb-0">
                 <li class="page-item" th:classappend="${users.first} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/admin/users(page=${users.number - 1}, search=${search})}">&laquo;</a>
+                       th:href="@{/admin/users(page=${users.number - 1}, username=${username}, email=${email})}">&laquo;</a>
                 </li>
                 <li class="page-item"
                     th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
                     th:classappend="${i == users.number} ? 'active'">
                     <a class="page-link"
-                       th:href="@{/admin/users(page=${i}, search=${search})}"
+                       th:href="@{/admin/users(page=${i}, username=${username}, email=${email})}"
                        th:text="${i + 1}">1</a>
                 </li>
                 <li class="page-item" th:classappend="${users.last} ? 'disabled'">
                     <a class="page-link"
-                       th:href="@{/admin/users(page=${users.number + 1}, search=${search})}">&raquo;</a>
+                       th:href="@{/admin/users(page=${users.number + 1}, username=${username}, email=${email})}">&raquo;</a>
                 </li>
             </ul>
         </nav>
