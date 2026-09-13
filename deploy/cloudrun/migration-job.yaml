@@ -1,0 +1,39 @@
+# Cloud Run Job template. Documentation/template only; do not apply without a
+# separately authorized Cloud Run resource gate.
+apiVersion: run.googleapis.com/v1
+kind: Job
+metadata:
+  name: video-call-staging-migrate
+  labels:
+    managed-by: deployment-hardening
+spec:
+  template:
+    spec:
+      parallelism: 1
+      taskCount: 1
+      template:
+        spec:
+          maxRetries: 1
+          timeoutSeconds: 900
+          serviceAccountName: cr-staging-migrator@${PROJECT_ID}.iam.gserviceaccount.com
+          containers:
+            - name: migrator
+              image: ${REGION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/video-call@sha256:${IMAGE_DIGEST}
+              env:
+                - name: SPRING_PROFILES_ACTIVE
+                  value: migration
+                - name: SPRING_MAIN_WEB_APPLICATION_TYPE
+                  value: none
+                - name: CLOUD_SQL_INSTANCE_CONNECTION_NAME
+                  value: ${PROJECT_ID}:${REGION}:video-call-staging-sql
+                - name: MYSQL_DATABASE
+                  value: video_call_staging
+                - name: MIGRATION_MYSQL_USERNAME
+                  value: app_migrator
+                - name: MIGRATION_MYSQL_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: cr-staging-migrator-db-password
+                      key: "1"
+        # The migration gate must validate Flyway and Hibernate before exit 0.
+        # A serving profile is prohibited by the application profile guard.

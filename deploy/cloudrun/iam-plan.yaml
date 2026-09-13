@@ -1,0 +1,33 @@
+# IAM plan only. No bindings are applied by this file.
+project: PROJECT_ID
+region: asia-southeast1
+serviceAccounts:
+  runtime: cr-staging-runtime@PROJECT_ID.invalid
+  migrator: cr-staging-migrator@PROJECT_ID.invalid
+  deployer: cr-staging-deployer@PROJECT_ID.invalid
+bindings:
+  - principal: serviceAccount:cr-staging-runtime@PROJECT_ID.invalid
+    resource: cloud-sql-instance/video-call-staging-sql
+    role: roles/cloudsql.client
+  - principal: serviceAccount:cr-staging-runtime@PROJECT_ID.invalid
+    resource: secret/cr-staging-runtime-db-password
+    role: roles/secretmanager.secretAccessor
+  - principal: serviceAccount:cr-staging-runtime@PROJECT_ID.invalid
+    resource: secret/cr-staging-oauth-client-secret
+    role: roles/secretmanager.secretAccessor
+  - principal: serviceAccount:cr-staging-runtime@PROJECT_ID.invalid
+    resource: secret/cr-staging-cloudinary-secret
+    role: roles/secretmanager.secretAccessor
+  - principal: serviceAccount:cr-staging-runtime@PROJECT_ID.invalid
+    resource: secret/cr-staging-agora-certificate
+    role: roles/secretmanager.secretAccessor
+  - principal: serviceAccount:cr-staging-migrator@PROJECT_ID.invalid
+    resource: cloud-sql-instance/video-call-staging-sql
+    role: roles/cloudsql.client
+  - principal: serviceAccount:cr-staging-migrator@PROJECT_ID.invalid
+    resource: secret/cr-staging-migrator-db-password
+    role: roles/secretmanager.secretAccessor
+deployerRules:
+  - deployer receives deployment and traffic permissions only after review
+  - deployer must not receive database-password or secret-payload access
+  - no Owner, Editor, or project-wide secret accessor binding

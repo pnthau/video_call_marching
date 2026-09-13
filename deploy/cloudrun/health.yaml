@@ -1,0 +1,30 @@
+# Health-gate contract/template; values are bounded and sanitized.
+service: video-call-staging
+region: asia-southeast1
+endpoints:
+  liveness: /actuator/health/liveness
+  readiness: /actuator/health/readiness
+  publicSmoke: /
+startup:
+  timeoutSeconds: 120
+  requestTimeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 12
+liveness:
+  requestTimeoutSeconds: 5
+  periodSeconds: 30
+  failureThreshold: 3
+readiness:
+  requestTimeoutSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 6
+publicSmoke:
+  scheme: https
+  overallTimeoutSeconds: 600
+  tlsVerification: required
+  responseLogging: prohibited
+successRequires:
+  - startup pass
+  - readiness pass
+  - sanitized public HTTPS smoke pass
+  - no credential, token, cookie, SQL, topology, or exception details in output
