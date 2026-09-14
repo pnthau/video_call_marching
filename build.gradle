@@ -44,5 +44,18 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+		excludeTags 'live'
+	}
+}
+
+tasks.register('liveTest', Test) {
+	description = 'Runs tests that require explicitly opted-in external services'
+	group = 'verification'
+	testClassesDirs = sourceSets.test.output.classesDirs
+	classpath = sourceSets.test.runtimeClasspath
+	useJUnitPlatform {
+		includeTags 'live'
+	}
+	shouldRunAfter tasks.named('test')
 }
