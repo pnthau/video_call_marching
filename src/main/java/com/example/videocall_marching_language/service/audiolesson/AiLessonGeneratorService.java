@@ -48,68 +48,48 @@ public class AiLessonGeneratorService {
     }
 
     private String buildPrompt(String segmentsData, String language, String topicName) {
-        return """
-        Bạn là chuyên gia sư phạm ngôn ngữ và thiết kế bài học tương tác cao cấp.
-        Nhiệm vụ của bạn là nhận danh sách các câu được bóc tách từ file audio (kèm timestamps) và sinh ra bộ học liệu tương tác hoàn chỉnh bằng tiếng Việt.
-        
-        Chủ đề bài học: "%s"
-        Ngôn ngữ mục tiêu: "%s"
-        
-        Danh sách câu trích xuất từ audio:
-        %s
-        
-        QUY TẮC BẮT BUỘC VỀ PHIÊN ÂM VÀ HỌC LIỆU:
-        1. PHẦN 1 - PHIÊN ÂM (phonetic):
-           - PHẢI PHIÊN ÂM CHÍNH XÁC THEO CÁCH PHÁT ÂM THỰC TẾ TRONG AUDIO.
-           - ĐẶC BIỆT chú ý cách đọc số và biến thể âm trong tiếng Nhật:
-             + Nếu audio đọc 17 là "juushichi" thì phiên âm BẮT BUỘC là "juushichi (じゅうしち)", TUYỆT ĐỐI KHÔNG tự động chuyển thành "juunana".
-             + Tương tự: số 7 nếu đọc "shichi" thì ghi "shichi (しち)", số 4 nếu đọc "shi" thì ghi "shi (し)" hoặc "yon (よん)" theo đúng âm audio.
-             + Cung cấp định dạng kết hợp dễ đọc: "Romaji (Hiragana)" ví dụ: "Juushichi-sai desu (じゅうしちさいです)".
-        2. PHẦN 2 - ĐỀ BÀI THỬ THÁCH ĐẶT CÂU & MẢNH GHÉP TỪ VỰNG GỢI Ý (BẮT BUỘC):
-           Quy trình tư duy 3 bước bắt buộc để đảm bảo đề bài thử thách và các mảnh ghép từ vựng KHỚP NHAU 100%:
-           - Bước 1: "challengeTargetSentence": Sáng tạo một CÂU TIẾNG NHẬT MẪU HOÀN TOÀN MỚI áp dụng cấu trúc ngữ pháp này vào tình huống thực tế (TUYỆT ĐỐI KHÔNG lặp lại câu gốc trong audio).
-             Ví dụ: "日曜日にコンサートがあります。"
-           - Bước 2: "sentenceChallengePrompt": Đề bài thử thách bằng tiếng Việt dịch từ câu mẫu trên.
-             Ví dụ: "Thử thách: Đặt câu thông báo rằng vào Chủ Nhật có một buổi hòa nhạc (áp dụng cấu trúc 〜があります)."
-           - Bước 3: "keyWordsJson": ĐÂY LÀ CÁC MẢNH GHÉP TỪ VỰNG ĐƯỢC BÓC TÁCH TRỰC TIẾP TỪ CHÍNH "challengeTargetSentence" Ở BƯỚC 1 (TUYỆT ĐỐI KHÔNG LẤY TỪ CÂU GỐC TRONG AUDIO).
-             Bạn PHẢI cung cấp đúng 3 đến 5 từ vựng then chốt cấu thành nên câu trả lời của thử thách, để người học chỉ việc nhặt các từ này ghép lại thành câu mới.
-             Ví dụ: Với câu thử thách "vào Chủ Nhật có một buổi hòa nhạc", keyWordsJson BẮT BUỘC phải là:
-             [
-               {"kanji": "日曜日", "hiragana": "にちようび", "romaji": "nichiyoubi", "meaning": "Chủ Nhật"},
-               {"kanji": "コンサート", "hiragana": "こんさーと", "romaji": "konsaato", "meaning": "buổi hòa nhạc"},
-               {"kanji": "あります", "hiragana": "あります", "romaji": "arimasu", "meaning": "có / diễn ra"}
-             ]
-             Mỗi từ vựng bắt buộc có đủ 4 trường: kanji, hiragana, romaji, meaning.
-        
-        YÊU CẦU ĐẦU RA:
-        Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm markdown ```json ... ``` hoặc bất kỳ text nào khác bên ngoài), tuân theo đúng cấu trúc JSON sau:
-        {
-          "lessonTitle": "Tiêu đề bài học hay và súc tích bằng tiếng Việt",
-          "sentences": [
-            {
-              "sentenceIndex": 0,
-              "startTime": 0.0,
-              "endTime": 2.5,
-              "originalText": "Câu gốc chính xác theo audio",
-              "phonetic": "Romaji (Hiragana) chuẩn xác theo âm audio thực tế",
-              "vietnameseMeaning": "Bản dịch tiếng Việt tự nhiên và sát nghĩa",
-              "grammarPoint": "Tên điểm ngữ pháp nổi bật của câu (ví dụ: Thể Te + kara, Cấu trúc câu điều kiện...)",
-              "explanation": "Giải thích ngữ pháp ngắn gọn, dễ hiểu bằng tiếng Việt (1-2 câu)",
-              "formula": "Công thức ngữ pháp (ví dụ: V-te + kara, Danh từ + です)",
-              "challengeTargetSentence": "日曜日にコンサートがあります。",
-              "sentenceChallengePrompt": "Thử thách: Đặt câu thông báo rằng vào Chủ Nhật có một buổi hòa nhạc (áp dụng cấu trúc 〜があります).",
-              "keyWordsJson": "[{\\"kanji\\":\\"日曜日\\",\\"hiragana\\":\\"にちようび\\",\\"romaji\\":\\"nichiyoubi\\",\\"meaning\\":\\"Chủ Nhật\\"},{\\"kanji\\":\\"コンサート\\",\\"hiragana\\":\\"こんさーと\\",\\"romaji\\":\\"konsaato\\",\\"meaning\\":\\"buổi hòa nhạc\\"},{\\"kanji\\":\\"あります\\",\\"hiragana\\":\\"あります\\",\\"romaji\\":\\"arimasu\\",\\"meaning\\":\\"có / diễn ra\\"}]",
-              "exerciseType": "LISTENING_FILL_BLANK",
-              "question": "Câu đố điền khuyết với chỗ trống ___",
-              "options": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-              "correctAnswer": "Đáp án đúng chính xác",
-              "exerciseExplanation": "Giải thích vì sao chọn đáp án đó"
-            }
-          ]
-        }
-        LƯU Ý:
-        - Giữ nguyên số lượng câu và đúng thứ tự sentenceIndex, startTime, endTime như dữ liệu đầu vào.
-        - Đảm bảo 4 đáp án trắc nghiệm options có 1 đáp án đúng và 3 phương án gây nhiễu hợp lý.
+        return """                                                                                                                                                               
+        Bạn là chuyên gia sư phạm ngôn ngữ. Hãy tạo bộ học liệu tương tác từ danh sách câu audio dưới đây.                                                                       
+                                                                                                                                                                                 
+        Chủ đề: "%s" | Ngôn ngữ: "%s"                                                                                                                                            
+                                                                                                                                                                                 
+        Dữ liệu câu audio:                                                                                                                                                       
+        %s                                                                                                                                                                       
+                                                                                                                                                                                 
+        QUY TẮC BẮT BUỘC:                                                                                                                                                        
+        1. phonetic: Phiên âm chính xác theo audio thực tế (chú ý số/biến âm), định dạng "Romaji (Hiragana)".                                                                    
+        2. Thử thách đặt câu (phải khớp nhau hoàn toàn):                                                                                                                         
+           - challengeTargetSentence: Tạo 1 câu mẫu mới áp dụng ngữ pháp của câu (không lặp lại câu gốc audio).                                                                  
+           - sentenceChallengePrompt: Đề bài tiếng Việt yêu cầu người học đặt câu mẫu trên.                                                                                      
+           - keyWordsJson: Chuỗi JSON chứa 3-5 mảnh ghép từ vựng bóc từ chính challengeTargetSentence, mỗi từ đủ 4 trường: kanji, hiragana, romaji, meaning.                     
+        3. Trắc nghiệm: 4 options (1 đúng, 3 nhiễu hợp lý), giữ nguyên số lượng câu và đúng thứ tự sentenceIndex, startTime, endTime.                                            
+                                                                                                                                                                                 
+        YÊU CẦU ĐẦU RA:                                                                                                                                                          
+        Chỉ trả về DUY NHẤT một chuỗi JSON hợp lệ (không kèm markdown ```json ... ```):                                                                                          
+        {                                                                                                                                                                        
+          "lessonTitle": "Tiêu đề bài học súc tích bằng tiếng Việt",                                                                                                             
+          "sentences": [                                                                                                                                                         
+            {                                                                                                                                                                    
+              "sentenceIndex": 0,                                                                                                                                                
+              "startTime": 0.0,                                                                                                                                                  
+              "endTime": 2.5,                                                                                                                                                    
+              "originalText": "Câu gốc từ audio",                                                                                                                                
+              "phonetic": "Romaji (Hiragana)",                                                                                                                                   
+              "vietnameseMeaning": "Nghĩa tiếng Việt",                                                                                                                           
+              "grammarPoint": "Tên điểm ngữ pháp",                                                                                                                               
+              "explanation": "Giải thích ngữ pháp ngắn gọn (1-2 câu)",                                                                                                           
+              "formula": "Công thức ngữ pháp",                                                                                                                                   
+              "challengeTargetSentence": "Câu mẫu mới áp dụng ngữ pháp",                                                                                                         
+              "sentenceChallengePrompt": "Thử thách: Đặt câu...",                                                                                                                
+              "keyWordsJson": "[{\\"kanji\\":\\"日曜日\\",\\"hiragana\\":\\"にちようび\\",\\"romaji\\":\\"nichiyoubi\\",\\"meaning\\":\\"Chủ Nhật\\"}]",                         
+              "exerciseType": "LISTENING_FILL_BLANK",                                                                                                                            
+              "question": "Câu đố có chỗ trống _",                                                                                                                             
+              "options": ["A", "B", "C", "D"],                                                                                                                                   
+              "correctAnswer": "Đáp án đúng",                                                                                                                                    
+              "exerciseExplanation": "Giải thích vì sao chọn đáp án này"                                                                                                         
+            }                                                                                                                                                                    
+          ]                                                                                                                                                                      
+        }                                                                                                                                                                        
         """.formatted(topicName != null ? topicName : "Giao tiếp tổng hợp", language != null ? language : "ja", segmentsData);
     }
 
