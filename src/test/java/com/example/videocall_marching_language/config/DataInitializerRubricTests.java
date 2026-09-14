@@ -1,5 +1,7 @@
 package com.example.videocall_marching_language.config;
 
+import com.example.videocall_marching_language.config.bootstrap.DataInitializer;
+
 import com.example.videocall_marching_language.entity.Rubric;
 import com.example.videocall_marching_language.enums.RubricCriteria;
 import com.example.videocall_marching_language.repository.IRubricRepository;

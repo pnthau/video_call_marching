@@ -1,6 +1,6 @@
 package com.example.videocall_marching_language.controller.user;
 
-import com.example.videocall_marching_language.dto.MatchRequestDTO;
+import com.example.videocall_marching_language.dto.matching.MatchRequestDTO;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.service.IUserService;
 import com.example.videocall_marching_language.service.MatchMakingService;

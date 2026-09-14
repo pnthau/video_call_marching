@@ -1,8 +1,8 @@
 package com.example.videocall_marching_language.service;
 
-import com.example.videocall_marching_language.config.MatchingProperties;
-import com.example.videocall_marching_language.dto.MatchRequestDTO;
-import com.example.videocall_marching_language.dto.MatchResultDTO;
+import com.example.videocall_marching_language.config.properties.MatchingProperties;
+import com.example.videocall_marching_language.dto.matching.MatchRequestDTO;
+import com.example.videocall_marching_language.dto.matching.MatchResultDTO;
 import com.example.videocall_marching_language.entity.LearningSession;
 import com.example.videocall_marching_language.entity.Tag;
 import com.example.videocall_marching_language.entity.TagCategory;

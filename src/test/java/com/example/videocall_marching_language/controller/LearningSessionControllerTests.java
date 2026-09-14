@@ -7,6 +7,9 @@ import com.example.videocall_marching_language.entity.LearningSession;
 import com.example.videocall_marching_language.entity.User;
 import com.example.videocall_marching_language.enums.JapaneseLevel;
 import com.example.videocall_marching_language.enums.SessionStatus;
+import com.example.videocall_marching_language.exception.SessionAccessDeniedException;
+import com.example.videocall_marching_language.exception.SessionConflictException;
+import com.example.videocall_marching_language.exception.SessionNotFoundException;
 import com.example.videocall_marching_language.service.ILearningSessionService;
 import com.example.videocall_marching_language.service.IUserService;
 import org.junit.jupiter.api.Test;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -209,7 +213,7 @@ class LearningSessionControllerTests {
     }
 
     @Test
-    void getSessionReturns403ForNonParticipant() {
+    void getSessionThrows403ForNonParticipant() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
         IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
@@ -232,14 +236,11 @@ class LearningSessionControllerTests {
         when(userService.findByEmail(nonParticipant.getEmail())).thenReturn(Optional.of(nonParticipant));
         when(sessionService.findById(100L)).thenReturn(Optional.of(session));
 
-        ResponseEntity<com.example.videocall_marching_language.dto.session.LearningSessionResponse> response =
-                controller.getSession(100L, authentication);
-
-        assertEquals(403, response.getStatusCode().value());
+        assertThrows(SessionAccessDeniedException.class, () -> controller.getSession(100L, authentication));
     }
 
     @Test
-    void getSessionReturns404ForNonExistentSession() {
+    void getSessionThrows404ForNonExistentSession() {
         ILearningSessionService sessionService = mock(ILearningSessionService.class);
         IUserService userService = mock(IUserService.class);
         Authentication authentication = mock(Authentication.class);
@@ -250,10 +251,7 @@ class LearningSessionControllerTests {
         when(userService.findByEmail(user1.getEmail())).thenReturn(Optional.of(user1));
         when(sessionService.findById(999L)).thenReturn(Optional.empty());
 
-        ResponseEntity<com.example.videocall_marching_language.dto.session.LearningSessionResponse> response =
-                controller.getSession(999L, authentication);
-
-        assertEquals(404, response.getStatusCode().value());
+        assertThrows(SessionNotFoundException.class, () -> controller.getSession(999L, authentication));
     }
 
     @Test
@@ -271,10 +269,7 @@ class LearningSessionControllerTests {
                         com.example.videocall_marching_language.exception.SessionConflictException.ConflictType.TERMINAL_STATE,
                         "Session is in terminal state"));
 
-        ResponseEntity<SessionTokenDTO> response =
-                controller.getToken(100L, authentication);
-
-        assertEquals(409, response.getStatusCode().value());
+        assertThrows(SessionConflictException.class, () -> controller.getToken(100L, authentication));
     }
 
     @Test
@@ -289,7 +284,7 @@ class LearningSessionControllerTests {
         when(sessionService.generateTokenForSession(100L, 3L))
                 .thenThrow(new com.example.videocall_marching_language.exception.SessionAccessDeniedException("not participant"));
 
-        assertEquals(403, controller.getToken(100L, authentication).getStatusCode().value());
+        assertThrows(SessionAccessDeniedException.class, () -> controller.getToken(100L, authentication));
     }
 
     @Test
@@ -304,7 +299,7 @@ class LearningSessionControllerTests {
         when(sessionService.generateTokenForSession(404L, 1L))
                 .thenThrow(new com.example.videocall_marching_language.exception.SessionNotFoundException("missing"));
 
-        assertEquals(404, controller.getToken(404L, authentication).getStatusCode().value());
+        assertThrows(SessionNotFoundException.class, () -> controller.getToken(404L, authentication));
     }
 
     @Test
@@ -338,7 +333,7 @@ class LearningSessionControllerTests {
                 com.example.videocall_marching_language.exception.SessionConflictException.ConflictType.RECONNECT_DEADLINE_PASSED,
                 "expired"));
 
-        assertEquals(409, controller.reportJoinAgora(100L, authentication).getStatusCode().value());
+        assertThrows(SessionConflictException.class, () -> controller.reportJoinAgora(100L, authentication));
     }
 
     private User user(Long id, String username) {

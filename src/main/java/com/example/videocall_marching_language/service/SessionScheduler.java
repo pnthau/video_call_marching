@@ -1,6 +1,6 @@
 package com.example.videocall_marching_language.service;
 
-import com.example.videocall_marching_language.dto.MatchResultDTO;
+import com.example.videocall_marching_language.dto.matching.MatchResultDTO;
 import com.example.videocall_marching_language.enums.SessionStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

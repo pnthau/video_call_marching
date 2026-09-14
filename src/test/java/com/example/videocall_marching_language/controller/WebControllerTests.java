@@ -1,6 +1,6 @@
 package com.example.videocall_marching_language.controller;
 
-import com.example.videocall_marching_language.config.MatchingProperties;
+import com.example.videocall_marching_language.config.properties.MatchingProperties;
 import com.example.videocall_marching_language.controller.user.WebController;
 import com.example.videocall_marching_language.entity.Tag;
 import com.example.videocall_marching_language.entity.TagCategory;
@@ -42,7 +42,7 @@ class WebControllerTests {
         verify(model).addAttribute("agoraAppId", "test-app-id");
         verify(model).addAttribute(eq("tagCategoryTypes"), any(TagCategoryType[].class));
         verify(model).addAttribute("availableTags", List.of(
-                new com.example.videocall_marching_language.dto.TagOptionDTO(
+                new com.example.videocall_marching_language.dto.matching.TagOptionDTO(
                         10L, "Giới thiệu bản thân", "TOPIC")));
         verify(model).addAttribute("adjacentLevelAfterSeconds", 120);
     }
