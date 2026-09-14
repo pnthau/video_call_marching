@@ -38,3 +38,7 @@ out/
 
 ### Secrets ###
 .env
+
+### Local Codex/task artifacts ###
+.1devtool/
+docs/current-state-report.md
