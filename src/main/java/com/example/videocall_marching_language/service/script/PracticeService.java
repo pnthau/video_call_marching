@@ -1,11 +1,11 @@
 package com.example.videocall_marching_language.service.script;
 
 import com.example.videocall_marching_language.dto.*;
-import com.example.videocall_marching_language.dto.script.IScriptSummaryView;
 import com.example.videocall_marching_language.dto.script.ScriptRequest;
 import com.example.videocall_marching_language.dto.script.ScriptResponse;
 import com.example.videocall_marching_language.dto.script.SentenceRoleResponse;
 import com.example.videocall_marching_language.dto.script.TopicWithCountDTO;
+import com.example.videocall_marching_language.dto.tts.TtsSegmentResponse;
 import com.example.videocall_marching_language.entity.PracticeHistory;
 import com.example.videocall_marching_language.entity.Script;
 import com.example.videocall_marching_language.entity.Tag;
@@ -109,6 +109,10 @@ public class PracticeService {
             return List.of("ja", "en");
         }
         return languages;
+    }
+
+    public List<LanguageOption> getAvailableLanguageOptions() {
+        return LanguageOption.fromCodes(getAvailableLanguages());
     }
 
     public ScriptResponse findScriptById(long id) {

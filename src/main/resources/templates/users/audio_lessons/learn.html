@@ -527,9 +527,10 @@
         document.getElementById('t1-hint-box').style.display = 'none';
 
         // Gợi ý phiên âm chi tiết kèm lưu ý âm đọc
+        const isEn = (typeof lessonData !== 'undefined' && lessonData && (lessonData.language === 'en' || lessonData.language === 'english'));
         let hintHtml = `<div><strong>Câu gốc:</strong> ${escapeHtml(s.originalText)}</div>`;
         hintHtml += `<div style="margin-top: 4px;"><strong>Phiên âm chuẩn:</strong> <span style="color: #4f46e5; font-weight: 700;">${escapeHtml(s.phonetic || s.originalText)}</span></div>`;
-        if (s.originalText && (s.originalText.includes('17') || s.originalText.includes('十七') || (s.phonetic && s.phonetic.includes('juu')))) {
+        if (!isEn && s.originalText && (s.originalText.includes('17') || s.originalText.includes('十七') || (s.phonetic && s.phonetic.includes('juu')))) {
             hintHtml += `<div style="margin-top: 4px; font-size: 0.82rem; color: #0284c7;">💡 Lưu ý: Số 17 chấp nhận cả <em>juushichi (じゅうしち)</em> và <em>juunana (じゅうなな)</em>.</div>`;
         }
         document.getElementById('t1-phonetic-hint').innerHTML = hintHtml;
@@ -542,24 +543,27 @@
             const rawPrompt = s.grammar.sentenceChallengePrompt || 'Hãy đặt một câu mới áp dụng cấu trúc ngữ pháp này.';
             document.getElementById('t2-challenge-prompt').innerText = rawPrompt.startsWith('Thử thách:') ? rawPrompt : `Thử thách: ${rawPrompt}`;
 
-            // Vocab card chips có Kanji + Hiragana + Meaning + Nút TTS phát âm từng từ
+            // Vocab card chips có:
+            // Với tiếng Anh: Word + IPA + Meaning + Nút TTS phát âm
+            // Với tiếng Nhật: Kanji + Hiragana + Meaning + Nút TTS phát âm
             const chipContainer = document.getElementById('t2-vocab-chips');
             chipContainer.innerHTML = '';
             try {
                 const words = JSON.parse(s.grammar.keyWordsJson || '[]');
                 if (Array.isArray(words) && words.length > 0) {
                     chipContainer.innerHTML = words.map(w => {
-                        const kanji = w.kanji || w.word || '';
-                        const hira = w.hiragana || w.reading || '';
-                        const meaning = w.meaning || '';
-                        const romaji = w.romaji || '';
-                        const insertWord = kanji || hira;
-                        const speakText = kanji || hira || insertWord;
+                        const isEn = (typeof lessonData !== 'undefined' && lessonData && (lessonData.language === 'en' || lessonData.language === 'english'));
+                        const mainText = isEn ? (w.word || w.kanji || '') : (w.kanji || w.word || '');
+                        const subText  = isEn ? (w.ipa || '') : (w.hiragana || w.reading || '');
+                        const meaning  = w.meaning || '';
+                        const romaji   = w.romaji || '';
+                        const insertWord = isEn ? (w.word || mainText) : (w.kanji || w.hiragana || mainText);
+                        const speakText  = insertWord;
                         return `
                             <div class="vocab-card-chip" onclick="insertVocabToChallenge('${escapeJsString(insertWord)}')" title="Bấm để chèn từ này vào ô đặt câu">
                                 <div class="kanji-row">
-                                    <span class="kanji-text">${escapeHtml(kanji)}</span>
-                                    ${hira && hira !== kanji ? `<span class="hiragana-text">(${escapeHtml(hira)})</span>` : ''}
+                                    <span class="kanji-text">${escapeHtml(mainText)}</span>
+                                    ${subText ? `<span class="hiragana-text">(${escapeHtml(subText)})</span>` : ''}
                                     <button type="button" class="btn-word-tts" onclick="speakWordTts('${escapeJsString(speakText)}', event)" title="Nghe phát âm từ này">🔊</button>
                                 </div>
                                 <div class="meaning-text">👉 ${escapeHtml(meaning || romaji)}</div>

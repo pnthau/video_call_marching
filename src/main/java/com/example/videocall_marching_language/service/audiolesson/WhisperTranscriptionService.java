@@ -1,6 +1,7 @@
 package com.example.videocall_marching_language.service.audiolesson;
 
 import com.example.videocall_marching_language.dto.audiolesson.WhisperSegmentDTO;
+import com.example.videocall_marching_language.dto.audiolesson.WhisperWordDTO;
 import com.example.videocall_marching_language.entity.UserAiSetting;
 import com.example.videocall_marching_language.enums.AIProvider;
 import com.example.videocall_marching_language.repository.IUserAiSettingRepository;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -28,6 +30,7 @@ public class WhisperTranscriptionService {
 
     private final RestTemplate restTemplate;
     private final IUserAiSettingRepository userAiSettingRepository;
+    private final WhisperSanitizerService whisperSanitizerService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${groq.whisper.url:https://api.groq.com/openai/v1/audio/transcriptions}")
@@ -65,6 +68,8 @@ public class WhisperTranscriptionService {
             body.add("model", defaultWhisperModel);
             body.add("response_format", "verbose_json");
             body.add("temperature", "0.0");
+            body.add("timestamp_granularities[]", "segment");
+            body.add("timestamp_granularities[]", "word");
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -94,6 +99,19 @@ public class WhisperTranscriptionService {
             String language = root.path("language").asText("ja");
             double duration = root.path("duration").asDouble(0.0);
 
+            // Đọc mảng words ở root nếu có
+            List<WhisperWordDTO> allWords = new ArrayList<>();
+            JsonNode rootWordsNode = root.path("words");
+            if (rootWordsNode.isArray()) {
+                for (JsonNode wNode : rootWordsNode) {
+                    allWords.add(WhisperWordDTO.builder()
+                            .word(wNode.path("word").asText(""))
+                            .startTime(wNode.path("start").asDouble(0.0))
+                            .endTime(wNode.path("end").asDouble(0.0))
+                            .build());
+                }
+            }
+
             List<WhisperSegmentDTO> segments = new ArrayList<>();
             JsonNode segmentsNode = root.path("segments");
 
@@ -103,6 +121,27 @@ public class WhisperTranscriptionService {
                     double start = seg.path("start").asDouble(0.0);
                     double end = seg.path("end").asDouble(0.0);
                     String text = seg.path("text").asText("").trim();
+                    Double noSpeechProb = seg.hasNonNull("no_speech_prob") ? seg.path("no_speech_prob").asDouble() : null;
+                    Double avgLogprob = seg.hasNonNull("avg_logprob") ? seg.path("avg_logprob").asDouble() : null;
+                    Double compressionRatio = seg.hasNonNull("compression_ratio") ? seg.path("compression_ratio").asDouble() : null;
+
+                    List<WhisperWordDTO> segWords = new ArrayList<>();
+                    JsonNode segWordsNode = seg.path("words");
+                    if (segWordsNode.isArray() && !segWordsNode.isEmpty()) {
+                        for (JsonNode wNode : segWordsNode) {
+                            segWords.add(WhisperWordDTO.builder()
+                                    .word(wNode.path("word").asText(""))
+                                    .startTime(wNode.path("start").asDouble(0.0))
+                                    .endTime(wNode.path("end").asDouble(0.0))
+                                    .build());
+                        }
+                    } else if (!allWords.isEmpty()) {
+                        for (WhisperWordDTO w : allWords) {
+                            if (w.getStartTime() >= start - 0.05 && w.getEndTime() <= end + 0.1) {
+                                segWords.add(w);
+                            }
+                        }
+                    }
 
                     if (!text.isEmpty()) {
                         segments.add(WhisperSegmentDTO.builder()
@@ -110,6 +149,10 @@ public class WhisperTranscriptionService {
                                 .startTime(start)
                                 .endTime(end)
                                 .text(text)
+                                .noSpeechProb(noSpeechProb)
+                                .avgLogprob(avgLogprob)
+                                .compressionRatio(compressionRatio)
+                                .words(segWords.isEmpty() ? null : segWords)
                                 .build());
                     }
                 }
@@ -123,7 +166,17 @@ public class WhisperTranscriptionService {
                         .build());
             }
 
-            return new WhisperTranscriptionResult(fullText, language, duration, segments);
+            // Lọc bỏ âm rác, nốt nhạc, thẻ hiệu ứng và ảo giác phụ đề từ Whisper
+            List<WhisperSegmentDTO> sanitizedSegments = whisperSanitizerService.sanitizeSegments(segments);
+
+            String cleanFullText = sanitizedSegments.stream()
+                    .map(WhisperSegmentDTO::getText)
+                    .collect(Collectors.joining(" "));
+            if (cleanFullText.isBlank()) {
+                cleanFullText = fullText;
+            }
+
+            return new WhisperTranscriptionResult(cleanFullText, language, duration, sanitizedSegments);
 
         } catch (Exception e) {
             log.error("Lỗi parse JSON kết quả Whisper: {}", e.getMessage(), e);

@@ -40,11 +40,11 @@
                         <dd class="col-sm-7 mb-2">
                             <span th:if="${profile.provider() != null and (profile.provider().name() == 'GROQ' or profile.provider().name() == 'GROG')}" 
                                   class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fs-6 rounded-3">
-                                ⚡ Groq AI (Qwen / Llama)
+                                ⚡ Groq AI
                             </span>
                             <span th:if="${profile.provider() != null and profile.provider().name() == 'GEMINI'}" 
                                   class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 fs-6 rounded-3">
-                                🤖 Google Gemini (2.5 Flash)
+                                🤖 Google Gemini
                             </span>
                             <span th:if="${profile.provider() == null}" 
                                   class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-3 py-2 fs-6 rounded-3">
@@ -55,10 +55,10 @@
                         <dt class="col-sm-5 mb-2 text-muted">Trạng thái API Key</dt>
                         <dd class="col-sm-7 mb-2">
                             <span th:if="${profile.apiKey() != null and !profile.apiKey().isBlank()}" class="text-success fw-semibold">
-                                🔒 Đã cấu hình Key riêng (Mã hóa AES)
+                                🔒 Đã cấu hình Key
                             </span>
                             <span th:unless="${profile.apiKey() != null and !profile.apiKey().isBlank()}" class="text-muted">
-                                ℹ️ Chưa có Key riêng (Dùng key mặc định hệ thống)
+                                ℹ️ Chưa có Key
                             </span>
                         </dd>
 
@@ -137,185 +137,11 @@
         </div>
     </div>
 
-    <!-- MODAL 1: Lựa chọn tiêu chí luyện kịch bản Scripts -->
-    <div class="modal fade" id="criteriaModal" tabindex="-1" aria-labelledby="criteriaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header bg-primary text-white p-4">
-                    <div>
-                        <h5 class="modal-title fw-bold fs-4 mb-1" id="criteriaModalLabel">
-                            🎯 Lựa Chọn Tiêu Chí Luyện Kịch Bản AI
-                        </h5>
-                        <p class="mb-0 text-white-50 small">
-                            Hệ thống sẽ lọc kịch bản đối thoại AI phù hợp nhất với mục tiêu giao tiếp thực tế của bạn
-                        </p>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                </div>
+    <!-- MODAL 1: Lựa chọn tiêu chí luyện kịch bản Scripts (Reusable Fragment) -->
+    <div th:replace="~{fragments/criteria_modal :: scriptCriteriaModal('criteriaModal', ${availableLanguages}, null, 1, '')}"></div>
 
-                <form th:action="@{/practice/scripts}" method="get" id="criteriaFilterForm">
-                    <div class="modal-body p-4">
-                        
-                        <!-- MỤC 1: LỰA CHỌN NGÔN NGỮ -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>🗣️ 1. Lựa chọn ngôn ngữ giao tiếp</span>
-                                <span class="badge bg-primary-subtle text-primary fw-medium">Bước 1: Chọn ngôn ngữ</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle" 
-                                    name="language" 
-                                    id="criteriaLanguageSelect">
-                                <option value="all" selected>🌐 Tất cả ngôn ngữ</option>
-                                <option value="ja">🇯🇵 Tiếng Nhật (Japanese)</option>
-                                <option value="en">🇬🇧 Tiếng Anh (English)</option>
-                            </select>
-                        </div>
-
-                        <!-- MỤC 2: LỰA CHỌN TRÌNH ĐỘ (LEVEL) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>📊 2. Lựa chọn trình độ (Level)</span>
-                                <span class="badge bg-warning-subtle text-warning-emphasis fw-medium">Bước 2: Chọn trình độ</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-warning-subtle" 
-                                    name="level" 
-                                    id="criteriaLevelSelect"
-                                    data-current-level="all">
-                                <option value="all">🌐 Tất cả trình độ</option>
-                            </select>
-                        </div>
-
-                        <!-- MỤC 3: CASCADING CHỦ ĐỀ -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>📚 3. Chủ đề bài học</span>
-                                <span class="badge bg-success-subtle text-success fw-medium">Bước 3: Chọn chủ đề</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" 
-                                    name="tagId" 
-                                    id="criteriaTopicSelect"
-                                    data-current-tag-id="">
-                                <option value="">Tất cả chủ đề</option>
-                            </select>
-                            <div class="form-text text-muted small" id="topicHelperText">
-                                Chỉ hiển thị các chủ đề có kịch bản thuộc ngôn ngữ và trình độ đã chọn.
-                            </div>
-                        </div>
-
-                        <!-- MỤC 4: HÌNH THỨC & GIAI ĐOẠN -->
-                        <div class="mb-2">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>⚡ 4. Hình thức &amp; Giai đoạn</span>
-                                <span class="badge bg-info-subtle text-info fw-medium">Bước 4: Chọn độ khó</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none" name="phase" id="criteriaPhaseSelect">
-                                <option value="1" selected>Giai đoạn 1: Nghe &amp; Nhắc lại từng câu (Beginner)</option>
-                                <option value="2">Giai đoạn 2: Khuyết từ vựng quan trọng (Intermediate)</option>
-                                <option value="3">Giai đoạn 3: Đóng vai &amp; Ẩn kịch bản (Advanced)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer bg-light p-3 border-top-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
-                            Khám phá kịch bản phù hợp ➔
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL 2: Lựa chọn tiêu chí Luyện Audio AI -->
-    <div class="modal fade" id="audioCriteriaModal" tabindex="-1" aria-labelledby="audioCriteriaModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="modal-header text-white p-4" style="background-color: #4f46e5;">
-                    <div>
-                        <h5 class="modal-title fw-bold fs-4 mb-1" id="audioCriteriaModalLabel">
-                            🎧 Lựa Chọn Tiêu Chí Luyện Audio AI
-                        </h5>
-                        <p class="mb-0 text-white-50 small">
-                            Hệ thống sẽ lọc bài nghe Whisper STT bóc tách kèm bài tập ngữ pháp phù hợp với bạn
-                        </p>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                </div>
-
-                <form th:action="@{/practice/audio-lessons}" method="get" id="audioCriteriaFilterForm">
-                    <div class="modal-body p-4">
-                        
-                        <!-- BƯỚC 1: NGÔN NGỮ AUDIO -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>🗣️ 1. Lựa chọn ngôn ngữ bài nghe</span>
-                                <span class="badge bg-primary-subtle text-primary fw-medium">Bước 1: Chọn ngôn ngữ</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle" 
-                                    name="language" 
-                                    id="audioCriteriaLanguageSelect">
-                                <option value="all" selected>🌐 Tất cả ngôn ngữ</option>
-                                <option value="ja">🇯🇵 Tiếng Nhật (Japanese)</option>
-                                <option value="en">🇬🇧 Tiếng Anh (English)</option>
-                            </select>
-                        </div>
-
-                        <!-- BƯỚC 2: TRÌNH ĐỘ AUDIO -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>📊 2. Lựa chọn trình độ (Level)</span>
-                                <span class="badge bg-warning-subtle text-warning-emphasis fw-medium">Bước 2: Chọn trình độ</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-warning-subtle" 
-                                    name="level" 
-                                    id="audioCriteriaLevelSelect"
-                                    data-current-level="all">
-                                <option value="all">🌐 Tất cả trình độ</option>
-                            </select>
-                        </div>
-
-                        <!-- BƯỚC 3: CHỦ ĐỀ BÀI NGHE (CASCADING) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>📚 3. Chủ đề bài nghe</span>
-                                <span class="badge bg-success-subtle text-success fw-medium">Bước 3: Chọn chủ đề</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle" 
-                                    name="tagId" 
-                                    id="audioCriteriaTopicSelect">
-                                <option value="">Tất cả chủ đề</option>
-                            </select>
-                            <div class="form-text text-muted small">
-                                Chỉ hiển thị các chủ đề có bài nghe thực tế thuộc ngôn ngữ và trình độ đã chọn (Zero-count elimination).
-                            </div>
-                        </div>
-
-                        <!-- BƯỚC 4: TRỌNG TÂM LUYỆN TẬP -->
-                        <div class="mb-2">
-                            <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
-                                <span>⚡ 4. Trọng tâm luyện tập</span>
-                                <span class="badge bg-info-subtle text-info fw-medium">Bước 4: Chọn phương pháp</span>
-                            </label>
-                            <select class="form-select form-select-lg rounded-3 shadow-none" name="focus" id="audioCriteriaFocusSelect">
-                                <option value="all" selected>Toàn diện: Nghe chép chính tả + Ngữ pháp + Shadowing Loop</option>
-                                <option value="dictation">Chuyên sâu: Luyện nghe &amp; Chép chính tả (Dictation)</option>
-                                <option value="grammar">Chuyên sâu: Phân tích cấu trúc &amp; Đặt câu AI</option>
-                                <option value="shadowing">Chuyên sâu: Lặp đoạn phát âm (Shadowing Loop) &amp; Trắc nghiệm</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer bg-light p-3 border-top-0 d-flex justify-content-between">
-                        <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
-                        <button type="submit" class="btn text-white px-4 py-2 rounded-pill fw-semibold shadow-sm" style="background-color: #4f46e5;">
-                            Khám phá bài nghe phù hợp ➔
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- MODAL 2: Lựa chọn tiêu chí Luyện Audio AI (Reusable Fragment) -->
+    <div th:replace="~{fragments/criteria_modal :: audioCriteriaModal('audioCriteriaModal', ${audioAvailableLanguages}, null, 'audio')}"></div>
 
     <!-- MODAL 3: Lựa chọn tiêu chí Ghép Đôi P2P Video Call -->
     <div class="modal fade" id="p2pCriteriaModal" tabindex="-1" aria-labelledby="p2pCriteriaModalLabel" aria-hidden="true">
@@ -346,8 +172,11 @@
                             <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle" 
                                     name="language" 
                                     id="p2pCriteriaLanguageSelect">
-                                <option value="ja" selected>🇯🇵 Tiếng Nhật (Japanese)</option>
-                                <option value="en">🇬🇧 Tiếng Anh (English)</option>
+                                <option th:each="lang : ${availableLanguages}"
+                                        th:value="${lang.code}"
+                                        th:selected="${lang.code == 'ja'}"
+                                        th:text="${lang.label}">
+                                </option>
                             </select>
                         </div>
 
@@ -413,204 +242,28 @@
     </script>
 </main>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/criteria-selector.js}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const LEVEL_CONFIGS = {
-            ja: [
-                { value: 'all', label: '🌐 Tất cả trình độ (Tiếng Nhật)' },
-                { value: 'n5', label: '🟢 N5 - Nhập môn (Beginner)' },
-                { value: 'n4', label: '🔵 N4 - Sơ cấp (Elementary)' },
-                { value: 'n3', label: '🟡 N3 - Trung cấp (Intermediate)' },
-                { value: 'n2', label: '🟠 N2 - Trung cao cấp (Upper-Intermediate)' },
-                { value: 'n1', label: '🔴 N1 - Cao cấp (Advanced)' }
-            ],
-            en: [
-                { value: 'all', label: '🌐 Tất cả trình độ (Tiếng Anh)' },
-                { value: 'a1', label: '🟢 A1 - Cơ bản (Beginner)' },
-                { value: 'a2', label: '🔵 A2 - Sơ cấp (Elementary)' },
-                { value: 'b1', label: '🟡 B1 - Trung cấp (Intermediate)' },
-                { value: 'b2', label: '🟠 B2 - Tự tin (Upper-Intermediate)' },
-                { value: 'c1', label: '🔴 C1 - Nâng cao (Advanced)' }
-            ]
-        };
-
-        // ==========================================
         // 1. CASCADING CHO MODAL SCRIPTS
-        // ==========================================
-        (function setupScriptsCascading() {
-            const rawDataEl = document.getElementById('topicsWithCountData');
-            if (!rawDataEl) return;
-            let topicsData = [];
-            try { topicsData = JSON.parse(rawDataEl.textContent || '[]'); } catch (err) { return; }
+        const rawScriptDataEl = document.getElementById('topicsWithCountData');
+        CriteriaSelector.initCascadingSelect({
+            langSelect: 'criteriaLanguageSelect',
+            levelSelect: 'criteriaLevelSelect',
+            topicSelect: 'criteriaTopicSelect',
+            topicsData: rawScriptDataEl ? rawScriptDataEl.textContent : '[]',
+            itemSuffix: 'bài học'
+        });
 
-            const langSelect = document.getElementById('criteriaLanguageSelect');
-            const levelSelect = document.getElementById('criteriaLevelSelect');
-            const topicSelect = document.getElementById('criteriaTopicSelect');
-            if (!langSelect || !levelSelect || !topicSelect) return;
-
-            function updateLevels(selectedLang, targetLevel) {
-                const lang = (selectedLang || 'all').trim().toLowerCase();
-                const currentLevel = (targetLevel || 'all').trim().toLowerCase();
-                levelSelect.innerHTML = '';
-
-                let validLevels = (lang === 'ja') ? LEVEL_CONFIGS.ja : (lang === 'en' ? LEVEL_CONFIGS.en : [
-                    { value: 'all', label: '🌐 Tất cả trình độ' },
-                    { optgroup: '🇯🇵 Tiếng Nhật (JLPT)', items: LEVEL_CONFIGS.ja.filter(x => x.value !== 'all') },
-                    { optgroup: '🇬🇧 Tiếng Anh (CEFR)', items: LEVEL_CONFIGS.en.filter(x => x.value !== 'all') }
-                ]);
-
-                validLevels.forEach(item => {
-                    if (item.optgroup) {
-                        const grp = document.createElement('optgroup');
-                        grp.label = item.optgroup;
-                        item.items.forEach(sub => {
-                            const opt = document.createElement('option');
-                            opt.value = sub.value; opt.textContent = sub.label;
-                            if (sub.value === currentLevel) opt.selected = true;
-                            grp.appendChild(opt);
-                        });
-                        levelSelect.appendChild(grp);
-                    } else {
-                        const opt = document.createElement('option');
-                        opt.value = item.value; opt.textContent = item.label;
-                        if (item.value === currentLevel) opt.selected = true;
-                        levelSelect.appendChild(opt);
-                    }
-                });
-            }
-
-            function updateTopics(selectedLang, selectedLevel, targetTagId) {
-                const lang = (selectedLang || 'all').trim().toLowerCase();
-                const lvl = (selectedLevel || 'all').trim().toLowerCase();
-                const tagMap = new Map();
-                let total = 0;
-
-                topicsData.forEach(item => {
-                    const itemLang = (item.language || '').trim().toLowerCase();
-                    const itemLvl = (item.level || '').trim().toLowerCase();
-                    const count = parseInt(item.scriptCount, 10) || 0;
-                    if ((lang === 'all' || itemLang === lang) && (lvl === 'all' || itemLvl === lvl)) {
-                        total += count;
-                        if (!tagMap.has(item.tagId)) {
-                            tagMap.set(item.tagId, { id: item.tagId, name: item.tagName, count: 0 });
-                        }
-                        tagMap.get(item.tagId).count += count;
-                    }
-                });
-
-                topicSelect.innerHTML = '';
-                const def = document.createElement('option');
-                def.value = ''; def.textContent = `Tất cả chủ đề (Tổng ${total} bài học)`;
-                topicSelect.appendChild(def);
-
-                Array.from(tagMap.values()).filter(t => t.count > 0).sort((a,b) => (a.name||'').localeCompare(b.name||'','vi')).forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id; opt.textContent = `${t.name} (${t.count} bài học)`;
-                    if (targetTagId && String(t.id) === String(targetTagId)) opt.selected = true;
-                    topicSelect.appendChild(opt);
-                });
-            }
-
-            updateLevels(langSelect.value || 'all', 'all');
-            updateTopics(langSelect.value || 'all', levelSelect.value, '');
-
-            langSelect.addEventListener('change', function () {
-                updateLevels(this.value, levelSelect.value);
-                updateTopics(this.value, levelSelect.value, topicSelect.value);
-            });
-            levelSelect.addEventListener('change', function () {
-                updateTopics(langSelect.value, this.value, topicSelect.value);
-            });
-        })();
-
-        // ==========================================
         // 2. CASCADING CHO MODAL AUDIO
-        // ==========================================
-        (function setupAudioCascading() {
-            const rawDataEl = document.getElementById('audioTopicsWithCountData');
-            if (!rawDataEl) return;
-            let topicsData = [];
-            try { topicsData = JSON.parse(rawDataEl.textContent || '[]'); } catch (err) { return; }
-
-            const langSelect = document.getElementById('audioCriteriaLanguageSelect');
-            const levelSelect = document.getElementById('audioCriteriaLevelSelect');
-            const topicSelect = document.getElementById('audioCriteriaTopicSelect');
-            if (!langSelect || !levelSelect || !topicSelect) return;
-
-            function updateLevels(selectedLang, targetLevel) {
-                const lang = (selectedLang || 'all').trim().toLowerCase();
-                const currentLevel = (targetLevel || 'all').trim().toLowerCase();
-                levelSelect.innerHTML = '';
-
-                let validLevels = (lang === 'ja') ? LEVEL_CONFIGS.ja : (lang === 'en' ? LEVEL_CONFIGS.en : [
-                    { value: 'all', label: '🌐 Tất cả trình độ' },
-                    { optgroup: '🇯🇵 Tiếng Nhật (JLPT)', items: LEVEL_CONFIGS.ja.filter(x => x.value !== 'all') },
-                    { optgroup: '🇬🇧 Tiếng Anh (CEFR)', items: LEVEL_CONFIGS.en.filter(x => x.value !== 'all') }
-                ]);
-
-                validLevels.forEach(item => {
-                    if (item.optgroup) {
-                        const grp = document.createElement('optgroup');
-                        grp.label = item.optgroup;
-                        item.items.forEach(sub => {
-                            const opt = document.createElement('option');
-                            opt.value = sub.value; opt.textContent = sub.label;
-                            if (sub.value === currentLevel) opt.selected = true;
-                            grp.appendChild(opt);
-                        });
-                        levelSelect.appendChild(grp);
-                    } else {
-                        const opt = document.createElement('option');
-                        opt.value = item.value; opt.textContent = item.label;
-                        if (item.value === currentLevel) opt.selected = true;
-                        levelSelect.appendChild(opt);
-                    }
-                });
-            }
-
-            function updateTopics(selectedLang, selectedLevel, targetTagId) {
-                const lang = (selectedLang || 'all').trim().toLowerCase();
-                const lvl = (selectedLevel || 'all').trim().toLowerCase();
-                const tagMap = new Map();
-                let total = 0;
-
-                topicsData.forEach(item => {
-                    const itemLang = (item.language || '').trim().toLowerCase();
-                    const itemLvl = (item.level || '').trim().toLowerCase();
-                    const count = parseInt(item.scriptCount, 10) || 0;
-                    if ((lang === 'all' || itemLang === lang) && (lvl === 'all' || itemLvl === lvl)) {
-                        total += count;
-                        if (!tagMap.has(item.tagId)) {
-                            tagMap.set(item.tagId, { id: item.tagId, name: item.tagName, count: 0 });
-                        }
-                        tagMap.get(item.tagId).count += count;
-                    }
-                });
-
-                topicSelect.innerHTML = '';
-                const def = document.createElement('option');
-                def.value = ''; def.textContent = `Tất cả chủ đề (Tổng ${total} bài nghe)`;
-                topicSelect.appendChild(def);
-
-                Array.from(tagMap.values()).filter(t => t.count > 0).sort((a,b) => (a.name||'').localeCompare(b.name||'','vi')).forEach(t => {
-                    const opt = document.createElement('option');
-                    opt.value = t.id; opt.textContent = `${t.name} (${t.count} bài nghe)`;
-                    if (targetTagId && String(t.id) === String(targetTagId)) opt.selected = true;
-                    topicSelect.appendChild(opt);
-                });
-            }
-
-            updateLevels(langSelect.value || 'all', 'all');
-            updateTopics(langSelect.value || 'all', levelSelect.value, '');
-
-            langSelect.addEventListener('change', function () {
-                updateLevels(this.value, levelSelect.value);
-                updateTopics(this.value, levelSelect.value, topicSelect.value);
-            });
-            levelSelect.addEventListener('change', function () {
-                updateTopics(langSelect.value, this.value, topicSelect.value);
-            });
-        })();
+        const rawAudioDataEl = document.getElementById('audioTopicsWithCountData');
+        CriteriaSelector.initCascadingSelect({
+            langSelect: 'audioCriteriaLanguageSelect',
+            levelSelect: 'audioCriteriaLevelSelect',
+            topicSelect: 'audioCriteriaTopicSelect',
+            topicsData: rawAudioDataEl ? rawAudioDataEl.textContent : '[]',
+            itemSuffix: 'bài nghe'
+        });
 
         // ==========================================
         // 3. CASCADING CHO MODAL P2P VIDEO CALL

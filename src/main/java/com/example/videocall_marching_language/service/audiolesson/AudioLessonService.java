@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.service.audiolesson;
 
+import com.example.videocall_marching_language.dto.LanguageOption;
 import com.example.videocall_marching_language.dto.audiolesson.*;
 import com.example.videocall_marching_language.dto.script.TopicWithCountDTO;
 import com.example.videocall_marching_language.entity.*;
@@ -324,6 +325,10 @@ public class AudioLessonService {
             return List.of("ja", "en");
         }
         return languages;
+    }
+
+    public List<LanguageOption> getAvailableLanguageOptions() {
+        return LanguageOption.fromCodes(getAvailableLanguages());
     }
 
     public GrammarChallengeResponseDTO evaluateGrammarChallenge(GrammarChallengeRequestDTO request, Long userId) {

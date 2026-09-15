@@ -1,7 +1,7 @@
 package com.example.videocall_marching_language.service.ai;
 
 import com.example.videocall_marching_language.dto.SpeechEvaluationResponse;
-import com.example.videocall_marching_language.dto.TtsSegmentResponse;
+import com.example.videocall_marching_language.dto.tts.TtsSegmentResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

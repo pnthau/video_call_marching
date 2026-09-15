@@ -46,32 +46,63 @@
                     </a>
                 </li>
             </ul>
-
             <!-- Auth Controls -->
-            <div class="d-flex align-items-center pt-3 pt-lg-0 border-top border-lg-0 mt-3 mt-lg-0">
-                <!-- If Authenticated -->
-                <div th:if="${isAuthenticated == true}" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap">
-                    <a th:href="@{/profile}" class="btn btn-light btn-sm border rounded-pill d-flex align-items-center gap-2 px-3 py-2 text-decoration-none text-dark shadow-sm">
-                        <img th:if="${currentUserAvatar != null}" th:src="${currentUserAvatar}" class="rounded-circle object-fit-cover" width="26" height="26" alt="Avatar">
-                        <span th:unless="${currentUserAvatar != null}" class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem;"
+            <div class="navbar-auth-controls d-flex align-items-center pt-3 pt-lg-0 mt-3 mt-lg-0">
+                <!-- If Authenticated: Only avatar shown; click opens dropdown menu -->
+                <div th:if="${isAuthenticated == true}" class="dropdown">
+                    <button class="nav-avatar-btn dropdown-toggle" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false" th:attr="aria-label=${currentUsername != null ? currentUsername : 'Tài khoản'}" th:title="${currentUsername != null ? currentUsername : 'Tài khoản'}">
+                        <img th:if="${currentUserAvatar != null and !currentUserAvatar.isEmpty()}" th:src="${currentUserAvatar}" class="nav-avatar-img" alt="Avatar">
+                        <span th:unless="${currentUserAvatar != null and !currentUserAvatar.isEmpty()}" class="nav-avatar-placeholder"
                               th:text="${currentUsername != null and !currentUsername.isEmpty() ? #strings.substring(currentUsername, 0, 1).toUpperCase() : 'U'}">U</span>
-                        <span class="fw-semibold text-truncate text-nowrap" style="max-width: 120px;" th:text="${currentUsername != null ? currentUsername : 'Tài khoản'}">Tài khoản</span>
-                    </a>
-                    <a th:href="@{/profile}" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap" th:classappend="${activePage == 'profile'} ? 'active' : ''">
-                        Vào Hồ Sơ
-                    </a>
-                    <form th:action="@{/logout}" method="post" class="d-inline m-0">
-                        <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap">
-                            Đăng xuất
-                        </button>
-                    </form>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-lg-end nav-user-menu shadow-lg border-0" aria-labelledby="userMenuDropdown">
+                        <!-- User Info Header -->
+                        <li class="dropdown-header-user">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="flex-shrink-0" style="width: 38px; height: 38px;">
+                                    <img th:if="${currentUserAvatar != null and !currentUserAvatar.isEmpty()}" th:src="${currentUserAvatar}" class="rounded-circle object-fit-cover w-100 h-100" alt="Avatar">
+                                    <span th:unless="${currentUserAvatar != null and !currentUserAvatar.isEmpty()}" class="nav-avatar-placeholder fs-6"
+                                          th:text="${currentUsername != null and !currentUsername.isEmpty() ? #strings.substring(currentUsername, 0, 1).toUpperCase() : 'U'}">U</span>
+                                </div>
+                                <div class="overflow-hidden" style="max-width: 175px;">
+                                    <div class="fw-bold text-slate-900 text-truncate" th:text="${currentUsername != null ? currentUsername : 'Tài khoản'}">Tài khoản</div>
+                                    <div class="text-muted small text-truncate" th:text="${currentUserEmail != null ? currentUserEmail : ''}">user@example.com</div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Navigation Items -->
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile}">
+                                <span>👤</span>
+                                <span>Hồ sơ cá nhân</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile/edit}">
+                                <span>✏️</span>
+                                <span>Chỉnh sửa thông tin</span>
+                            </a>
+                        </li>
+                        <li th:if="${currentUserRole == 'ADMIN'}">
+                            <a class="dropdown-item text-primary" th:href="@{/admin}">
+                                <span>🛡️</span>
+                                <span>Trang quản trị</span>
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider my-1"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="m-0 p-0">
+                                <button type="submit" class="dropdown-item text-danger border-0 bg-transparent w-100 text-start">
+                                    <span>🚪</span>
+                                    <span>Đăng xuất</span>
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
                 </div>
 
                 <!-- If Not Authenticated -->
                 <div th:unless="${isAuthenticated == true}" class="d-flex align-items-center gap-2 flex-wrap flex-lg-nowrap">
-                    <a th:href="@{/login}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2 fw-semibold text-nowrap">
-                        Đăng nhập
-                    </a>
                     <a th:href="@{/login}" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap">
                         🚀 Bắt đầu miễn phí
                     </a>
