@@ -1,25 +1,41 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phòng luyện nói (Video Call)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phòng luyện nói 1-1 (Video Call) - Video Marching</title>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <link rel="stylesheet" href="/css/style.css">
-        <!-- Thư viện Agora SDK -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Thư viện Agora SDK -->
     <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
     <!-- Thư viện WebSocket STOMP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    
 </head>
 <body>
+    <!-- Universal Top Navigation -->
+    <div th:replace="~{fragments/navbar :: navbar('p2p')}"></div>
+
     <div class="container">
+        <!-- Top Nav Sub-bar -->
+        <div class="nav-top-p2p">
+            <a href="/profile" class="btn-back-p2p">← Quay lại Trang cá nhân</a>
+            <a href="/practice/audio-lessons" style="display: inline-flex; align-items: center; gap: 0.4rem; background: #eef2ff; color: #4f46e5; text-decoration: none; padding: 0.4rem 0.9rem; border-radius: 999px; font-weight: 700; font-size: 0.85rem;">
+                🎧 Luyện Audio AI ➔
+            </a>
+        </div>
+
         <h2>Phòng Luyện Nói 1-1</h2>
 
+        <!-- Quy tắc ghép đôi -->
         <section class="matching-rules" aria-labelledby="matching-rules-title">
             <h3 id="matching-rules-title">Quy tắc ghép đôi</h3>
             <ul>
-                <li>Bạn cần chọn đủ <strong>chủ đề, trình độ luyện tập và hình thức học</strong>.</li>
+                <li>Bạn cần chọn đủ <strong>ngôn ngữ, trình độ luyện tập, chủ đề và hình thức học</strong>.</li>
                 <li>Hệ thống chỉ ghép hai người có <strong>ít nhất một lựa chọn chung</strong> và ưu tiên người cùng trình độ.</li>
                 <li>
                     Nếu chưa có người phù hợp sau
@@ -31,60 +47,175 @@
             </ul>
         </section>
         
-        <!-- Trạng thái 1: Chọn một tag cho từng nhóm -->
-        <div id="setup-panel" class="controls" style="text-align: center; margin-bottom: 20px;">
-            <div th:each="categoryType : ${tagCategoryTypes}" style="margin-bottom: 15px;">
-                <label th:for="${'tag-select-' + #strings.toLowerCase(categoryType.name())}"
-                       th:text="${categoryType.displayName + ':'}"
-                       style="display: inline-block; min-width: 180px; text-align: right; font-weight: bold; margin-right: 10px;">
-                    Nhóm tag:
-                </label>
-                <select class="tag-group-select"
-                        th:id="${'tag-select-' + #strings.toLowerCase(categoryType.name())}"
-                        th:attr="data-category-type=${categoryType.name()}"
-                        style="padding: 8px 12px; font-size: 16px; border-radius: 4px; border: 1px solid #ccc;">
-                    <option value="" th:text="${'-- Chọn ' + categoryType.displayName + ' --'}">-- Chọn --</option>
-                    <option th:each="tag : ${availableTags}"
-                            th:if="${tag.categoryType == categoryType.name()}"
-                            th:value="${tag.id}"
-                            th:text="${tag.name}"></option>
-                </select>
+        <!-- Trạng thái 1: Bộ tiêu chí ghép đôi 4 bước chuẩn hóa -->
+        <div id="setup-panel" class="controls setup-card-standardized">
+            <div class="setup-header">
+                <h3>🎯 Tiêu Chí Ghép Đôi Đa Chiều (4 Bước)</h3>
+                <p>Hệ thống tự động lọc phòng phù hợp theo ngôn ngữ, trình độ và chủ đề của bạn</p>
             </div>
-            <button id="find-partner-btn" style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 8px; cursor: pointer;">🔍 Bắt đầu tìm đối tác</button>
+
+            <div class="setup-grid-steps">
+                <!-- BƯỚC 1: NGÔN NGỮ GIAO TIẾP -->
+                <div class="step-card">
+                    <div class="step-badge">Bước 1</div>
+                    <label class="step-label">🗣️ Ngôn ngữ giao tiếp</label>
+                    <div class="lang-toggle-container">
+                        <label class="lang-radio-card active" id="label-lang-ja">
+                            <input type="radio" name="p2p-language" value="ja" checked onchange="switchP2PLanguage('ja')">
+                            <span class="lang-flag">🇯🇵</span>
+                            <span class="lang-title">Tiếng Nhật</span>
+                        </label>
+                        <label class="lang-radio-card" id="label-lang-en">
+                            <input type="radio" name="p2p-language" value="en" onchange="switchP2PLanguage('en')">
+                            <span class="lang-flag">🇬🇧</span>
+                            <span class="lang-title">Tiếng Anh</span>
+                        </label>
+                    </div>
+                    <small class="step-desc">Tự động đồng bộ trình độ và chủ đề theo ngôn ngữ</small>
+                </div>
+
+                <!-- BƯỚC 2: TRÌNH ĐỘ LUYỆN TẬP -->
+                <div class="step-card">
+                    <div class="step-badge" style="background: #fef3c7; color: #b45309;">Bước 2</div>
+                    <label for="tag-select-level" class="step-label">📊 Trình độ luyện tập</label>
+                    <select id="tag-select-level" class="tag-group-select custom-select" data-category-type="LEVEL" required>
+                        <option value="">-- Chọn trình độ --</option>
+                    </select>
+                    <small class="step-desc">Ưu tiên ghép bạn học cùng hoặc liền kề trình độ</small>
+                </div>
+
+                <!-- BƯỚC 3: CHỦ ĐỀ GIAO TIẾP -->
+                <div class="step-card">
+                    <div class="step-badge" style="background: #e0f2fe; color: #0284c7;">Bước 3</div>
+                    <label for="tag-select-topic" class="step-label">📚 Chủ đề giao tiếp</label>
+                    <select id="tag-select-topic" class="tag-group-select custom-select" data-category-type="TOPIC" required>
+                        <option value="">-- Chọn chủ đề --</option>
+                    </select>
+                    <small class="step-desc">Chủ đề thảo luận trong phòng luyện thực chiến</small>
+                </div>
+
+                <!-- BƯỚC 4: HÌNH THỨC HỌC -->
+                <div class="step-card">
+                    <div class="step-badge" style="background: #f3e8ff; color: #7e22ce;">Bước 4</div>
+                    <label for="tag-select-activity" class="step-label">⚡ Hình thức học</label>
+                    <select id="tag-select-activity" class="tag-group-select custom-select" data-category-type="ACTIVITY" required>
+                        <option value="">-- Chọn hình thức --</option>
+                    </select>
+                    <small class="step-desc">Đóng vai tình huống, từ vựng hoặc hội thoại tự do</small>
+                </div>
+            </div>
+
+            <div class="setup-action-center">
+                <button id="find-partner-btn" class="btn btn-find-partner">
+                    👥 Tìm Phòng &amp; Ghép Đôi Ngay ➔
+                </button>
+            </div>
         </div>
 
-        <!-- Trạng thái 2: Màn hình chờ (Loading) -->
-        <div id="waiting-panel" class="controls" style="display: none;">
-            <p>⏳ Đang tìm kiếm đối tác... Xin vui lòng đợi.</p>
-            <button id="cancel-search-btn" style="background-color: #f44336; color: white;">Hủy tìm kiếm</button>
+        <!-- Trạng thái 2: Màn hình chờ tìm người thật -->
+        <div id="waiting-panel" class="controls" style="display: none; text-align: center;">
+            <p style="font-size: 18px; margin-bottom: 15px;">⏳ Đang tìm kiếm đối tác học cùng... Xin vui lòng đợi.</p>
+            <button id="cancel-search-btn" class="btn btn-danger">Hủy tìm kiếm</button>
         </div>
 
-        <!-- Trạng thái 3: Màn hình Video Call -->
-        <div id="call-panel" class="controls" style="display: none;">
-            <p id="room-info" style="font-weight: bold; color: green;"></p>
-            <button id="end-call-btn" style="background-color: #f44336; color: white;">Rời phòng / Kết thúc</button>
-            <button id="mic-btn">Tắt Mic</button>
-            <button id="cam-btn">Tắt Camera</button>
+        <!-- Trạng thái 3: Thanh điều khiển cuộc gọi -->
+        <div id="call-panel" class="controls call-panel-flex" style="display: none;">
+            <div id="room-info" style="font-weight: 600; color: #0284c7;"></div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="btn-toggle-cheatsheet" class="btn btn-secondary" style="background: #0284c7; color: white;" onclick="toggleCheatSheet()" title="Mở sổ tay gợi ý câu thoại">📖 Phao Cứu Sinh (Gợi ý)</button>
+                <button id="mic-btn" class="btn btn-secondary">🎤 Tắt Mic</button>
+                <button id="cam-btn" class="btn btn-secondary">📷 Tắt Camera</button>
+                <button id="end-call-btn" class="btn btn-danger">🔴 Kết thúc cuộc gọi</button>
+            </div>
         </div>
 
+        <!-- Khung Video Call -->
         <div class="video-container" id="video-container" style="display: none;">
+            <!-- Khung của Bạn (Local) -->
             <div class="video-box">
-                <p>Bạn (Local)</p>
+                <p class="label">Bạn (Local)</p>
                 <div id="local-player" class="player"></div>
             </div>
+
+            <!-- Khung của Đối tác (Remote) -->
             <div class="video-box">
-                <p>Đối tác (Remote)</p>
+                <p class="label" id="remote-label">Đối tác (Remote)</p>
                 <div id="remote-player" class="player"></div>
+            </div>
+        </div>
+
+        <!-- Rating Modal -->
+        <div id="rating-modal" class="custom-rating-modal" style="display: none;">
+            <div class="custom-rating-modal-content">
+                <h3 style="text-align: center; color: #38bdf8; margin-top: 0;">Đánh giá đối tác học tập</h3>
+                <div id="rating-criteria-container"></div>
+                <div style="margin-top: 15px;">
+                    <label for="rating-comment" style="display: block; margin-bottom: 8px; font-weight: bold;">Nhận xét thêm (tuỳ chọn):</label>
+                    <textarea id="rating-comment" rows="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #475569; background: #0f172a; color: white;"></textarea>
+                </div>
+                <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="skip-rating-btn" class="btn btn-secondary" style="padding: 10px 20px;">Bỏ qua</button>
+                    <button id="submit-rating-btn" class="btn btn-primary" style="padding: 10px 20px; background-color: #4CAF50; border: none; color: white; border-radius: 4px;">Gửi Đánh Giá</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Truyền AppID và thông tin user đã xác thực từ Backend xuống JS -->
+    <!-- Drawer Sổ Tay Phao Cứu Sinh (In-Call Cheat Sheet) -->
+    <div id="cheatsheet-drawer" class="cheatsheet-drawer" style="display: none;">
+        <div class="cheatsheet-header">
+            <h4>📖 Sổ Tay Phao Cứu Sinh</h4>
+            <button type="button" class="btn-close-cheatsheet" onclick="toggleCheatSheet()">✕</button>
+        </div>
+        <div class="cheatsheet-body">
+            <div class="cheat-block">
+                <h5>💡 Khi cần xin đối tác nói lại hoặc chờ một chút:</h5>
+                <div class="cheat-item">
+                    <div class="cheat-main">すみません、もう一度お願いします。</div>
+                    <div class="cheat-sub">Sumimasen, mou ichido onegaishimasu.</div>
+                    <div class="cheat-vi">Xin lỗi, bạn nhắc lại một lần nữa được không?</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">なるほど！そうですね。</div>
+                    <div class="cheat-sub">Naruhodo! Sou desu ne.</div>
+                    <div class="cheat-vi">Ra là vậy! Đúng như thế nhỉ.</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">ちょっと待ってください。</div>
+                    <div class="cheat-sub">Chotto matte kudasai.</div>
+                    <div class="cheat-vi">Xin đợi tôi một chút nhé.</div>
+                </div>
+            </div>
+
+            <div class="cheat-block">
+                <h5>🎯 Mẫu câu bắt đầu &amp; duy trì hội thoại:</h5>
+                <div class="cheat-item">
+                    <div class="cheat-main">はじめまして、よろしくお願いします。</div>
+                    <div class="cheat-sub">Hajimemashite, yoroshiku onegaishimasu.</div>
+                    <div class="cheat-vi">Rất vui được gặp bạn, mong được giúp đỡ.</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">〜はどう思いますか？</div>
+                    <div class="cheat-sub">... wa dou omoimasu ka?</div>
+                    <div class="cheat-vi">Bạn thấy thế nào về ...?</div>
+                </div>
+                <div class="cheat-item">
+                    <div class="cheat-main">〜をお願いします。</div>
+                    <div class="cheat-sub">... o onegaishimasu.</div>
+                    <div class="cheat-vi">Làm ơn cho tôi xin ...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Truyền AppID và danh sách Tag từ Backend xuống JS -->
     <script th:inline="javascript">
         const AGORA_APP_ID = /*[[${agoraAppId}]]*/ 'defaultAppId';
         const CURRENT_USER_ID = /*[[${currentUserId}]]*/ 0;
         const CURRENT_USER_LEVEL = /*[[${currentUserLevel}]]*/ 'N5';
+        const ALL_AVAILABLE_TAGS = /*[[${availableTags}]]*/ [];
     </script>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script src="/js/video_call.js"></script>
 </body>
 </html>

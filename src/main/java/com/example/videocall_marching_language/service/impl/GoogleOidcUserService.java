@@ -34,33 +34,38 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
     @Override
     @Transactional
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        // Load Google user
-        OidcUser googleUser = loadGoogleUser(userRequest);
-        String providerId = requiredClaim(googleUser.getSubject(), "Tài khoản Google không có subject");
-        String email = requiredClaim(googleUser.getEmail(), "Tài khoản Google không có email")
-                .trim()
-                .toLowerCase(Locale.ROOT);
+        try {
+            // Load Google user
+            OidcUser googleUser = loadGoogleUser(userRequest);
+            String providerId = requiredClaim(googleUser.getSubject(), "Tài khoản Google không có subject");
+            String email = requiredClaim(googleUser.getEmail(), "Tài khoản Google không có email")
+                    .trim()
+                    .toLowerCase(Locale.ROOT);
 
-        if (!Boolean.TRUE.equals(googleUser.getEmailVerified())) {
-            throw authenticationError("unverified_google_email", "Email Google chưa được xác minh");
+            if (!Boolean.TRUE.equals(googleUser.getEmailVerified())) {
+                throw authenticationError("unverified_google_email", "Email Google chưa được xác minh");
+            }
+
+            // Find existing user or create a new one
+            final String finalProviderId = providerId;
+            final String finalEmail = email;
+            User user = socialAccountRepository.findByProviderAndProviderId(PROVIDER, finalProviderId)
+                    .map(SocialAccount::getUser)
+                    .orElseGet(() -> createUser(googleUser, finalProviderId, finalEmail));
+            if (user.getStatus() != UserStatus.ACTIVE) {
+                throw authenticationError("disabled_account", "Tài khoản đã bị vô hiệu hóa");
+            }
+
+            return new DefaultOidcUser(
+                    List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
+                    googleUser.getIdToken(),
+                    googleUser.getUserInfo(),
+                    "email"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-
-        // Find existing user or create a new one
-        final String finalProviderId = providerId;
-        final String finalEmail = email;
-        User user = socialAccountRepository.findByProviderAndProviderId(PROVIDER, finalProviderId)
-                .map(SocialAccount::getUser)
-                .orElseGet(() -> createUser(googleUser, finalProviderId, finalEmail));
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw authenticationError("disabled_account", "Tài khoản đã bị vô hiệu hóa");
-        }
-
-        return new DefaultOidcUser(
-                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name())),
-                googleUser.getIdToken(),
-                googleUser.getUserInfo(),
-                "email"
-        );
     }
 
     @Transactional
@@ -69,19 +74,49 @@ public class GoogleOidcUserService implements OAuth2UserService<OidcUserRequest,
     }
 
     private User createUser(OidcUser googleUser, String providerId, String email) {
-        User user = userRepository.findByEmail(email).orElseGet(() -> userRepository.save(User.builder()
-                .username(resolveUniqueUsername(googleUser, email))
+        System.err.println("=== CREATE USER PROCESS STARTED ===");
+        System.err.println("Checking if email exists: " + email);
+        User user = userRepository.findByEmail(email).orElseGet(() -> {
+            System.err.println("Email not found. Generating unique username...");
+            String uniqueUsername = resolveUniqueUsername(googleUser, email);
+            System.err.println("Generated username: " + uniqueUsername);
+            
+            User newUser = User.builder()
+                .username(uniqueUsername)
                 .email(email)
                 .avatarUrl(googleUser.getPicture())
                 .trustScore(0.0f)
                 .role(UserRole.USER)
                 .status(UserStatus.ACTIVE)
-                .build()));
-        socialAccountRepository.save(SocialAccount.builder()
-                .user(user)
-                .provider(PROVIDER)
-                .providerId(providerId)
-                .build());
+                .build();
+                
+            System.err.println("Saving new User to database...");
+            try {
+                User savedUser = userRepository.save(newUser);
+                System.err.println("User saved successfully with ID: " + savedUser.getId());
+                return savedUser;
+            } catch (Exception e) {
+                System.err.println("ERROR saving User to database!");
+                e.printStackTrace();
+                throw e;
+            }
+        });
+
+        System.err.println("Checking SocialAccount for User ID: " + user.getId());
+        try {
+            socialAccountRepository.save(SocialAccount.builder()
+                    .user(user)
+                    .provider(PROVIDER)
+                    .providerId(providerId)
+                    .build());
+            System.err.println("SocialAccount saved successfully.");
+        } catch (Exception e) {
+            System.err.println("ERROR saving SocialAccount to database!");
+            e.printStackTrace();
+            throw e;
+        }
+        
+        System.err.println("=== CREATE USER PROCESS COMPLETED ===");
         return user;
     }
 

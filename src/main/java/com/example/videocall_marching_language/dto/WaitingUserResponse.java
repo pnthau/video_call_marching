@@ -7,10 +7,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WaitingUserDTO {
+public class WaitingUserResponse {
     private Long userId;
     private String username;
     private String tagKey;
     private long joinedTimestamp;
-
 }

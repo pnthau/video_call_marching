@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${script.title} + ' — Học Script'">Học Script</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary:    #1a1a1a;
+            --secondary:  #666666;
+            --surface:    #ffffff;
+            --background: #f7f7f9;
+            --border:     #eaeaea;
+            --accent:     #2563eb;
+            --accent-dim: #dbeafe;
+            --success:    #16a34a;
+            --success-dim:#dcfce7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background: var(--background); color: var(--primary); padding: 2rem 1rem; -webkit-font-smoothing: antialiased; }
+        .container { max-width: 760px; margin: 0 auto; }
+
+        /* ── Breadcrumb ── */
+        .breadcrumb { font-size: 0.85rem; color: var(--secondary); margin-bottom: 1.5rem; }
+        .breadcrumb a { color: var(--accent); text-decoration: none; }
+        .breadcrumb a:hover { text-decoration: underline; }
+
+        /* ── Header ── */
+        .page-header { margin-bottom: 2rem; }
+        .stage-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: var(--accent-dim); color: var(--accent);
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.04em;
+            padding: 0.3rem 0.75rem; border-radius: 999px; margin-bottom: 0.75rem;
+        }
+        .page-header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.3; }
+        .page-header .meta { color: var(--secondary); font-size: 0.95rem; margin-top: 0.4rem; }
+
+        /* ── Pipeline tracker ── */
+        .pipeline {
+            display: flex; align-items: center; gap: 0; margin-bottom: 2.5rem;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            overflow: hidden;
+        }
+        .pipeline-step {
+            flex: 1; padding: 0.75rem 1rem; text-align: center;
+            font-size: 0.8rem; font-weight: 500; color: var(--secondary);
+            border-right: 1px solid var(--border); position: relative;
+        }
+        .pipeline-step:last-child { border-right: none; }
+        .pipeline-step.active { color: var(--accent); background: var(--accent-dim); font-weight: 600; }
+        .pipeline-step.done   { color: var(--success); background: var(--success-dim); }
+        .pipeline-step .step-num { font-size: 0.72rem; opacity: 0.7; display: block; margin-bottom: 0.2rem; }
+
+        /* ── Script body ── */
+        .script-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 2rem; margin-bottom: 1.5rem;
+        }
+        .section-label {
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+            text-transform: uppercase; color: var(--secondary); margin-bottom: 0.75rem;
+        }
+        .script-content {
+            font-size: 1.25rem; line-height: 1.9; white-space: pre-wrap;
+            border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.25rem;
+        }
+        .phonetic-content {
+            font-size: 1rem; line-height: 1.8; color: #4b5563; white-space: pre-wrap;
+            border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; margin-bottom: 1.25rem;
+        }
+        .meaning-content {
+            font-size: 0.95rem; line-height: 1.7; color: var(--secondary); white-space: pre-wrap;
+        }
+
+        /* ── Action area ── */
+        .action-area {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 1.75rem 2rem; display: flex; align-items: center; justify-content: space-between;
+            gap: 1rem; flex-wrap: wrap;
+        }
+        .action-hint { font-size: 0.9rem; color: var(--secondary); max-width: 380px; line-height: 1.5; }
+        .action-hint strong { color: var(--primary); }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            padding: 0.75rem 1.5rem; border-radius: 10px; font-size: 0.95rem;
+            font-weight: 600; cursor: pointer; border: none; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--accent); color: #fff;
+        }
+        .btn-primary:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-1px); }
+        .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; transform: none; }
+        .btn-success {
+            background: var(--success); color: #fff; pointer-events: none;
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+            background: #111; color: #fff; padding: 0.75rem 1.5rem; border-radius: 10px;
+            font-size: 0.9rem; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); z-index: 999;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+        <a href="/practice/scripts">← Danh sách kịch bản</a>
+        &nbsp;/&nbsp; Học Script
+    </nav>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="stage-badge">📖 STAGE 1 — Học Script</div>
+        <h1 th:text="${script.title}">Tiêu đề Script</h1>
+        <p class="meta" th:if="${script.language != null}">
+            Ngôn ngữ: <strong th:text="${script.language}">JA</strong>
+            <span th:if="${script.targetDuration != null}">
+                &nbsp;·&nbsp; Mục tiêu: <strong th:text="${script.targetDuration + ' giây'}">60 giây</strong>
+            </span>
+        </p>
+    </div>
+
+    <!-- Learning Pipeline Tracker -->
+    <div class="pipeline">
+        <div class="pipeline-step active">
+            <span class="step-num">STAGE 1</span>
+            📖 Học Script
+        </div>
+        <div class="pipeline-step">
+            <span class="step-num">STAGE 2</span>
+            👥 P2P Call
+        </div>
+    </div>
+
+    <!-- Script Content -->
+    <div class="script-card">
+        <div class="section-label">Nội dung kịch bản (Tiếng Nhật)</div>
+        <div class="script-content" th:text="${script.content}">Script content here...</div>
+
+        <div th:if="${script.phoneticContent != null and !script.phoneticContent.isEmpty()}">
+            <div class="section-label">Phiên âm (Romaji)</div>
+            <div class="phonetic-content" th:text="${script.phoneticContent}">Phonetic content...</div>
+        </div>
+
+        <div th:if="${script.meaningContent != null and !script.meaningContent.isEmpty()}">
+            <div class="section-label">Nghĩa tiếng Việt</div>
+            <div class="meaning-content" th:text="${script.meaningContent}">Meaning content...</div>
+        </div>
+    </div>
+
+    <!-- Action Area -->
+    <div class="action-area">
+        <div class="action-hint">
+            <strong>Đã đọc và hiểu kịch bản?</strong><br>
+            Click "Đã hiểu" để xác nhận hoàn thành kịch bản này.
+        </div>
+
+        <!-- Button chưa đọc -->
+        <button th:if="${!alreadyRead}"
+                id="btnMarkRead"
+                class="btn btn-primary"
+                th:data-script-id="${script.id}">
+            ✅ Đã hiểu
+        </button>
+
+        <!-- Button đã đọc -->
+        <button th:if="${alreadyRead}"
+           class="btn btn-success" disabled>
+            ✅ Đã hiểu
+        </button>
+    </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="toast">✅ Đã lưu thành công!</div>
+
+<script th:inline="javascript">
+    const btn = document.getElementById('btnMarkRead');
+    const toast = document.getElementById('toast');
+
+    if (btn) {
+        btn.addEventListener('click', async () => {
+            const scriptId = btn.dataset.scriptId;
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang lưu...';
+
+            try {
+                const res = await fetch(`/api/scripts/${scriptId}/read`, { method: 'POST' });
+                if (!res.ok) throw new Error('API lỗi ' + res.status);
+
+                // Hiện toast và reload trang
+                toast.classList.add('show');
+                setTimeout(() => { window.location.reload(); }, 1200);
+
+            } catch (err) {
+                console.error(err);
+                btn.disabled = false;
+                btn.textContent = '✅ Đã hiểu';
+                alert('Lỗi khi lưu. Vui lòng thử lại.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

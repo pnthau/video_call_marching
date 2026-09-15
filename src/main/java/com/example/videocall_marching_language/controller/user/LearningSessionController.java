@@ -48,7 +48,7 @@ public class LearningSessionController {
                 .orElse(null);
         if (session == null) {
             return ResponseEntity.notFound().build();
-        }
+        }   
         boolean isParticipant = session.getUser1().getId().equals(currentUser.getId())
                 || session.getUser2().getId().equals(currentUser.getId());
         if (!isParticipant) {

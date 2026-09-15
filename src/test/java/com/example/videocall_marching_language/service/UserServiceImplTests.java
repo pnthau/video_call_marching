@@ -7,6 +7,7 @@ import com.example.videocall_marching_language.enums.JapaneseLevel;
 import com.example.videocall_marching_language.enums.UserRole;
 import com.example.videocall_marching_language.exception.AvatarUploadException;
 import com.example.videocall_marching_language.exception.UserNotFoundException;
+import com.example.videocall_marching_language.repository.IUserAiSettingRepository;
 import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,12 +35,16 @@ class UserServiceImplTests {
     @Mock
     private AvatarStorageService avatarStorageService;
 
+    @Mock
+    private IUserAiSettingRepository userAiSettingRepository;
+
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
         userService = new UserServiceImpl(
                 userRepository,
+                userAiSettingRepository,
                 avatarStorageService
         );
     }
@@ -53,7 +58,6 @@ class UserServiceImplTests {
 
         assertEquals("learner@example.com", response.email());
         assertEquals("Học viên", response.username());
-        assertEquals(JapaneseLevel.N5, response.currentLevel());
         assertEquals(UserRole.USER, response.role());
     }
 
@@ -72,12 +76,11 @@ class UserServiceImplTests {
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setUsername("Tên mới");
-        request.setCurrentLevel(JapaneseLevel.N4);
+
 
         UserProfileResponse response = userService.updateCurrentProfile("learner@example.com", request);
 
         assertEquals("Tên mới", response.username());
-        assertEquals(JapaneseLevel.N4, response.currentLevel());
         assertEquals("https://example.com/old.png", response.avatarUrl());
         verify(avatarStorageService, never()).upload(any());
     }
@@ -96,7 +99,6 @@ class UserServiceImplTests {
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setUsername("Học viên");
-        request.setCurrentLevel(JapaneseLevel.N3);
         request.setAvatar(avatar);
 
         UserProfileResponse response = userService.updateCurrentProfile("learner@example.com", request);
@@ -120,7 +122,6 @@ class UserServiceImplTests {
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setUsername("Học viên");
-        request.setCurrentLevel(JapaneseLevel.N3);
         request.setAvatar(avatar);
 
         userService.updateCurrentProfile("learner@example.com", request);
@@ -139,7 +140,6 @@ class UserServiceImplTests {
 
         UpdateProfileRequest request = new UpdateProfileRequest();
         request.setUsername("Tên mới");
-        request.setCurrentLevel(JapaneseLevel.N3);
         request.setAvatar(avatar);
 
         assertThrows(AvatarUploadException.class,
