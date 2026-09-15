@@ -1,7 +1,7 @@
 package com.example.videocall_marching_language.service;
 
 import com.example.videocall_marching_language.dto.SpeechEvaluationResponse;
-import com.example.videocall_marching_language.dto.TtsSegmentResponse;
+import com.example.videocall_marching_language.dto.tts.TtsSegmentResponse;
 import com.example.videocall_marching_language.entity.PracticeHistory;
 import com.example.videocall_marching_language.entity.Script;
 import com.example.videocall_marching_language.entity.User;

@@ -38,11 +38,11 @@
                         <h5 class="mb-3">Cấu hình AI</h5>
 
                         <div class="mb-3">
-                            <label for="provider" class="form-label">AI Provider (Mô hình AI đang kích hoạt)</label>
+                            <label for="provider" class="form-label">AI Provider</label>
                             <select id="provider" th:field="*{provider}" class="form-select" th:classappend="${#fields.hasErrors('provider')} ? 'is-invalid'">
                                 <option value="">-- Chọn mô hình AI --</option>
-                                <option value="GROQ">⚡ Groq AI (Qwen / Llama - Siêu tốc)</option>
-                                <option value="GEMINI">🤖 Google Gemini (Gemini 2.5 Flash)</option>
+                                <option value="GROQ">⚡ Groq AI</option>
+                                <option value="GEMINI">🤖 Google Gemini</option>
                             </select>
                             <div class="invalid-feedback" th:errors="*{provider}"></div>
                             <div class="form-text">Chọn mô hình AI mà bạn muốn kích hoạt cho các tính năng luyện tập nói.</div>
@@ -58,7 +58,7 @@
                                 <span th:if="${profile.apiKey() != null and !profile.apiKey().isBlank()}" class="text-success fw-medium d-block mb-1">
                                     ✅ Mô hình hiện tại đã có API Key (để trống nếu không muốn đổi key).
                                 </span>
-                                <span>Key của bạn sẽ được <strong>mã hoá an toàn (AES)</strong> trước khi lưu vào cơ sở dữ liệu.</span>
+                                <span>Key của bạn sẽ được <strong>mã hoá an toàn (AES)</strong> trước khi lưu</span>
                             </div>
                         </div>
 

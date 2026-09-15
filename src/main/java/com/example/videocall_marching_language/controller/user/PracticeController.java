@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.controller.user;
 
+import com.example.videocall_marching_language.dto.LanguageOption;
 import com.example.videocall_marching_language.dto.script.ScriptResponse;
 import com.example.videocall_marching_language.dto.script.ScriptRequest;
 import com.example.videocall_marching_language.dto.script.TopicWithCountDTO;
@@ -31,7 +32,7 @@ public class PracticeController {
         List<TopicWithCountDTO> topicsWithCount = practiceService.getTopicsWithScriptCount();
         String topicsWithCountJson = practiceService.getTopicsWithCountAsJson();
         List<Tag> availableTopics = practiceService.getAvailableTopics();
-        List<String> availableLanguages = practiceService.getAvailableLanguages();
+        List<LanguageOption> availableLanguages = LanguageOption.fromCodes(practiceService.getAvailableLanguages());
 
         String selectedTopicName = null;
         if (request.getTagId() != null) {

@@ -31,6 +31,7 @@ public class GlobalModelAttributes {
                 model.addAttribute("currentUsername", user.getUsername());
                 model.addAttribute("currentUserAvatar", user.getAvatarUrl());
                 model.addAttribute("currentUserEmail", user.getEmail());
+                model.addAttribute("currentUserRole", user.getRole() != null ? user.getRole().name() : "USER");
             });
         }
     }

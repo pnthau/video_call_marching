@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.controller.user;
 
+import com.example.videocall_marching_language.dto.LanguageOption;
 import com.example.videocall_marching_language.dto.TagOptionDTO;
 import com.example.videocall_marching_language.dto.user.UpdateProfileRequest;
 import com.example.videocall_marching_language.dto.user.UserProfileResponse;
@@ -33,13 +34,13 @@ public class ProfileController {
     public String showProfile(Authentication authentication, Model model) {
         model.addAttribute("profile", userService.getCurrentProfile(authentication.getName()));
         model.addAttribute("availableTopics", practiceService.getAvailableTopics());
-        model.addAttribute("availableLanguages", practiceService.getAvailableLanguages());
+        model.addAttribute("availableLanguages", LanguageOption.fromCodes(practiceService.getAvailableLanguages()));
         model.addAttribute("topicsWithCount", practiceService.getTopicsWithScriptCount());
         model.addAttribute("topicsWithCountJson", practiceService.getTopicsWithCountAsJson());
 
         // Dữ liệu cho Audio Criteria Modal & P2P Video Call
         model.addAttribute("audioAvailableTopics", practiceService.getAvailableTopics());
-        model.addAttribute("audioAvailableLanguages", audioLessonService.getAvailableLanguages());
+        model.addAttribute("audioAvailableLanguages", LanguageOption.fromCodes(audioLessonService.getAvailableLanguages()));
         model.addAttribute("audioTopicsWithCount", audioLessonService.getTopicsWithAudioLessonCount());
         model.addAttribute("audioTopicsWithCountJson", audioLessonService.getTopicsWithCountAsJson());
 

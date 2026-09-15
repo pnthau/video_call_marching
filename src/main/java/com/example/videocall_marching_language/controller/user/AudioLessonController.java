@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.controller.user;
 
+import com.example.videocall_marching_language.dto.LanguageOption;
 import com.example.videocall_marching_language.dto.TagOptionDTO;
 import com.example.videocall_marching_language.dto.audiolesson.AudioLessonDTO;
 import com.example.videocall_marching_language.dto.audiolesson.AudioLessonRequest;
@@ -51,7 +52,7 @@ public class AudioLessonController {
         List<TopicWithCountDTO> topicsWithCount = audioLessonService.getTopicsWithAudioLessonCount();
         String topicsWithCountJson = audioLessonService.getTopicsWithCountAsJson();
         List<Tag> availableTopics = tagRepository.findByTagCategoryType(TagCategoryType.TOPIC);
-        List<String> availableLanguages = audioLessonService.getAvailableLanguages();
+        List<LanguageOption> availableLanguages = LanguageOption.fromCodes(audioLessonService.getAvailableLanguages());
 
         String selectedTopicName = null;
         if (request.getTagId() != null) {

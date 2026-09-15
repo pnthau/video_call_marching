@@ -1,4 +1,4 @@
-package com.example.videocall_marching_language.dto;
+package com.example.videocall_marching_language.dto.tts;
 
 import lombok.*;
 

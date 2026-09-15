@@ -1,5 +1,6 @@
 package com.example.videocall_marching_language.dto;
 
+import com.example.videocall_marching_language.dto.tts.TtsSegmentResponse;
 import lombok.*;
 
 import java.util.List;

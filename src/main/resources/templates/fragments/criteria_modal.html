@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- =========================================================================
+     1. UNIVERSAL SCRIPT CRITERIA MODAL (Lựa chọn tiêu chí luyện kịch bản)
+     ========================================================================= -->
+<div th:fragment="scriptCriteriaModal(modalId, availableLanguages, criteria, phase, idPrefix)"
+     class="modal fade" th:id="${modalId}" tabindex="-1"
+     th:aria-labelledby="${modalId + 'Label'}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <!-- Modal Header -->
+            <div class="modal-header bg-primary text-white p-4">
+                <div>
+                    <h5 class="modal-title fw-bold fs-4 mb-1" th:id="${modalId + 'Label'}">
+                        🎯 Lựa Chọn Tiêu Chí Luyện Kịch Bản
+                    </h5>
+                    <p class="mb-0 text-white-50 small">
+                        Hệ thống sẽ lọc kịch bản AI phù hợp nhất với mục tiêu giao tiếp thực tế của bạn
+                    </p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/practice/scripts}" method="get" th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaFilterForm' : 'criteriaFilterForm'}">
+                <div class="modal-body p-4">
+
+                    <!-- MỤC 1: LỰA CHỌN NGÔN NGỮ GIAO TIẾP -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>🗣️ 1. Lựa chọn ngôn ngữ giao tiếp</span>
+                            <span class="badge bg-primary-subtle text-primary fw-medium">Bước 1: Chọn ngôn ngữ</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle"
+                                name="language"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaLanguageSelect' : 'criteriaLanguageSelect'}">
+                            <option value="all" th:selected="${criteria == null or criteria.language == null or criteria.language == 'all'}">
+                                🌐 Tất cả ngôn ngữ
+                            </option>
+                            <option th:each="lang : ${availableLanguages}"
+                                    th:value="${lang.code}"
+                                    th:selected="${criteria != null and criteria.language == lang.code}"
+                                    th:text="${lang.label}">
+                            </option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Danh sách trình độ và chủ đề sẽ tự động thay đổi theo ngôn ngữ bạn chọn.
+                        </div>
+                    </div>
+
+                    <!-- MỤC 2: LỰA CHỌN TRÌNH ĐỘ (LEVEL) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>📊 2. Lựa chọn trình độ</span>
+                            <span class="badge bg-warning-subtle text-warning-emphasis fw-medium">Bước 2: Chọn trình độ</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-warning-subtle"
+                                name="level"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaLevelSelect' : 'criteriaLevelSelect'}"
+                                th:data-current-level="${criteria != null and criteria.level != null ? criteria.level : 'all'}">
+                            <option value="all">🌐 Tất cả trình độ</option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Trình độ tương ứng với ngôn ngữ đã chọn.
+                        </div>
+                    </div>
+
+                    <!-- MỤC 3: CASCADING CHỦ ĐỀ BÀI HỌC -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>📚 3. Chủ đề kịch bản</span>
+                            <span class="badge bg-success-subtle text-success fw-medium">Bước 3: Chọn chủ đề</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle"
+                                name="tagId"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaTopicSelect' : 'criteriaTopicSelect'}"
+                                th:data-current-tag-id="${criteria != null and criteria.tagId != null ? criteria.tagId : ''}">
+                            <option value="">Tất cả chủ đề</option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Chỉ hiển thị các chủ đề có kịch bản thuộc ngôn ngữ và trình độ đã chọn.
+                        </div>
+                    </div>
+
+                    <!-- MỤC 4: HÌNH THỨC & GIAI ĐOẠN -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>⚡ 4. Hình thức &amp; Giai đoạn</span>
+                            <span class="badge bg-info-subtle text-info fw-medium">Bước 4: Chọn độ khó</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none"
+                                name="phase"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaPhaseSelect' : 'criteriaPhaseSelect'}">
+                            <option value="1" th:selected="${phase == null or phase == 1}">
+                                Giai đoạn 1: Nghe &amp; Nhắc lại từng câu (Beginner)
+                            </option>
+                            <option value="2" th:selected="${phase == 2}">
+                                Giai đoạn 2: Khuyết từ vựng quan trọng (Intermediate)
+                            </option>
+                            <option value="3" th:selected="${phase == 3}">
+                                Giai đoạn 3: Đóng vai &amp; Ẩn kịch bản (Advanced)
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer bg-light p-3 border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                        Khám phá kịch bản phù hợp ➔
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     2. UNIVERSAL AUDIO CRITERIA MODAL (Lựa chọn tiêu chí luyện nghe audio)
+     ========================================================================= -->
+<div th:fragment="audioCriteriaModal(modalId, availableLanguages, criteria, idPrefix)"
+     class="modal fade" th:id="${modalId}" tabindex="-1"
+     th:aria-labelledby="${modalId + 'Label'}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <!-- Modal Header -->
+            <div class="modal-header text-white p-4" style="background-color: #4f46e5;">
+                <div>
+                    <h5 class="modal-title fw-bold fs-4 mb-1" th:id="${modalId + 'Label'}">
+                        🎧 Lựa Chọn Tiêu Chí Luyện Nghe Audio
+                    </h5>
+                    <p class="mb-0 text-white-50 small">
+                        Hệ thống sẽ lọc bài nghe Whisper AI phù hợp nhất với mục tiêu luyện nghe phản xạ của bạn
+                    </p>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <!-- Form -->
+            <form th:action="@{/practice/audio-lessons}" method="get" th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaFilterForm' : 'criteriaFilterForm'}">
+                <div class="modal-body p-4">
+
+                    <!-- MỤC 1: LỰA CHỌN NGÔN NGỮ BÀI NGHE -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>🗣️ 1. Lựa chọn ngôn ngữ bài nghe</span>
+                            <span class="badge bg-primary-subtle text-primary fw-medium">Bước 1: Chọn ngôn ngữ</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-primary-subtle"
+                                name="language"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaLanguageSelect' : 'criteriaLanguageSelect'}">
+                            <option value="all" th:selected="${criteria == null or criteria.language == null or criteria.language == 'all'}">
+                                🌐 Tất cả ngôn ngữ
+                            </option>
+                            <option th:each="lang : ${availableLanguages}"
+                                    th:value="${lang.code}"
+                                    th:selected="${criteria != null and criteria.language == lang.code}"
+                                    th:text="${lang.label}">
+                            </option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Danh sách trình độ và chủ đề bài nghe sẽ tự động thay đổi theo ngôn ngữ bạn chọn.
+                        </div>
+                    </div>
+
+                    <!-- MỤC 2: TRÌNH ĐỘ (LEVEL) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>📊 2. Lựa chọn trình độ (Level)</span>
+                            <span class="badge bg-warning-subtle text-warning-emphasis fw-medium">Bước 2: Chọn trình độ</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-warning-subtle"
+                                name="level"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaLevelSelect' : 'criteriaLevelSelect'}"
+                                th:data-current-level="${criteria != null and criteria.level != null ? criteria.level : 'all'}">
+                            <option value="all">🌐 Tất cả trình độ</option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Trình độ JLPT (N5 - N1) hoặc CEFR (A1 - C1) tương ứng với ngôn ngữ đã chọn.
+                        </div>
+                    </div>
+
+                    <!-- MỤC 3: CASCADING CHỦ ĐỀ BÀI NGHE -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>📚 3. Chủ đề bài nghe</span>
+                            <span class="badge bg-success-subtle text-success fw-medium">Bước 3: Chọn chủ đề</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none border-secondary-subtle"
+                                name="tagId"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaTopicSelect' : 'criteriaTopicSelect'}"
+                                th:data-current-tag-id="${criteria != null and criteria.tagId != null ? criteria.tagId : ''}">
+                            <option value="">Tất cả chủ đề</option>
+                        </select>
+                        <div class="form-text text-muted small">
+                            Chỉ hiển thị các chủ đề có bài nghe thực tế thuộc ngôn ngữ và trình độ đã chọn (Zero-count elimination).
+                        </div>
+                    </div>
+
+                    <!-- MỤC 4: TRỌNG TÂM LUYỆN TẬP -->
+                    <div class="mb-2">
+                        <label class="form-label fw-bold text-dark d-flex align-items-center justify-content-between mb-2">
+                            <span>⚡ 4. Trọng tâm luyện tập</span>
+                            <span class="badge bg-info-subtle text-info fw-medium">Bước 4: Chọn phương pháp</span>
+                        </label>
+                        <select class="form-select form-select-lg rounded-3 shadow-none"
+                                name="focus"
+                                th:id="${(idPrefix != null and !idPrefix.isEmpty()) ? idPrefix + 'CriteriaFocusSelect' : 'criteriaFocusSelect'}">
+                            <option value="all" th:selected="${criteria == null or criteria.focus == null or criteria.focus == 'all'}">
+                                Toàn diện: Nghe chép chính tả + Ngữ pháp + Shadowing Loop
+                            </option>
+                            <option value="dictation" th:selected="${criteria != null and criteria.focus == 'dictation'}">
+                                Chuyên sâu: Luyện nghe &amp; Chép chính tả (Dictation)
+                            </option>
+                            <option value="grammar" th:selected="${criteria != null and criteria.focus == 'grammar'}">
+                                Chuyên sâu: Phân tích cấu trúc &amp; Đặt câu AI
+                            </option>
+                            <option value="shadowing" th:selected="${criteria != null and criteria.focus == 'shadowing'}">
+                                Chuyên sâu: Lặp đoạn phát âm (Shadowing Loop) &amp; Trắc nghiệm
+                            </option>
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer bg-light p-3 border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn text-white px-4 py-2 rounded-pill fw-semibold shadow-sm" style="background-color: #4f46e5;">
+                        Khám phá bài nghe phù hợp ➔
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

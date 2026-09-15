@@ -1,28 +1,17 @@
 package com.example.videocall_marching_language.controller.user.api;
 
 import com.example.videocall_marching_language.dto.SpeechEvaluationResponse;
-import com.example.videocall_marching_language.dto.TtsAudioRequest;
-import com.example.videocall_marching_language.dto.TtsAudioResponse;
+import com.example.videocall_marching_language.dto.tts.TtsAudioRequest;
+import com.example.videocall_marching_language.dto.tts.TtsAudioResponse;
 import com.example.videocall_marching_language.entity.PracticeHistory;
 import com.example.videocall_marching_language.service.script.PracticeService;
 import com.example.videocall_marching_language.service.speech.TtsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @RestController
