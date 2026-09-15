@@ -8,6 +8,7 @@ import com.example.videocall_marching_language.repository.IUserRepository;
 import com.example.videocall_marching_language.service.ai.AiEvaluationService;
 import com.example.videocall_marching_language.service.ai.GroqAiServiceImpl;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @SpringBootTest
+@Tag("live")
 public class GroqLiveTest {
 
     @Autowired
@@ -43,9 +45,7 @@ public class GroqLiveTest {
         for (UserAiSetting setting : allSettings) {
             System.out.println("-> User ID: " + setting.getUser().getId() +
                     " | Provider: " + setting.getAiProvider() +
-                    " | Key: " + (setting.getAiApiKey() != null && setting.getAiApiKey().length() > 8
-                    ? setting.getAiApiKey().substring(0, 8) + "..."
-                    : "EMPTY"));
+                    " | Key configured: " + (setting.getAiApiKey() != null && !setting.getAiApiKey().isBlank()));
             if (setting.getAiProvider() == AIProvider.GROQ || setting.getAiProvider() == AIProvider.GROG) {
                 groqSetting = setting;
             }

@@ -5,6 +5,7 @@ import com.example.videocall_marching_language.entity.UserAiSetting;
 import com.example.videocall_marching_language.repository.IUserAiSettingRepository;
 import com.example.videocall_marching_language.service.ai.AiEvaluationService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
 
 @SpringBootTest
+@Tag("live")
 public class AiLiveTest {
 
     @Autowired

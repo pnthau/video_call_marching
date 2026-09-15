@@ -44,6 +44,7 @@ jobs:
       CLOUDINARY_CLOUD_NAME: ci-cloud
       CLOUDINARY_API_KEY: ci-cloudinary-key
       CLOUDINARY_API_SECRET: ci-cloudinary-secret
+      API_SECRET_KEY: ci-test-only-secret-key
       WEBSOCKET_ALLOWED_ORIGIN_PATTERNS: http://localhost:*
 
     steps:
